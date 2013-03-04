@@ -1,0 +1,26 @@
+{
+  "author": "https://github.com/maxlang/angular-dataviz/graphs/contributors",
+  "name": "angular-dataviz",
+  "description": "Angular Dataviz - Reliable, componentized data visualization controls for AngularJS",
+  "version": "0.1.0",
+  "homepage": "https://github.com/maxlang/angular-dataviz",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/maxlang/angular-dataviz.git"
+  },
+  "engines": {
+    "node": ">= 0.8.4"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt-recess": "~0.3.1",
+    "async": "0.1.x",
+    "testacular": "~0.5.x",
+    "grunt": "~0.4.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-concat": "~0.1.3",
+    "grunt-contrib-uglify": "~0.1.1",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt-contrib-jshint": "~0.1.1"
+  }
+}

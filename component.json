@@ -1,0 +1,15 @@
+{
+  "author": "Angular Dataviz Team",
+  "name": "angular-dataviz",
+  "description": "Angular Dataviz - Reliable, componentized data vizualization controls for AngularJS",
+  "version": "0.1.0",
+  "homepage": "https://github.com/maxlang/angular-dataviz",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/maxlang/angular-dataviz.git"
+  },
+  "main": "./build/angular-dataviz.min.js",
+  "dependencies": {
+    "angular": ">= 1.1.3"
+  }
+}
