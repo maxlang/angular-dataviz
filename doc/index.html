@@ -5,6 +5,7 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
     <script src="http://code.angularjs.org/1.1.3/angular.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="../dist/angular-dataviz.js"></script>
     <script src="js/prettify.js"></script>
     <script src="js/demoApp.js"></script>
@@ -35,16 +36,7 @@
                   <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a scrollto href="#TODODODODOD">TODO</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-                  Integrations
-                  <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a scrollto href="#TODODODODOD">TODO</a></li>
+                  <li><a scrollto href="#blockCalendar">Block Calendar</a></li>
                 </ul>
               </li>
             </ul>
@@ -107,7 +99,7 @@
         </div>
       </header>
 
-      <div class="container">
+      <div class="container" ng-controller="GlobalDataCtrl">
 
         <section id="setup">
           <h1>Getting Started</h1>
@@ -126,10 +118,11 @@
           </ol>
         </section>
 
-        <section id="TODODODOD" class="TODODOD"
-                 ng-controller="TODODOD">
+        <section id="blockCalendar" class="blockCalendar">
           <div class="page-header">
-            <h1>TODODODODDO</h1>
+            <h1>Block Calendar</h1>
+
+              <block-calendar id="chart"></block-calendar>
           </div>
         </section>
       </div>

@@ -1,0 +1,163 @@
+block-calendar {
+//  .flexbox();
+  position: relative;
+  @default: rgb(238,238,238);
+  @stroke: white;
+  @vOffset: 10px;
+  @containerPadY: 18px;
+  @containerPadX: 20px;
+  @containerPadOffset: 5px + @containerPadX;
+//min-height: 170px !important;
+
+/* MAGNITUDE COLORS */
+  @mag1: rgb(212,231,132);
+  @mag2: rgb(171,200,109);
+  @mag3: rgb(118,161,78);
+  @mag4: rgb(69,124,50);
+  @mag5: rgb(28,93,26);
+
+  .container {
+//    .flex(1.0);
+    padding: @containerPadY @containerPadX @containerPadY - 1px @containerPadOffset;
+    position: relative;
+  }
+
+  &#chart {
+    font: 10px sans-serif;
+//    .flexbox();
+    margin-bottom: @vOffset;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      margin-left:9px;
+      margin-top:5px;
+    }
+
+    .qundefined-9 { fill: @default; }
+    .q0-9 { fill: @mag1; }
+    .q1-9, .q2-9 { fill: @mag2; }
+    .q3-9, .q4-9 { fill: @mag3; }
+    .q5-9, .q6-9 { fill: @mag4 }
+    .q7-9, .q8-9 { fill: @mag5 }
+
+    .day {
+      stroke: white;
+      stroke-width: 2px;
+
+      &:hover {
+        cursor: pointer;
+        opacity: 0.25;
+        fill: red;
+      }
+
+      &.selected {
+        fill:blue;
+        opacity:.5;
+      }
+
+    }
+
+    .month {
+      fill: none;
+    //stroke: rgba(0,0,0,0.35);
+      stroke-width: 1px;
+    }
+  }
+
+  .axis {
+    position: absolute;
+
+    span {
+      display: block;
+      font-weight: bold;
+      color: rgb(128,128,128);
+    }
+  }
+
+  .y.axis {
+    top: @vOffset+7px;
+    left: 0;
+
+    span {
+      margin-bottom: 12px;
+      font-size: 0.6em;
+      opacity: 0.8
+    }
+  }
+  .x.axis {
+    top: -9px;
+    left: 35px;
+//    .flexbox();
+    span {
+      width: 47px;
+      font-size: 0.65em;
+    }
+  }
+  .description {
+    position: absolute;
+    bottom: 12px;
+    left: 55px;
+    font-weight: 500;
+    font-size: 0.7em;
+    color: rgb(150,150,150);
+    display: none;
+  }
+  .legend {
+    position: absolute;
+    bottom: 12px;
+    right: 30px;
+    display: none;
+  //.flexbox();
+    li.day {
+      width: 10px;
+      height: 10px;
+      background-color: green;
+    }
+    li {
+      font-weight: 500;
+      font-size: 0.7em;
+      color: rgb(150,150,150);
+      vertical-align: middle;
+      margin-left: 3px;
+
+      &.m1 { background-color: @mag1; }
+      &.m2 { background-color: @mag2; }
+      &.m3 { background-color: @mag3; }
+      &.m4 { background-color: @mag4; }
+      &.m5 { background-color: @mag5; }
+
+      &:last-child, &:nth-child(2) { margin-left: 10px; }
+    }
+  }
+  .annotations {
+    @blue: rgb(0,186,251);
+    @green: rgb(102,177,50);
+    @spanOffset: 2px;
+    margin: 15px 12px 0 34px;
+//    .flexbox();
+    li {
+//      .flex(1);
+      font-size: 0.75em;
+      line-height: 1.2em;
+      font-weight: bold;
+      position: relative;
+
+      span {
+        font-size: 0.8em;
+        color: rgb(192,192,192);
+        display: block;
+        margin-top: -1*@spanOffset;
+      }
+      &.introduced {
+        color: @blue;
+        span.pointer { display: none; }
+      }
+      &.last-comm {
+        color: @blue;
+        text-align: right;
+        span.pointer { display: none; }
+      }
+    }
+  }
+}

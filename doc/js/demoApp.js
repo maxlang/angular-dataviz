@@ -19,3 +19,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     });
   };
 }]);
+
+function GlobalDataCtrl($scope) {
+    $scope.feedParams = {};
+}

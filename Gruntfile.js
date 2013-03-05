@@ -8,6 +8,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-recess');
 
   // Project configuration.
@@ -42,22 +43,32 @@ module.exports = function (grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
-    recess: {
-      dist: {
-        src: ['common/**/*.less', 'modules/**/*.less'],
-        dest: 'dist/<%= pkg.name %>.css',
+    less: {
         options: {
-          compile: true
+            dumpLineNumbers: 'all'
+        },
+        dist: {
+            files: {
+                'dist/<%= pkg.name %>.css': ['common/**/*.less', 'modules/**/*.less']
+            }
         }
-      },
-      min: {
-        src: '<%= recess.dist.dest %>',
-        dest: 'dist/<%= pkg.name %>.min.css',
-        options: {
-          compress: true
-        }
-      }
     },
+//    recess: {
+//      dist: {
+//        src: ['common/**/*.less', 'modules/**/*.less','modules/directives/stylesheets/blockCalendar.less'],
+//        dest: 'dist/<%= pkg.name %>.css',
+//        options: {
+//          compile: true
+//        }
+//      },
+//      min: {
+//        src: '<%= recess.dist.dest %>',
+//        dest: 'dist/<%= pkg.name %>.min.css',
+//        options: {
+//          compress: true
+//        }
+//      }
+//    },
     jshint: {
       gruntfile: {
         src: 'Gruntfile.js'
@@ -94,14 +105,14 @@ module.exports = function (grunt) {
       });
 
       grunt.config('concat.dist.src', jsBuildFiles);
-      grunt.config('recess.dist.src', lessBuildFiles);
+      grunt.config('less.dist.src', lessBuildFiles);
 
     } else {
       grunt.config('concat.dist.src', jsBuildFiles.concat(['modules/*/*/*.js']));
-      grunt.config('recess.dist.src', lessBuildFiles.concat(grunt.config('recess.dist.src')));
+      grunt.config('less.dist.src', lessBuildFiles.concat(grunt.config('less.dist.src')));
     }
 
-    grunt.task.run(['jshint', 'concat', 'recess:dist']);
+    grunt.task.run(['jshint', 'concat', 'less:dist']);
   });
 
   grunt.registerTask('server', 'start testacular server', function () {
