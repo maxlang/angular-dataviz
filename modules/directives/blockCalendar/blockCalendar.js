@@ -2,26 +2,22 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
     return {
         restrict: 'E',
         scope: {
-            'vizSelectedTimeRanges': '=',
-            'vizHighlightedTimeRanges': '=',
-            'vizTimeUnitCounts' : '=',
-            'vizTimeUnit' : '=',
-            'vizCountUnit' : '='
+          //TODO: change expected values to something more reasonable
+            'selectedRanges': '=',   // expects an array of {start:<timestamp>, end:<timestamp>} objects
+            //'highlightedRanges': '=',
+            'counts' : '=',   // expects an array of {date:<YYYY-mm-dd>, count:<number>}
+            'width'  : '=',  // expects a measurement in pixels
+            'height' : '='  // expects a measurement in pixels
         },
         link: function(scope, elem, attrs) {
             console.log("link");
-
-            scope.selectedDates = null;
-            scope.selectedDatesUpper = null;
-            scope.selectedrange = "";
-
             var datefromstr = function(datestr, add) {
                 var nima = datestr.split("-");
                 return new Date(parseInt(nima[0], 10), parseInt(nima[1], 10) - 1, parseInt(nima[2], 10) + add);
             };
 
             var gitcalendar = {
-                format : d3.time.format("%Y-%m-%d"),
+                format : d3.time.format("%Y-%-m-%-d"),
 
                 dates : function (monthsBack) {
                     var dates = [],
@@ -43,6 +39,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 }
 
             };
+          //TODO: needs to factor in selectedRanges
             function drawChart(data2, element, calendar) {
 
                 console.log(data2);
@@ -65,27 +62,43 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                     .attr("x", function(d) {return (d.week * cellSize) + "px"; })
                     .attr("y", function(d) {return (d.day * cellSize) + "px"; })
                     .on("click", function (d, i) {
+                      console.log("click");
+                      var dThis = d3.select(this);
+                      //TODO: change behavior if this is part of a large selection?
+                      if (dThis.classed("selected")) {
+                        console.log("selected");
                         d3.selectAll("rect").classed("selected", false);
-                        var selectedDate = datefromstr(d.Date, 0).getTime();
-                        if (selectedDate === scope.selectedDates) {
-                            scope.selectedDates = null;
-                            scope.selectedDatesUpper = null;
-                        } else {
-                            $scope.selectedDates = selectedDate;
-                            $scope.selectedDatesUpper = datefromstr(d.Date, 1).getTime();
-                            d3.select(this).classed("selected", true);
-                        }
-
                         scope.$apply(function() {
-                            scope.range = { from: scope.selectedDates, to: scope.selectedDatesUpper };
+                          scope.selectedRanges = [];
                         });
+                      } else {
+                        console.log("not selected");
+                        d3.selectAll("rect").classed("selected", false);
+                        dThis.classed("selected", true);
+                        //HACK: clear then push so that watchers know there is a change
+                        //maybe use apply?
+                        scope.$apply(function() {
+                          scope.selectedRanges = [{
+                            start: datefromstr(d.Date, 0).getTime(),
+                            end: datefromstr(d.Date, 1).getTime()
+                          }];
+                        });
+                        console.log(scope.selectedRanges);
+                      }
+
+                      //TODO: why do we need to use apply here again?
+
                     });
+              // TODO: change to mousedown, mousemove, and mouseup to select ranges
+              // shift click selects a consecutive range
+              // ctrl click selects a disjoint set of ranges
+              //
 
                 var data = {};
                 var max = 0;
                 var dates = {};
-                var i = 0;
-                for (i = 0; i < data3.length; i += 1) {
+                var i;
+                for (i = 0; i < data3.length; i++) {
                     var date = new Date(data3[i].date);
                     var dateString = data3[i].date;
                     max = Math.max(data3[i].count, max);
@@ -105,52 +118,46 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                         var count = data[d.Date];
                         var itemString = "";
                         if (count !== undefined) {
-                            itemString = " : " + count + (count === 1 ? " email" : " emails");
+                            itemString = " : " + count + (count === 1 ? " item" : " items");
                         }
                         return d.Date + itemString;
                     });
             }
-            //var url = "/api/topics/" + scope.topicId + "/dates";
-            //var url = "http://localhost:9000/api/topics/ba4595f8d23165cdb34eb68227f9919b/dates";
+                scope.$watch('counts',function(counts) {
+                  console.log("count change");
+                  console.log(counts);
+                  if(counts!==undefined && counts!==null) {
+                    drawChart(counts, elem[0], gitcalendar);
+                  }
+                }, true);
 
-            var data = [
-                {
-                    "date": "2013-02-24",
-                    "count": 22
-                },
-                {
-                    "date": "2013-02-25",
-                    "count": 20
-                },
-                {
-                    "date": "2013-02-26",
-                    "count": 10
-                },
-                {
-                    "date": "2013-02-27",
-                    "count": 13
-                },
-                {
-                    "date": "2013-02-28",
-                    "count": 7
-                },
-                {
-                    "date": "2013-03-01",
-                    "count": 4
-                },
-                {
-                    "date": "2013-03-02",
-                    "count": 2
-                },
-                {
-                    "date": "2013-03-03",
-                    "count": 25
-                }
-            ];
+          //TODO: optimize and clean
+          function selectRanges(ranges, element) {
+            d3.select(element).selectAll('rect.day').classed("selected", function(d) {
+              var i;
+              for (i=0;i<ranges.length;i++) {
+                var r = ranges[i];
+                var dayStart = datefromstr(d.Date, 0).getTime();
+                var dayEnd = datefromstr(d.Date, 1).getTime();
+                  if ((r.start < dayEnd && r.start >= dayStart) ||
+                      (r.end <= dayEnd && r.end > dayStart) ||
+                      (r.end > dayEnd && r.start < dayStart)) {
+                    return true;
+                  }
+              }
+              return false;
+            });
+          }
 
-            //$.get(url).then(function (response) {
-                drawChart(data, elem[0], gitcalendar);
-            //});
+          scope.$watch('selectedRanges',function(ranges) {
+            console.log("range change");
+            console.log(ranges);
+            if(ranges!==undefined && ranges!==null) {
+              selectRanges(ranges, elem[0]);
+            }
+          }, true);
+
+
 
             function dateToYMD(date) {
                 var d = date.getDate();

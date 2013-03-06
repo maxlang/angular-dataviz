@@ -49,13 +49,13 @@ module.exports = function (grunt) {
         },
         dist: {
             files: {
-                'dist/<%= pkg.name %>.css': ['common/**/*.less', 'modules/**/*.less']
+                'dist/<%= pkg.name %>.css': ['modules/**/*.less']   //'common/**/*.less' ?
             }
         }
     },
 //    recess: {
 //      dist: {
-//        src: ['common/**/*.less', 'modules/**/*.less','modules/directives/stylesheets/blockCalendar.less'],
+//        src: ['common/**/*.less', 'modules/**/*.less','modules/directives/stylesheets/widgetTranslator.less'],
 //        dest: 'dist/<%= pkg.name %>.css',
 //        options: {
 //          compile: true
