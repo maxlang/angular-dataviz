@@ -118,15 +118,45 @@
           </ol>
         </section>
 
+        <section id="randomData">
+            <h1>Data (Randomly Generated)</h1>
+            {{dataObject.records[0]}}
+            <div style="height:250px; overflow:scroll;" >
+            <table>
+                <thead>
+                <th>Eater Name</th>
+                <th>Number of Bites</th>
+                <th>Eaten Name</th>
+                <th>Time</th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="record in dataObject.records|inView:queryObject">
+                    <td>
+                        {{record.eater}}
+                    </td>
+                    <td>
+                        {{record.bites}}
+                    </td>
+                    <td>
+                        {{record.eaten}}
+                    </td>
+                    <td>
+                        {{record.time|timestampToTime}}
+                    </td>
+
+                    </tr>
+
+                </tbody>
+            </table>
+            </div>
+
         <section id="blockCalendar" class="blockCalendar">
           <div class="page-header">
             <h1>Block Calendar</h1>
               <div ng-controller="queryConverterCtrl">
-                  {{dataObject.dateRangeCounts[0]}}
                 <block-calendar id="chart" counts="counts" selected-ranges="selectedRanges"></block-calendar>
               </div>
               <div ng-controller="queryConverterCtrl">
-                  {{dataObject.dateRangeCounts[0]}}
                   <block-calendar id="chart" counts="counts" selected-ranges="selectedRanges"></block-calendar>
               </div>
           </div>
