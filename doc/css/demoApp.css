@@ -1,0 +1,23 @@
+nv-barchart svg {
+    height: 400px;
+    width:500px;
+}
+
+.table {
+    width:500px;
+
+}
+
+.table-container {
+    width:500px;
+    height:750px;
+    overflow:scroll;
+    float:left;
+}
+
+.blockCalendar {
+    width: 600px;
+    float:left;
+}
+
+
