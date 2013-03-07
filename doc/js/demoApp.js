@@ -3,6 +3,50 @@
  * demoApp - 1.0.0rc2
  */
 
+//records - array of record objects
+//key - the key to reduce on in the record object
+//keyTransofrm - a transformation to perform on the key
+//value - the value to be reduced
+//valueTransform - a transformation to be performed on the value
+//combineFn - how to combine two values with the same key
+function reduce(records, key, keyTransform, value, valueTransform, combineFn) {
+  var i;
+  var reducedRecords = {};
+  for(i=0;i<records.length;i++) {
+    var k = (keyTransform && keyTransform(records[i][key])) || records[i][key];
+    var v = (valueTransform && valueTransform(records[i][value])) || records[i][value];
+    if(k in reducedRecords) {
+      reducedRecords[k] = combineFn(reducedRecords[k],v);
+    } else {
+      reducedRecords[k]=v;
+    }
+  }
+  return reducedRecords;
+}
+
+function sumCombine(a,b) {
+  return a+b;
+}
+
+function timestampToDate(t) {
+  var d = new Date();
+  d.setTime(t);
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+
+function mapTokvArray(map,keyName,valueName) {
+  var array = [];
+  var k;
+  for (k in map) {
+    var item = {};
+    item[keyName] = k;
+    item[valueName] = map[k];
+    array.push(item) ;
+  }
+  return array;
+}
+
+
 angular.module('demoApp', ['dataviz'], function($locationProvider) {
   $locationProvider.hashPrefix('');
   // Make code pretty
@@ -38,78 +82,135 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       };
     }])
     .filter('inView', [function() {
-      return function(records, queryObject){
+      return function(records, filters, excludeFilter){
         var i;
         var output = [];
         for(i=0;i<records.length;i++) {
           var record = records[i];
-          if ((!queryObject.from || record.time >= queryObject.from) && (!queryObject.to || record.time < queryObject.to)) {
-            console.log(queryObject);
+          var push = true;
+          var filterKey;
+          for(filterKey in filters) {
+            if(filterKey !== excludeFilter) {
+              push &= filters[filterKey].apply(record);
+            }
+          }
+          if (push) {
             output.push(record);
           }
         }
         return output;
       }
     }])
-    .directive('calendarConverter', [function() {
-      return {
-        restrict:'E',
-        scope: {
-          data: '=',
-          query: '='
-        },
-    controller: 'queryConverterCtrl'
-      }
-    }])
-    .controller('queryConverterCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
+    .controller('calendarConverterCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
       console.log('controller');
       console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
-      $scope.counts = $filter('timestampToDay')($scope.dataObject.records);  //TODO TDOD:sum
+      $scope.counts = reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,sumCombine);
 
 
-      $scope.queryObject = $rootScope.queryObject;
+      $scope.filters = $rootScope.filters;
       $scope.selectedRanges = [{start:null,end:null}];
       console.log($scope);
       $scope.$watch('selectedRanges', function() {
         console.log($scope.selectedRanges);
-        if ($scope.selectedRanges.length !== null && $scope.selectedRanges.length !== undefined && $scope.selectedRanges.length > 0) {
-          $rootScope.queryObject.from = $scope.selectedRanges[0].start;
-          $rootScope.queryObject.to = $scope.selectedRanges[0].end;
+        if ($scope.selectedRanges.length > 0) {
+          $rootScope.filters.dateFilter.from = $scope.selectedRanges[0].start;
+          $rootScope.filters.dateFilter.to = $scope.selectedRanges[0].end;
         } else {
-          $rootScope.queryObject.from = null;
-          $rootScope.queryObject.to = null;
+          $rootScope.filters.dateFilter.from = null;
+          $rootScope.filters.dateFilter.to = null;
         }
-        console.log($scope.selectedRanges);
-        console.log('queryobject');
-        console.log($rootScope.queryObject);
       }, true);
 
-      $rootScope.$watch('queryObject.from', function(val) {
-        console.log($scope.selectedRanges);
-        $scope.selectedRanges[0].start = val;
-        console.log($scope.selectedRanges);
-        console.log('queryobject');
+      $rootScope.$watch('filters.dateFilter', function(df) {
+        $scope.selectedRanges[0].start = df.from;
+        $scope.selectedRanges[0].end = df.to;
 
-      });
+      }, true);
 
-      $rootScope.$watch('queryObject.to', function(val) {
+      // add a watch to all other filters
+      var filterKey;
+      for(filterKey in $rootScope.filters) {
+        if (filterKey !== "dateFilter") {
+          $scope.$watch('filters.'+filterKey, function() {
+            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
+            $scope.counts = reduce(records,'time',timestampToDate,'bites',null,sumCombine);
+          }, true);
+        }
+      }
+
+    }])
+    .controller('calendarConverterUnfilteredCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
+      console.log('controller');
+      console.log($scope);
+      $scope.dataObject = $rootScope.dataObject;
+      $scope.counts = reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,sumCombine);
+
+
+      $scope.filters = $rootScope.filters;
+      $scope.selectedRanges = [{start:null,end:null}];
+      console.log($scope);
+      $scope.$watch('selectedRanges', function() {
         console.log($scope.selectedRanges);
-        $scope.selectedRanges[0].end = val;
-        console.log($scope.selectedRanges);
-      });
+        if ($scope.selectedRanges.length > 0) {
+          $rootScope.filters.dateFilter.from = $scope.selectedRanges[0].start;
+          $rootScope.filters.dateFilter.to = $scope.selectedRanges[0].end;
+        } else {
+          $rootScope.filters.dateFilter.from = null;
+          $rootScope.filters.dateFilter.to = null;
+        }
+      }, true);
 
+      $rootScope.$watch('filters.dateFilter', function(df) {
+        $scope.selectedRanges[0].start = df.from;
+        $scope.selectedRanges[0].end = df.to;
 
+      }, true);
 
     }])
 
+
+    .controller('eaterConverterCtrl',['$scope','$rootScope', function($scope, $rootScope) {
+      console.log('controller');
+      console.log($scope);
+      $scope.dataObject = $rootScope.dataObject;
+      var values = mapTokvArray(reduce($scope.dataObject.records,'eater',null,'bites',null,sumCombine), "label", "value");
+
+      $scope.labeledCounts = [{
+         key:"Key",
+         values:values
+      }];
+
+      $scope.$watch('selectedLabels', function(val) {
+        console.log("scope labels");
+        console.log(val);
+        if (val!==null && val!==undefined && val.length > 0) {
+          $rootScope.filters.eaterFilter.selected = val[0];
+        }
+      });
+
+
+      $scope.filters = $rootScope.filters;
+      $scope.selectedRanges = [{start:null,end:null}];
+      console.log('controller exit');
+      console.log($scope);
+    }])
     .controller('GlobalDataCtrl',['$scope', '$rootScope', function($scope, $rootScope) {
     console.log("global data controller");
   $rootScope.dataObject = [];
-  $rootScope.queryObject = {
+  $rootScope.filters = {
+    dateFilter:
+    {
+      to: null,
       from: null,
-      to: null
-    };
+      apply: function(r) { return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from); }
+    },
+    eaterFilter:
+    {
+      selected: null,
+      apply: function(r) { return (!this.selected || r.eater.toUpperCase() === this.selected.toUpperCase()); }
+    }
+  };
 
     var carnivores = ["Rex", "Allen", "Velossy"];
     var herbivores = ["Steggy", "Trice", "Bronta"];
@@ -141,7 +242,8 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
           }
         }
-      console.log(dataObj);
+      console.log("records");
+      console.log(dataObj.records.length);
     }
 
 
