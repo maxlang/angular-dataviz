@@ -5,7 +5,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
           //TODO: change expected values to something more reasonable
             'selectedRanges': '=',   // expects an array of {start:<timestamp>, end:<timestamp>} objects
             //'highlightedRanges': '=',
-            'counts' : '=',   // expects an array of {date:<YYYY-mm-dd>, count:<number>}
+            'counts' : '=',   // expects an map of {<YYYY-mm-dd>:<count>}
             'width'  : '=',  // expects a measurement in pixels
             'height' : '='  // expects a measurement in pixels
         },
@@ -51,7 +51,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 var weeks = days[days.length - 1].week + 1; //week is 0 indexed
                 var totalWidth = 586;
                 var totalHeight = 86;
-                $("#chart").css("height", totalHeight + "px").css("width", totalWidth + "px");
+                $(element).find(".chart").css("height", totalHeight + "px").css("width", totalWidth + "px");
                 var cellWidth = (totalWidth / weeks);
                 var cellHeight = totalHeight / 7;
                 var cellSize = Math.floor(Math.min(cellWidth, cellHeight));
@@ -97,14 +97,17 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 var data = {};
                 var max = 0;
                 var dates = {};
-                var i;
-                for (i = 0; i < data3.length; i++) {
-                    var date = new Date(data3[i].date);
-                    var dateString = data3[i].date;
-                    max = Math.max(data3[i].count, max);
-                    data[dateString] = data3[i].count;
+                var k;
+                for (k in data3) {
+                    var date = new Date(k);
+                    var dateString = k;
+                    max = Math.max(data3[k], max);
+                    data[dateString] = data3[k];
                     dates[dateString] = date;
                 }
+              console.log("cal processing");
+              console.log(data);
+              console.log(dates);
 
                 var color = d3.scale.quantize().domain([0, max]).range(d3.range(9));
 
@@ -126,6 +129,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 scope.$watch('counts',function(counts) {
                   console.log("count change");
                   console.log(counts);
+                  //HACK - remove everything in the div for right now
+                  elem.html("");
                   if(counts!==undefined && counts!==null) {
                     drawChart(counts, elem[0], gitcalendar);
                   }
