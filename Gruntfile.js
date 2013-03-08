@@ -45,7 +45,7 @@ module.exports = function (grunt) {
     },
     less: {
         options: {
-            dumpLineNumbers: 'all'
+//            dumpLineNumbers: 'all'
         },
         dist: {
             files: {

@@ -9,7 +9,7 @@
 //value - the value to be reduced
 //valueTransform - a transformation to be performed on the value
 //combineFn - how to combine two values with the same key
-function reduce(records, key, keyTransform, value, valueTransform, combineFn) {
+function reduce(records, key, keyTransform, value, valueTransform, valueDefault, combineFn) {
   var i;
   var reducedRecords = {};
   for(i=0;i<records.length;i++) {
@@ -18,7 +18,7 @@ function reduce(records, key, keyTransform, value, valueTransform, combineFn) {
     if(k in reducedRecords) {
       reducedRecords[k] = combineFn(reducedRecords[k],v);
     } else {
-      reducedRecords[k]=v;
+      reducedRecords[k]=combineFn(valueDefault,v);
     }
   }
   return reducedRecords;
@@ -26,6 +26,9 @@ function reduce(records, key, keyTransform, value, valueTransform, combineFn) {
 
 function sumCombine(a,b) {
   return a+b;
+}
+function countCombine(a) {
+  return a+1;
 }
 
 function timestampToDate(t) {
@@ -105,7 +108,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       console.log('controller');
       console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
-      $scope.counts = reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,sumCombine);
+      $scope.counts = mapTokvArray(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine),"key","count");
 
 
       $scope.filters = $rootScope.filters;
@@ -134,7 +137,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "dateFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
-            $scope.counts = reduce(records,'time',timestampToDate,'bites',null,sumCombine);
+            $scope.counts = mapTokvArray(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine),"key","count");
           }, true);
         }
       }
@@ -144,7 +147,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       console.log('controller');
       console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
-      $scope.counts = reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,sumCombine);
+      $scope.counts = mapTokvArray(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine),"key","count");
 
 
       $scope.filters = $rootScope.filters;
@@ -170,11 +173,11 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     }])
 
 
-    .controller('eaterConverterCtrl',['$scope','$rootScope', function($scope, $rootScope) {
+    .controller('eaterConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
       console.log('controller');
       console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
-      var values = mapTokvArray(reduce($scope.dataObject.records,'eater',null,'bites',null,sumCombine), "label", "value");
+      var values = mapTokvArray(reduce($scope.dataObject.records,'eater',null,'bites',null,0,countCombine), "key", "count");
 
       $scope.labeledCounts = [{
          key:"Key",
@@ -186,15 +189,78 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         console.log(val);
         if (val!==null && val!==undefined && val.length > 0) {
           $rootScope.filters.eaterFilter.selected = val[0];
+        } else {
+          $rootScope.filters.eaterFilter.selected = null;
         }
       });
 
+      //TODO: add watch on filters.eaterFilter
+
+      // add a watch to all other filters
+      var filterKey;
+      for(filterKey in $rootScope.filters) {
+        if (filterKey !== "eaterFilter") {
+          $scope.$watch('filters.'+filterKey, function() {
+            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
+            var counts = mapTokvArray(reduce(records,'eater',null,'bites',null,0,countCombine), "key", "count");
+            $scope.labeledCounts = [{
+              key:"Key",
+              values:counts
+            }];
+          }, true);
+        }
+      }
 
       $scope.filters = $rootScope.filters;
-      $scope.selectedRanges = [{start:null,end:null}];
       console.log('controller exit');
       console.log($scope);
     }])
+
+    .controller('eatenConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
+      console.log('controller');
+      console.log($scope);
+      $scope.dataObject = $rootScope.dataObject;
+      var values = mapTokvArray(reduce($scope.dataObject.records,'eaten',null,'bites',null,0,countCombine), "key", "count");
+
+      $scope.labeledCounts = [{
+        key:"Key",
+        values:values
+      }];
+
+      $scope.$watch('selectedLabels', function(val) {
+        console.log("scope labels");
+        console.log(val);
+        if (val!==null && val!==undefined && val.length > 0) {
+          $rootScope.filters.eatenFilter.selected = val[0];
+        } else {
+          $rootScope.filters.eatenFilter.selected = null;
+        }
+      });
+
+      //TODO: add watch on filters.eatenFilter
+
+      // add a watch to all other filters
+      var filterKey;
+      for(filterKey in $rootScope.filters) {
+        if (filterKey !== "eatenFilter") {
+          $scope.$watch('filters.'+filterKey, function() {
+            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eatenFilter");
+            var counts = mapTokvArray(reduce(records,'eaten',null,'bites',null,0,countCombine), "key", "count");
+            $scope.labeledCounts = [{
+              key:"Key",
+              values:counts
+            }];
+          }, true);
+        }
+      }
+
+      $scope.filters = $rootScope.filters;
+      console.log('controller exit');
+      console.log($scope);
+    }])
+
+
+
     .controller('GlobalDataCtrl',['$scope', '$rootScope', function($scope, $rootScope) {
     console.log("global data controller");
   $rootScope.dataObject = [];
@@ -209,11 +275,16 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     {
       selected: null,
       apply: function(r) { return (!this.selected || r.eater.toUpperCase() === this.selected.toUpperCase()); }
+    },
+    eatenFilter:
+    {
+      selected: null,
+      apply: function(r) { return (!this.selected || r.eaten.toUpperCase() === this.selected.toUpperCase()); }
     }
   };
 
     var carnivores = ["Rex", "Allen", "Velossy"];
-    var herbivores = ["Steggy", "Trice", "Bronta"];
+    var herbivores = ["Stegasaurus", "Trice", "Bronta"];
 
 
 

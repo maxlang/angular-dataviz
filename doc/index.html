@@ -131,7 +131,7 @@
                 <th>Time</th>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="record in dataObject.records|inView:queryObject">
+                    <tr ng-repeat="record in dataObject.records|inView:filters">
                     <td>
                         {{record.eater}}
                     </td>
@@ -164,10 +164,16 @@
               </div>
 
               <div ng-controller="eaterConverterCtrl">
-                  <nv-barchart class="chart" labeled-counts="labeledCounts" selected-labels="selectedLabels" widget-translator test="asdf">
+                  <nv-barchart class="chart" labeled-counts="labeledCounts" selected-labels="selectedLabels">
                       <svg></svg>
-                  </block-calendar>
+                  </nv-barchart>
               </div>
+              <div ng-controller="eatenConverterCtrl">
+                  <nv-barchart class="chart" labeled-counts="labeledCounts" selected-labels="selectedLabels">
+                      <svg></svg>
+                  </nv-barchart>
+              </div>
+
           </div>
         </section>
       </div>

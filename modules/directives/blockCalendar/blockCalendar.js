@@ -39,6 +39,26 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 }
 
             };
+
+          //TODO: optimize and clean
+          var selectRanges = function (ranges, element) {
+            d3.select(element).selectAll('rect.day').classed("selected", function(d) {
+              var i;
+              for (i=0;i<ranges.length;i++) {
+                var r = ranges[i];
+                var dayStart = datefromstr(d.Date, 0).getTime();
+                var dayEnd = datefromstr(d.Date, 1).getTime();
+                if ((r.start < dayEnd && r.start >= dayStart) ||
+                    (r.end <= dayEnd && r.end > dayStart) ||
+                    (r.end > dayEnd && r.start < dayStart)) {
+                  return true;
+                }
+              }
+              return false;
+            });
+          };
+
+
           //TODO: needs to factor in selectedRanges
             function drawChart(data2, element, calendar) {
 
@@ -97,12 +117,12 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 var data = {};
                 var max = 0;
                 var dates = {};
-                var k;
-                for (k in data3) {
-                    var date = new Date(k);
-                    var dateString = k;
-                    max = Math.max(data3[k], max);
-                    data[dateString] = data3[k];
+                var i;
+                for (i=0;i<data3.length;i++) {
+                    var date = new Date(data3[i].key);
+                    var dateString = data3[i].key;
+                    max = Math.max(data3[i].count, max);
+                    data[dateString] = data3[i].count;
                     dates[dateString] = date;
                 }
               console.log("cal processing");
@@ -125,6 +145,10 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                         }
                         return d.Date + itemString;
                     });
+              console.log("selecting ranges");
+              console.log(scope.selectedRanges);
+
+              selectRanges(scope.selectedRanges, element);
             }
                 scope.$watch('counts',function(counts) {
                   console.log("count change");
@@ -136,23 +160,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                   }
                 }, true);
 
-          //TODO: optimize and clean
-          function selectRanges(ranges, element) {
-            d3.select(element).selectAll('rect.day').classed("selected", function(d) {
-              var i;
-              for (i=0;i<ranges.length;i++) {
-                var r = ranges[i];
-                var dayStart = datefromstr(d.Date, 0).getTime();
-                var dayEnd = datefromstr(d.Date, 1).getTime();
-                  if ((r.start < dayEnd && r.start >= dayStart) ||
-                      (r.end <= dayEnd && r.end > dayStart) ||
-                      (r.end > dayEnd && r.start < dayStart)) {
-                    return true;
-                  }
-              }
-              return false;
-            });
-          }
+
 
           scope.$watch('selectedRanges',function(ranges) {
             console.log("range change");
