@@ -144,17 +144,13 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
     }])
     .controller('calendarConverterUnfilteredCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
-      console.log('controller');
-      console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
       $scope.counts = mapTokvArray(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine),"key","count");
 
 
       $scope.filters = $rootScope.filters;
       $scope.selectedRanges = [{start:null,end:null}];
-      console.log($scope);
       $scope.$watch('selectedRanges', function() {
-        console.log($scope.selectedRanges);
         if ($scope.selectedRanges.length > 0) {
           $rootScope.filters.dateFilter.from = $scope.selectedRanges[0].start;
           $rootScope.filters.dateFilter.to = $scope.selectedRanges[0].end;
@@ -174,8 +170,6 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
 
     .controller('eaterConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
-      console.log('controller');
-      console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
       var values = mapTokvArray(reduce($scope.dataObject.records,'eater',null,'bites',null,0,countCombine), "key", "count");
 
@@ -185,8 +179,6 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }];
 
       $scope.$watch('selectedLabels', function(val) {
-        console.log("scope labels");
-        console.log(val);
         if (val!==null && val!==undefined && val.length > 0) {
           $rootScope.filters.eaterFilter.selected = val[0];
         } else {
@@ -212,13 +204,9 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }
 
       $scope.filters = $rootScope.filters;
-      console.log('controller exit');
-      console.log($scope);
     }])
 
     .controller('eatenConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
-      console.log('controller');
-      console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
       var values = mapTokvArray(reduce($scope.dataObject.records,'eaten',null,'bites',null,0,countCombine), "key", "count");
 
@@ -228,8 +216,6 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }];
 
       $scope.$watch('selectedLabels', function(val) {
-        console.log("scope labels");
-        console.log(val);
         if (val!==null && val!==undefined && val.length > 0) {
           $rootScope.filters.eatenFilter.selected = val[0];
         } else {
@@ -255,14 +241,11 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }
 
       $scope.filters = $rootScope.filters;
-      console.log('controller exit');
-      console.log($scope);
     }])
 
 
 
     .controller('GlobalDataCtrl',['$scope', '$rootScope', function($scope, $rootScope) {
-    console.log("global data controller");
   $rootScope.dataObject = [];
   $rootScope.filters = {
     dateFilter:
@@ -289,7 +272,6 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
 
     var populate = function(dataObj) {
-      console.log("populating records");
         var today = new Date();
         var dayInMilliseconds = 24*60*60*1000;
         var end = today.getTime();
@@ -313,14 +295,10 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
           }
         }
-      console.log("records");
-      console.log(dataObj.records.length);
     }
 
 
     populate($scope.dataObject);
-      console.log('dataObject');
-    console.log($scope.dataObject);
 }]).filter('timestampToTime',function() {
       return function(t) {
         var d = new Date();

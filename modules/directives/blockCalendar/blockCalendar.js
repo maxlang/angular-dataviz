@@ -10,7 +10,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
             'height' : '='  // expects a measurement in pixels
         },
         link: function(scope, elem, attrs) {
-            console.log("link");
             var datefromstr = function(datestr, add) {
                 var nima = datestr.split("-");
                 return new Date(parseInt(nima[0], 10), parseInt(nima[1], 10) - 1, parseInt(nima[2], 10) + add);
@@ -62,7 +61,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
           //TODO: needs to factor in selectedRanges
             function drawChart(data2, element, calendar) {
 
-                console.log(data2);
                 var months = 10;
 
                 var data3 = data2;
@@ -82,17 +80,14 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                     .attr("x", function(d) {return (d.week * cellSize) + "px"; })
                     .attr("y", function(d) {return (d.day * cellSize) + "px"; })
                     .on("click", function (d, i) {
-                      console.log("click");
                       var dThis = d3.select(this);
                       //TODO: change behavior if this is part of a large selection?
                       if (dThis.classed("selected")) {
-                        console.log("selected");
                         d3.selectAll("rect").classed("selected", false);
                         scope.$apply(function() {
                           scope.selectedRanges = [];
                         });
                       } else {
-                        console.log("not selected");
                         d3.selectAll("rect").classed("selected", false);
                         dThis.classed("selected", true);
                         //HACK: clear then push so that watchers know there is a change
@@ -103,7 +98,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                             end: datefromstr(d.Date, 1).getTime()
                           }];
                         });
-                        console.log(scope.selectedRanges);
                       }
 
                       //TODO: why do we need to use apply here again?
@@ -125,9 +119,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                     data[dateString] = data3[i].count;
                     dates[dateString] = date;
                 }
-              console.log("cal processing");
-              console.log(data);
-              console.log(dates);
 
                 var color = d3.scale.quantize().domain([0, max]).range(d3.range(9));
 
@@ -145,14 +136,10 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                         }
                         return d.Date + itemString;
                     });
-              console.log("selecting ranges");
-              console.log(scope.selectedRanges);
 
               selectRanges(scope.selectedRanges, element);
             }
                 scope.$watch('counts',function(counts) {
-                  console.log("count change");
-                  console.log(counts);
                   //HACK - remove everything in the div for right now
                   elem.html("");
                   if(counts!==undefined && counts!==null) {
@@ -163,8 +150,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
 
           scope.$watch('selectedRanges',function(ranges) {
-            console.log("range change");
-            console.log(ranges);
+
             if(ranges!==undefined && ranges!==null) {
               selectRanges(ranges, elem[0]);
             }
