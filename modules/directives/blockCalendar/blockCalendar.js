@@ -34,8 +34,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       //INIT
       d3.select(element[0]).classed("chart", true);
 
-      alert("appending");
-
       scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
       function drawChart(data) {
@@ -174,7 +172,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
-        if(counts!==undefined && counts!==null) {
+        if(counts!==undefined && counts!==null && counts.length > 0) {
           drawChart(counts);
           selectRanges(scope.params.filter);
         }
@@ -190,8 +188,10 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
       scope.$watch('params.options', function(o) {
         //the display options have changed, redraw the chart
-        drawChart(scope.data);
-        selectRanges(scope.params.filter);
+        if(scope.data!==undefined && scope.data!==null && scope.data.length > 0) {
+          drawChart(scope.data);
+          selectRanges(scope.params.filter);
+        }
       }, true);
     }
   };

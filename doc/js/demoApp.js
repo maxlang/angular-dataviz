@@ -104,57 +104,35 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         return output;
       }
     }])
+
+  //TODO: stop using rootscope
+
     .controller('dashboardCtrl', ['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
 
 
-    .controller('calendarConverterCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
-      $scope.dataObject = $rootScope.dataObject;
-      $scope.data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
-
       $scope.params = {};
-
-      $scope.params.filter = [];
-      $scope.$watch('params.filter', function(f) {
-
-          if (f.length > 0) {
-            $rootScope.filters.dateFilter.from = f[0][0];
-            $rootScope.filters.dateFilter.to = f[0][1];
-          } else {
-            $rootScope.filters.dateFilter.from = null;
-            $rootScope.filters.dateFilter.to = null;
-          }
-      }, true);
-
-      $rootScope.$watch('filters.dateFilter', function(df) {
-
-        if($scope.params.filter[0]) {
-          $scope.params.filter[0][0] = df.from;
-          $scope.params.filter[0][1] = df.to;
-        } else {
-          $scope.params.filter[0]=[df.from,df.to];
-        }
-      }, true);
-
-      // add a watch to all other filters
-      var filterKey;
-      for(filterKey in $rootScope.filters) {
-        if (filterKey !== "dateFilter") {
-          $scope.$watch('filters.'+filterKey, function() {
-            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
-            $scope.data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
-          }, true);
-        }
-      }
-
-    }])
-    .controller('calendarConverterUnfilteredCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
       $scope.dataObject = $rootScope.dataObject;
-      $scope.data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
 
-      $scope.params = {};
+      ///CALENDAR 1
+      $scope.cal1data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine));
 
-      $scope.params.filter = [];
-      $scope.$watch('params.filter', function(f) {
+      $scope.cal1params = {};
+
+      $scope.params.dateFilter = [];
+
+      $scope.cal1params.filter = $scope.params.dateFilter;
+
+      //CALENDAR 2
+      $scope.dataObject = $rootScope.dataObject;
+      $scope.cal2data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
+
+      $scope.cal2params = {};
+
+      $scope.cal2params.filter = $scope.params.dateFilter;
+
+
+      // CALENDAR WATCHES
+      $scope.$watch('params.dateFilter', function(f) {
 
         if (f.length > 0) {
           $rootScope.filters.dateFilter.from = f[0][0];
@@ -167,13 +145,26 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $rootScope.$watch('filters.dateFilter', function(df) {
 
-        if($scope.params.filter[0]) {
-          $scope.params.filter[0][0] = df.from;
-          $scope.params.filter[0][1] = df.to;
+        if($scope.params.dateFilter[0]) {
+          $scope.params.dateFilter[0][0] = df.from;
+          $scope.params.dateFilter[0][1] = df.to;
         } else {
-          $scope.params.filter[0]=[df.from,df.to];
+          $scope.params.dateFilter[0]=[df.from,df.to];
         }
       }, true);
+
+      // add a watch to all other filters
+      var filterKey;
+      for(filterKey in $rootScope.filters) {
+        if (filterKey !== "dateFilter") {
+          $scope.$watch('filters.'+filterKey, function() {
+            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
+            $scope.cal1data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
+            $scope.cal2data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,countCombine));
+          }, true);
+        }
+      }
+
 
     }])
 
