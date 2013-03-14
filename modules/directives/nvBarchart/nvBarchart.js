@@ -3,28 +3,44 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
         restrict: 'E',
         scope: {
           //TODO: change expected values to something more reasonable
-            'selectedLabels': '=', //expects an array of selected label strings
-            'labeledCounts' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
-            'width'  : '@',  // expects a measurement in pixels
-            'height' : '@'  // expects a measurement in pixels
+            'data': '=', //expects an array of selected label strings
+            'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
         },
-        link: function(scope, elem, attrs) {
-          elem.find("svg").width(scope.width);
-          elem.find("svg").height(scope.height);
+        link: function(scope, element, attributes) {
 
-            function drawChart(data2, element, selected) {
+          var defaultOptions = {
+            'tooltips' : false,
+            'showValues': true,
+            'staggerLabels': true,
+            'widthPx' : 586,
+            'heightPx' : 86
+          };
+
+          //TODO: better way to handle options, esp option merging
+          function getOption(optionName) {
+            return scope.params && scope.params.options && optionName in scope.params.options ? scope.options[optionName] : defaultOptions[optionName];
+          }
+
+
+          //INIT:
+          element.append("<svg></svg>");
+
+            function drawChart(data) {
+              element.find("svg").width(getOption('widthPx'));
+              element.find("svg").height(getOption('heightPx'));
+
               nv.addGraph(function() {
                 var chart = nv.models.discreteBarChart()
-                    .x(function(d) { return d.key; })
-                    .y(function(d) { return d.count; })
-                    .staggerLabels(true)
-                    .tooltips(false)
-                    .showValues(true)
-                    .staggerLabels(true);
+                    .x(function(d) { return data.key; })
+                    .y(function(d) { return data.value; })
+                    .staggerLabels(getOption('staggerLabels'))
+                    .tooltips(getOption('tooltips'))
+                    .showValues(getOption('showValues'))
+                    .staggerLabels(getOption('staggerLabels'));
 
                 ///TODO fix selector
-                d3.select(element).select("svg")
-                    .datum(data2)
+                d3.select(element[0]).select("svg")
+                    .datum(data)
                     .transition().duration(500)
                     .call(chart);
 
@@ -32,18 +48,18 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 
                 setTimeout(function() {
 
-                d3.select(element).selectAll('.nv-bar').classed("selected", function(d,i) {
+                d3.select(element[0]).selectAll('.nv-bar').classed("selected", function(d,i) {
                   //TODO: HACK ATTACK
-                  var labels = d3.select(element).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
+                  var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
                     var a_trans = a.transform.animVal.getItem(0).matrix.e;
                     var b_trans = b.transform.animVal.getItem(0).matrix.e;
                     return a_trans - b_trans;
                   });
                   var label = $(labels[i]).text();
-                  if(scope.selectedLabels) {
+                  if(scope.params.filter) {
                     var j;
-                    for(j=0;j<scope.selectedLabels.length;j++) {
-                      if(label === scope.selectedLabels[j]) {
+                    for(j=0;j<scope.params.filter.length;j++) {
+                      if(label === scope.params.filter[j]) {
                         return true;
                       }
                     }
@@ -52,9 +68,9 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                 });
                  },100);
 
-                d3.select(element).selectAll('.nv-bar').on("click",function(d, i) {
+                d3.select(element[0]).selectAll('.nv-bar').on("click",function(d, i) {
                   //TODO HACK to get around nvd3 not adding labels to the bars
-                  var labels = d3.select(element).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
+                  var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
                     var a_trans = a.transform.animVal.getItem(0).matrix.e;
                     var b_trans = b.transform.animVal.getItem(0).matrix.e;
                     return a_trans - b_trans;
@@ -62,14 +78,14 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                   var label = $(labels[i]).text();
                   if( d3.select(this).classed("selected")) {
                     scope.$apply(function() {
-                      scope.selectedLabels = [];
+                      scope.params.filter = [];
                     });
-                    d3.select(element).selectAll("g.nv-bar").classed("selected", false);
+                    d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
                   } else {
                     scope.$apply(function() {
-                      scope.selectedLabels = [label];
+                      scope.params.filter = [label];
                     });
-                    d3.select(element).selectAll("g.nv-bar").classed("selected", false);
+                    d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
                     var dThis = d3.select(this);
                     //HACK: nvd3 seems to be overwriting this
                     setTimeout(function() {
@@ -87,36 +103,20 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                 return chart;
               });
             }
-            scope.$watch('labeledCounts',function(counts) {
+            scope.$watch('data',function(counts) {
               if(counts!==undefined && counts!==null) {
-                drawChart(counts, elem[0]);
+                drawChart(counts);
               }
             }, true);
 
-//          //TODO: should operate on a label id
-//          function selectLabels(labels, element) {
-//            d3.select(element).selectAll('g').classed("selected", function(d) {
-//              var i;
-//              for (i=0;i<labels.length;i++) {
-//                var l = labels[i].toUpperCase();
-//                if($(this).find("text").text().toUpperCase() === l) {
-//                    return true;
-//                  }
-//              }
-//              return false;
-//            });
-//          }
-//
-//          scope.$watch('selectedLabels',function(labels) {
-//            console.log("selected label change");
-//            console.log(labels);
-//            if(labels!==undefined && labels!==null) {
-//              selectLabels(labels, elem[0]);
-//            }
-//          }, true);
+            scope.$watch('params.filter', function(f) {
+            //TODO: IMPLEMENT SELECTION AS A SEPARATE METHOD
 
+            }, true);
 
-
+            scope.$watch('params.option', function() {
+              drawChart(scope.data);
+            }, true);
 
         }
     };

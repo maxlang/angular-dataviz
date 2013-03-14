@@ -1,4 +1,4 @@
-//TODO: FIX CSS SO IT DOESN'T NEED THE 'CHART' CLASS
+//TODO: add prefixes to directives
 
 angular.module('dataviz.directives').directive('blockCalendar', [function() {
   return {
@@ -29,6 +29,15 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         });
       }
 
+      //TODO: change styles to avoid this
+
+      //INIT
+      d3.select(element[0]).classed("chart", true);
+
+      alert("appending");
+
+      scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+
       function drawChart(data) {
         //TODO: take into account height
         //calculate columns based on width
@@ -56,9 +65,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         }
 
         //DRAW IT
-        var svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
-        svg.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
+        scope.svg.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
             .attr("width", size)
             .attr("height", size)
@@ -76,20 +84,20 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
               scope.mousedown = d;
               var rect = d3.select(this);
               //if only 1 cell is selected
-              if(svg.selectAll("rect.day.selected")[0].length===1) {
+              if(scope.svg.selectAll("rect.day.selected")[0].length===1) {
                 //if it's this cell
                 if(rect.classed("selected")) {
                   rect.classed("selected", false);
                   setSelectedRanges([]);
                 } else {
-                  svg.selectAll("rect.day").classed("selected", false);
+                  scope.svg.selectAll("rect.day").classed("selected", false);
                   rect.classed("selected", true);
                   setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
                 }
               } else {
                 // if lots of cells are selected, always select (TODO: does this behavior make sense?)
                 //TODO: add a good way to deselect esp for ranges
-                svg.selectAll("rect.day").classed("selected", false);
+                scope.svg.selectAll("rect.day").classed("selected", false);
                 rect.classed("selected", true);
                 var rangeStartDate = start.clone().add("days", d);
                 var rangeEndDate = start.clone().add("days", d + 1);
@@ -104,7 +112,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 var startRange = Math.min(scope.mousedown, d);
                 var endRange = Math.max(scope.mousedown, d);
 
-                svg.selectAll("rect.day").classed("selected", function(rectNumber) {
+                scope.svg.selectAll("rect.day").classed("selected", function(rectNumber) {
                   return rectNumber >= startRange && rectNumber <= endRange;
                 });
 
@@ -156,7 +164,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
             if (r[0] && r[1]) {
               var rangeStart = -scope.start.diff(r[0], "days", true);
               var rangeEnd = -scope.start.diff(r[1], "days", true);
-              //FIXME: currently two days are selected instead of just 1
               if (d >= rangeStart && d < rangeEnd) {
                 return true;
               }
@@ -167,8 +174,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
-        //TODO: HACK - remove everything in the div for right now
-        element.html("");
         if(counts!==undefined && counts!==null) {
           drawChart(counts);
           selectRanges(scope.params.filter);
@@ -177,14 +182,17 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
 
       //TODO: update the options as well
-      scope.$watch('params',function(p) {
-        if(p.filter!==undefined && p.filter!==null) {
-          selectRanges(p.filter);
+      scope.$watch('params.filter',function(f) {
+        if(f!==undefined && f!==null) {
+          selectRanges(f);
         }
       }, true);
 
-
-
+      scope.$watch('params.options', function(o) {
+        //the display options have changed, redraw the chart
+        drawChart(scope.data);
+        selectRanges(scope.params.filter);
+      }, true);
     }
   };
 }]);

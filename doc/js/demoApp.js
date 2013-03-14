@@ -104,6 +104,9 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         return output;
       }
     }])
+    .controller('dashboardCtrl', ['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
+
+
     .controller('calendarConverterCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
       $scope.dataObject = $rootScope.dataObject;
       $scope.data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));

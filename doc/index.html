@@ -9,6 +9,7 @@
     <script src="../test/lib/nvd3/nv.d3.js"></script>
   <script src="../test/lib/moment/moment.js"></script>
   <script src="../test/lib/underscore/underscore.js"></script>
+      <script src="../test/lib/gridstr/gridstr.js"></script>
     <script src="../dist/angular-dataviz.js"></script>
     <script src="js/prettify.js"></script>
     <script src="js/demoApp.js"></script>
@@ -157,23 +158,11 @@
           <div class="page-header">
             <!--<h1>Block Calendar</h1> -->
 
-              <div ng-controller="calendarConverterUnfilteredCtrl">
-                  <block-calendar class="chart" data="data" params="params"></block-calendar>
-              </div>
-
-              <div ng-controller="calendarConverterCtrl">
-                <block-calendar class="chart" data="data" params="params"></block-calendar>
-              </div>
-
-              <div ng-controller="eaterConverterCtrl">
-                  <nv-barchart class="chart" labeled-counts="labeledCounts" selected-labels="selectedLabels">
-                      <svg></svg>
-                  </nv-barchart>
-              </div>
-              <div ng-controller="eatenConverterCtrl">
-                  <nv-barchart class="chart" labeled-counts="labeledCounts" selected-labels="selectedLabels" width="50px" height="50px">
-                      <svg></svg>
-                  </nv-barchart>
+              <div ng-controller="dashboardCtrl">
+                  <block-calendar data="cal1Data" params="cal1params"></block-calendar>
+                  <block-calendar data="cal2Data" params="cal2params"></block-calendar>
+                  <nv-barchart data="bar1Data" params="bar1params"></nv-barchart>
+                  <nv-barchart data="bar2Data" params="bar2params"></nv-barchart>
               </div>
 
           </div>
