@@ -23,9 +23,12 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         return scope.params && scope.params.options && optionName in scope.params.options ? scope.options[optionName] : defaultOptions[optionName];
       }
 
+      //TODO: standardize how filters are changed (don't create a new object) - use extend?
       function setSelectedRanges(ranges) {
         scope.$apply(function () {
-          scope.params.filter = ranges;
+          console.log("changing filter");
+          var args = [0, scope.params.filter.length].concat(ranges);
+          Array.prototype.splice.apply(scope.params.filter, args);
         });
       }
 

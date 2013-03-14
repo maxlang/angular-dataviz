@@ -130,10 +130,9 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $scope.cal2params.filter = $scope.params.dateFilter;
 
-
       // CALENDAR WATCHES
       $scope.$watch('params.dateFilter', function(f) {
-
+        console.log("date filter change");
         if (f.length > 0) {
           $rootScope.filters.dateFilter.from = f[0][0];
           $rootScope.filters.dateFilter.to = f[0][1];
@@ -144,7 +143,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }, true);
 
       $rootScope.$watch('filters.dateFilter', function(df) {
-
+        console.log("root date filter change");
         if($scope.params.dateFilter[0]) {
           $scope.params.dateFilter[0][0] = df.from;
           $scope.params.dateFilter[0][1] = df.to;
