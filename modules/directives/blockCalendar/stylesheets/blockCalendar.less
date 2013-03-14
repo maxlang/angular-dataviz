@@ -16,6 +16,13 @@ block-calendar {
   @mag4: rgb(69,124,50);
   @mag5: rgb(28,93,26);
 
+  @defaultsel: rgb(204, 204, 255);
+  @mag1sel: rgb(133, 133, 230);
+  @mag2sel: rgb(109, 109, 199);
+  @mag3sel: rgb(79, 79, 161);
+  @mag4sel: rgb(50, 50, 122);
+  @mag5sel: rgb(26, 26, 92);
+
   .container {
 //    .flex(1.0);
     padding: @containerPadY @containerPadX @containerPadY - 1px @containerPadOffset;
@@ -34,16 +41,33 @@ block-calendar {
       margin-top:5px;
     }
 
-    .qundefined-9 { fill: @default; }
-    .q0-9 { fill: @mag1; }
-    .q1-9, .q2-9 { fill: @mag2; }
-    .q3-9, .q4-9 { fill: @mag3; }
-    .q5-9, .q6-9 { fill: @mag4 }
-    .q7-9, .q8-9 { fill: @mag5 }
+    .qundefined-9 {
+      fill: @default;
+      &.selected { fill: @defaultsel; }
+    }
+    .q0-9 { fill: @mag1;
+      &.selected { fill: @mag1sel; }
+    }
+    .q1-9, .q2-9 {
+      fill: @mag2;
+      &.selected { fill: @mag2sel; }
+    }
+    .q3-9, .q4-9 {
+      fill: @mag3;
+      &.selected { fill: @mag3sel; }
+    }
+    .q5-9, .q6-9 {
+      fill: @mag4;
+      &.selected { fill: @mag4sel; }
+    }
+    .q7-9, .q8-9 {
+      fill: @mag5;
+      &.selected { fill: @mag5sel; }
+    }
 
     .day {
       stroke: white;
-      stroke-width: 2px;
+//      stroke-width: 2px;
 
       &:hover {
         cursor: pointer;
@@ -52,7 +76,7 @@ block-calendar {
       }
 
       &.selected {
-        fill:blue;
+        //fill:blue;
         opacity:.5;
       }
 
@@ -126,6 +150,12 @@ block-calendar {
       &.m3 { background-color: @mag3; }
       &.m4 { background-color: @mag4; }
       &.m5 { background-color: @mag5; }
+
+      &.m1.selected { background-color: @mag1sel; }
+      &.m2.selected { background-color: @mag2sel; }
+      &.m3.selected { background-color: @mag3sel; }
+      &.m4.selected { background-color: @mag4sel; }
+      &.m5.selected { background-color: @mag5sel; }
 
       &:last-child, &:nth-child(2) { margin-left: 10px; }
     }

@@ -105,30 +105,31 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }
     }])
     .controller('calendarConverterCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
-      console.log('controller');
-      console.log($scope);
       $scope.dataObject = $rootScope.dataObject;
-      $scope.counts = mapTokvArray(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine),"key","count");
+      $scope.data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
 
+      $scope.params = {};
 
-      $scope.filters = $rootScope.filters;
-      $scope.selectedRanges = [{start:null,end:null}];
-      console.log($scope);
-      $scope.$watch('selectedRanges', function() {
-        console.log($scope.selectedRanges);
-        if ($scope.selectedRanges.length > 0) {
-          $rootScope.filters.dateFilter.from = $scope.selectedRanges[0].start;
-          $rootScope.filters.dateFilter.to = $scope.selectedRanges[0].end;
-        } else {
-          $rootScope.filters.dateFilter.from = null;
-          $rootScope.filters.dateFilter.to = null;
-        }
+      $scope.params.filter = [];
+      $scope.$watch('params.filter', function(f) {
+
+          if (f.length > 0) {
+            $rootScope.filters.dateFilter.from = f[0][0];
+            $rootScope.filters.dateFilter.to = f[0][1];
+          } else {
+            $rootScope.filters.dateFilter.from = null;
+            $rootScope.filters.dateFilter.to = null;
+          }
       }, true);
 
       $rootScope.$watch('filters.dateFilter', function(df) {
-        $scope.selectedRanges[0].start = df.from;
-        $scope.selectedRanges[0].end = df.to;
 
+        if($scope.params.filter[0]) {
+          $scope.params.filter[0][0] = df.from;
+          $scope.params.filter[0][1] = df.to;
+        } else {
+          $scope.params.filter[0]=[df.from,df.to];
+        }
       }, true);
 
       // add a watch to all other filters
@@ -137,7 +138,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "dateFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
-            $scope.counts = mapTokvArray(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine),"key","count");
+            $scope.data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
           }, true);
         }
       }
@@ -145,15 +146,16 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     }])
     .controller('calendarConverterUnfilteredCtrl',['$scope','$rootScope','$filter', function($scope, $rootScope, $filter) {
       $scope.dataObject = $rootScope.dataObject;
-      $scope.counts = mapTokvArray(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine),"key","count");
+      $scope.data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
 
+      $scope.params = {};
 
-      $scope.filters = $rootScope.filters;
-      $scope.selectedRanges = [{start:null,end:null}];
-      $scope.$watch('selectedRanges', function() {
-        if ($scope.selectedRanges.length > 0) {
-          $rootScope.filters.dateFilter.from = $scope.selectedRanges[0].start;
-          $rootScope.filters.dateFilter.to = $scope.selectedRanges[0].end;
+      $scope.params.filter = [];
+      $scope.$watch('params.filter', function(f) {
+
+        if (f.length > 0) {
+          $rootScope.filters.dateFilter.from = f[0][0];
+          $rootScope.filters.dateFilter.to = f[0][1];
         } else {
           $rootScope.filters.dateFilter.from = null;
           $rootScope.filters.dateFilter.to = null;
@@ -161,9 +163,13 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }, true);
 
       $rootScope.$watch('filters.dateFilter', function(df) {
-        $scope.selectedRanges[0].start = df.from;
-        $scope.selectedRanges[0].end = df.to;
 
+        if($scope.params.filter[0]) {
+          $scope.params.filter[0][0] = df.from;
+          $scope.params.filter[0][1] = df.to;
+        } else {
+          $scope.params.filter[0]=[df.from,df.to];
+        }
       }, true);
 
     }])

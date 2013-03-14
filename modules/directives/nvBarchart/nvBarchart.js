@@ -3,16 +3,14 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
         restrict: 'E',
         scope: {
           //TODO: change expected values to something more reasonable
-            'selectedLabels': '=', //expects an array of selected labels
-            'labeledCounts' : '=',   // expects an array of {<label>:<count>}
-            'width'  : '=',  // expects a measurement in pixels
-            'height' : '='  // expects a measurement in pixels
+            'selectedLabels': '=', //expects an array of selected label strings
+            'labeledCounts' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
+            'width'  : '@',  // expects a measurement in pixels
+            'height' : '@'  // expects a measurement in pixels
         },
         link: function(scope, elem, attrs) {
-          elem.width(scope.width);
-          elem.height(scope.width);
-
-
+          elem.find("svg").width(scope.width);
+          elem.find("svg").height(scope.height);
 
             function drawChart(data2, element, selected) {
               nv.addGraph(function() {
@@ -23,13 +21,6 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                     .tooltips(false)
                     .showValues(true)
                     .staggerLabels(true);
-//
-//                chart.dispatch.on("click", function(d,i) {
-//                  console.log(d);
-//                  console.log(i);
-//                  console.log(this);
-//                });
-
 
                 ///TODO fix selector
                 d3.select(element).select("svg")

@@ -1,172 +1,190 @@
+//TODO: FIX CSS SO IT DOESN'T NEED THE 'CHART' CLASS
+
 angular.module('dataviz.directives').directive('blockCalendar', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-          //TODO: change expected values to something more reasonable
-            'selectedRanges': '=',   // expects an array of {start:<timestamp>, end:<timestamp>} objects
-            //'highlightedRanges': '=',
-            'counts' : '=',   // expects an map of {<YYYY-mm-dd>:<count>}
-            'width'  : '=',  // expects a measurement in pixels
-            'height' : '='  // expects a measurement in pixels
-        },
-        link: function(scope, elem, attrs) {
-            var datefromstr = function(datestr, add) {
-                var nima = datestr.split("-");
-                return new Date(parseInt(nima[0], 10), parseInt(nima[1], 10) - 1, parseInt(nima[2], 10) + add);
-            };
+  return {
+    restrict: 'E',
+    scope: {
+      //TODO: DOCUMENT BETTER
+      'data': '=',   // expects an array of objects with a key and a value
+      'params' : '='   // a parameters object with the current filters, options, and highlighted data
+    },
+    link: function(scope, element) {
+      scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
 
-            var gitcalendar = {
-                format : d3.time.format("%Y-%-m-%-d"),
+      var defaultOptions = {
+        'cellSizePx' : 13,
+        'cellBorderPx' : 2,
+        'widthPx' : 586, //TODO:
+        'heightPx' : 86
+      };
 
-                dates : function (monthsBack) {
-                    var dates = [],
-                        week = 0,
-                        day;
+      //TODO: better way to handle options, esp option merging
+      function getOption(optionName) {
+        return scope.params && scope.params.options && optionName in scope.params.options ? scope.options[optionName] : defaultOptions[optionName];
+      }
 
-                    var today = new Date();
-                    var date2 = new Date(today.getFullYear(), 1 - monthsBack, 1);
+      function setSelectedRanges(ranges) {
+        scope.$apply(function () {
+          scope.params.filter = ranges;
+        });
+      }
 
-                    for (date2; date2 <= today; date2.setDate(date2.getDate() + 1)) {
-                        dates.push({
-                            day : day = date2.getDay(),
-                            week : day === 0 ? week += 1 : week,
-                            month : date2.getMonth(),
-                            Date : gitcalendar.format(date2)
-                        });
-                    }
-                    return dates;
-                }
+      function drawChart(data) {
+        //TODO: take into account height
+        //calculate columns based on width
+        var width = getOption('widthPx');
+        var size = getOption('cellSizePx');
+        var border = getOption('cellBorderPx');
+        var totalCellSize = size + border;
 
-            };
+        var columns = Math.floor(width/(totalCellSize));
 
-          //TODO: optimize and clean
-          var selectRanges = function (ranges, element) {
-            d3.select(element).selectAll('rect.day').classed("selected", function(d) {
-              var i;
-              for (i=0;i<ranges.length;i++) {
-                var r = ranges[i];
-                var dayStart = datefromstr(d.Date, 0).getTime();
-                var dayEnd = datefromstr(d.Date, 1).getTime();
-                if ((r.start < dayEnd && r.start >= dayStart) ||
-                    (r.end <= dayEnd && r.end > dayStart) ||
-                    (r.end > dayEnd && r.start < dayStart)) {
-                  return true;
-                }
-              }
-              return false;
-            });
-          };
+        // current week counts as an extra column
+        var start = moment().subtract('weeks',columns - 1).startOf('week');
+        scope.start = start;
+        var end = moment().startOf('day');
+        // current day counts as an extra day
+        var days = end.diff(start,'days', true) + 1;
 
+        var maxCount = _.max(data, function(d) {return d.value;}).value;
 
-          //TODO: needs to factor in selectedRanges
-            function drawChart(data2, element, calendar) {
-
-                var months = 10;
-
-                var data3 = data2;
-                var svg = d3.select(element).append("svg:svg").attr("width", "100%").attr("height", "100%");
-                var days = calendar.dates(months);
-                var weeks = days[days.length - 1].week + 1; //week is 0 indexed
-                var totalWidth = 586;
-                var totalHeight = 86;
-                $(element).find(".chart").css("height", totalHeight + "px").css("width", totalWidth + "px");
-                var cellWidth = (totalWidth / weeks);
-                var cellHeight = totalHeight / 7;
-                var cellSize = Math.floor(Math.min(cellWidth, cellHeight));
-                var cells = svg.selectAll("rect").data(days).enter().append("svg:rect");
-
-                cells.attr("width", function(d) {return cellSize + "px"; })
-                    .attr("height", function(d) {return cellSize + "px"; })
-                    .attr("x", function(d) {return (d.week * cellSize) + "px"; })
-                    .attr("y", function(d) {return (d.day * cellSize) + "px"; })
-                    .on("click", function (d, i) {
-                      var dThis = d3.select(this);
-                      //TODO: change behavior if this is part of a large selection?
-                      if (dThis.classed("selected")) {
-                        d3.selectAll("rect").classed("selected", false);
-                        scope.$apply(function() {
-                          scope.selectedRanges = [];
-                        });
-                      } else {
-                        d3.selectAll("rect").classed("selected", false);
-                        dThis.classed("selected", true);
-                        //HACK: clear then push so that watchers know there is a change
-                        //maybe use apply?
-                        scope.$apply(function() {
-                          scope.selectedRanges = [{
-                            start: datefromstr(d.Date, 0).getTime(),
-                            end: datefromstr(d.Date, 1).getTime()
-                          }];
-                        });
-                      }
-
-                      //TODO: why do we need to use apply here again?
-
-                    });
-              // TODO: change to mousedown, mousemove, and mouseup to select ranges
-              // shift click selects a consecutive range
-              // ctrl click selects a disjoint set of ranges
-              //
-
-                var data = {};
-                var max = 0;
-                var dates = {};
-                var i;
-                for (i=0;i<data3.length;i++) {
-                    var date = new Date(data3[i].key);
-                    var dateString = data3[i].key;
-                    max = Math.max(data3[i].count, max);
-                    data[dateString] = data3[i].count;
-                    dates[dateString] = date;
-                }
-
-                var color = d3.scale.quantize().domain([0, max]).range(d3.range(9));
-
-                svg.selectAll("rect").attr("class", function (d) {
-                    var colorClass = "q" + color(data[d.Date]) + "-9";
-                    return colorClass;
-                })
-                    .classed("day", true)
-                    .append("svg:title")
-                    .text(function(d, i) {
-                        var count = data[d.Date];
-                        var itemString = "";
-                        if (count !== undefined) {
-                            itemString = " : " + count + (count === 1 ? " item" : " items");
-                        }
-                        return d.Date + itemString;
-                    });
-
-              selectRanges(scope.selectedRanges, element);
-            }
-                scope.$watch('counts',function(counts) {
-                  //HACK - remove everything in the div for right now
-                  elem.html("");
-                  if(counts!==undefined && counts!==null) {
-                    drawChart(counts, elem[0], gitcalendar);
-                  }
-                }, true);
-
-
-
-          scope.$watch('selectedRanges',function(ranges) {
-
-            if(ranges!==undefined && ranges!==null) {
-              selectRanges(ranges, elem[0]);
-            }
-          }, true);
-
-
-
-            function dateToYMD(date) {
-                var d = date.getDate();
-                var m = date.getMonth() + 1;
-                var y = date.getFullYear();
-                return y.toString() + '-' + (m <= 9 ? '0' + m : m) + '-' + (d <= 9 ? '0' + d : d);
-            }
-
-
-
+        //TODO: feels like there should be a better way
+        var dataMapping = {};
+        var i;
+        for(i = 0; i < data.length; i++) {
+          dataMapping[-start.diff(data[i].key,"days", true)] = data[i].value;
         }
-    };
+
+        //DRAW IT
+        var svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+
+        svg.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
+            .classed("day", true)
+            .attr("width", size)
+            .attr("height", size)
+            .attr("stroke-width",border)
+            .attr("x", function(d) { return Math.floor(d / 7) * totalCellSize;})
+            .attr("y", function(d) { return Math.floor(d % 7) * totalCellSize;})
+
+          //TODO: change the data over so we don't have to keep doing date math from the startdate
+
+          // TODO: shift click selects a consecutive range
+          // TODO: ctrl click selects a disjoint set of ranges
+
+          //TODO TODO! : stop setting the selected class here since we just call the selected ranges method afterwards anyway
+            .on("mousedown", function(d) {
+              scope.mousedown = d;
+              var rect = d3.select(this);
+              //if only 1 cell is selected
+              if(svg.selectAll("rect.day.selected")[0].length===1) {
+                //if it's this cell
+                if(rect.classed("selected")) {
+                  rect.classed("selected", false);
+                  setSelectedRanges([]);
+                } else {
+                  svg.selectAll("rect.day").classed("selected", false);
+                  rect.classed("selected", true);
+                  setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
+                }
+              } else {
+                // if lots of cells are selected, always select (TODO: does this behavior make sense?)
+                //TODO: add a good way to deselect esp for ranges
+                svg.selectAll("rect.day").classed("selected", false);
+                rect.classed("selected", true);
+                var rangeStartDate = start.clone().add("days", d);
+                var rangeEndDate = start.clone().add("days", d + 1);
+                var ranges = [[rangeStartDate, rangeEndDate]];
+                setSelectedRanges(ranges);
+              }
+            })
+          //TODO: doublecheck re: mouseover bubbling concerns
+            .on("mouseover", function(d) {
+              // if we're in the middle of a click & drag
+              if(scope.mousedown !== undefined && scope.mousedown !== null) {
+                var startRange = Math.min(scope.mousedown, d);
+                var endRange = Math.max(scope.mousedown, d);
+
+                svg.selectAll("rect.day").classed("selected", function(rectNumber) {
+                  return rectNumber >= startRange && rectNumber <= endRange;
+                });
+
+                setSelectedRanges([[start.clone().add("days", startRange), start.clone().add("days", endRange + 1)]]);
+              }
+            })
+            .on("mouseup", function() {
+              scope.mousedown = null;
+            })
+          //TODO: try gradient colors with hsl
+            .attr("class", function(d) {
+              var curClasses = d3.select(this).attr("class");
+              if (_.has(dataMapping, d)) {
+                curClasses += " q"+ Math.floor(dataMapping[d]/maxCount * 8) + "-9";
+              } else {
+                curClasses += " qundefined-9";
+              }
+              return curClasses;
+            })
+          //TODO: change to an onhover and make nicer
+            .append("svg:title")
+            .text(function(d) {
+              var dateString = start.clone().add("days", d).format("MMMM DD, YYYY");
+              if (_.has(dataMapping, d) && dataMapping[d] !== undefined && dataMapping[d] !== null) {
+                var count = dataMapping[d];
+                return dateString + " : " + count + (count === 1 ? " item" : " items");
+              } else {
+                return dateString;
+              }
+            });
+
+        // in case we lift up the mouse somewhere else on the page
+        d3.select("body").on("mouseup", function() {
+          scope.mousedown = null;
+        });
+
+      }
+
+      //TODO: stop using startdate
+      //TODO: slightly redundant if we've changed the range
+      var selectRanges = function (ranges) {
+        console.log("range change");
+        if (ranges[0] && ranges[0][0] && ranges[0][1]) {
+        }
+        d3.select(element[0]).selectAll('rect.day').classed("selected", function(d) {
+          var i;
+          for (i=0;i<ranges.length;i++) {
+            var r = ranges[i];
+            if (r[0] && r[1]) {
+              var rangeStart = -scope.start.diff(r[0], "days", true);
+              var rangeEnd = -scope.start.diff(r[1], "days", true);
+              //FIXME: currently two days are selected instead of just 1
+              if (d >= rangeStart && d < rangeEnd) {
+                return true;
+              }
+            }
+          }
+          return false;
+        });
+      };
+
+      scope.$watch('data',function(counts) {
+        //TODO: HACK - remove everything in the div for right now
+        element.html("");
+        if(counts!==undefined && counts!==null) {
+          drawChart(counts);
+          selectRanges(scope.params.filter);
+        }
+      }, true);
+
+
+      //TODO: update the options as well
+      scope.$watch('params',function(p) {
+        if(p.filter!==undefined && p.filter!==null) {
+          selectRanges(p.filter);
+        }
+      }, true);
+
+
+
+    }
+  };
 }]);

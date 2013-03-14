@@ -1,10 +1,10 @@
-angular.module('dataviz.directives').directive('nvBarchart', [function() {
+angular.module('dataviz.directives').directive('translate', [function() {
     return {
-        restrict: 'E',
+        restrict: 'A',
         scope: {
           //TODO: change expected values to something more reasonable
             'selectedLabels': '=', //expects an array of selected labels
-            'labeledCounts' : '=',   // expects an array of {<label>:<count>}
+            'labeledCounts' : '=',   // expects an array of {key:<lable>,value:<count>} pairs
             'width'  : '=',  // expects a measurement in pixels
             'height' : '='  // expects a measurement in pixels
         },
@@ -12,15 +12,13 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
           elem.width(scope.width);
           elem.height(scope.width);
 
-
-
             function drawChart(data2, element, selected) {
               nv.addGraph(function() {
                 var chart = nv.models.discreteBarChart()
                     .x(function(d) { return d.key; })
                     .y(function(d) { return d.count; })
                     .staggerLabels(true)
-                    .tooltips(false)
+                    .tooltips(true)
                     .showValues(true)
                     .staggerLabels(true);
 //
