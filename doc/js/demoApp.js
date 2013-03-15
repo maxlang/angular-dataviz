@@ -111,10 +111,9 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
 
       $scope.params = {};
-      $scope.dataObject = $rootScope.dataObject;
 
       ///CALENDAR 1
-      $scope.cal1data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine));
+      $scope.cal1data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine));
 
       $scope.cal1params = {};
 
@@ -123,12 +122,13 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       $scope.cal1params.filter = $scope.params.dateFilter;
 
       //CALENDAR 2
-      $scope.dataObject = $rootScope.dataObject;
-      $scope.cal2data = d3.entries(reduce($scope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
+      $scope.cal2data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
 
       $scope.cal2params = {};
 
       $scope.cal2params.filter = $scope.params.dateFilter;
+
+      //NOTE: we avoid watches on the calendar filter by modifying the filter array instead of replacing it
 
       // CALENDAR WATCHES
       $scope.$watch('params.dateFilter', function(f) {
@@ -158,26 +158,21 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "dateFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
-            $scope.cal1data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
-            $scope.cal2data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,countCombine));
+            console.log(records);
+              $scope.cal1data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
+              $scope.cal2data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,countCombine));
           }, true);
         }
       }
 
+      // BAR CHART 1
+      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'eater',null,'bites',null,0,countCombine));
 
-    }])
+      $scope.bar1params = {};
 
+      $scope.bar1params.filter = [];
 
-    .controller('eaterConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
-      $scope.dataObject = $rootScope.dataObject;
-      var values = mapTokvArray(reduce($scope.dataObject.records,'eater',null,'bites',null,0,countCombine), "key", "count");
-
-      $scope.labeledCounts = [{
-         key:"Key",
-         values:values
-      }];
-
-      $scope.$watch('selectedLabels', function(val) {
+      $scope.$watch('bar1params.filter', function(val) {
         if (val!==null && val!==undefined && val.length > 0) {
           $rootScope.filters.eaterFilter.selected = val[0];
         } else {
@@ -193,28 +188,19 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "eaterFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
-            var counts = mapTokvArray(reduce(records,'eater',null,'bites',null,0,countCombine), "key", "count");
-            $scope.labeledCounts = [{
-              key:"Key",
-              values:counts
-            }];
+            $scope.bar1data = d3.entries(reduce(records,'eater',null,'bites',null,0,countCombine));
           }, true);
         }
       }
 
-      $scope.filters = $rootScope.filters;
-    }])
+      // BAR CHART 2
+      $scope.bar2data = d3.entries(reduce($rootScope.dataObject.records,'eaten',null,'bites',null,0,countCombine));
 
-    .controller('eatenConverterCtrl',['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
-      $scope.dataObject = $rootScope.dataObject;
-      var values = mapTokvArray(reduce($scope.dataObject.records,'eaten',null,'bites',null,0,countCombine), "key", "count");
+      $scope.bar2params = {};
 
-      $scope.labeledCounts = [{
-        key:"Key",
-        values:values
-      }];
+      $scope.bar2params.filter = [];
 
-      $scope.$watch('selectedLabels', function(val) {
+      $scope.$watch('bar2params.filter', function(val) {
         if (val!==null && val!==undefined && val.length > 0) {
           $rootScope.filters.eatenFilter.selected = val[0];
         } else {
@@ -230,16 +216,10 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "eatenFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eatenFilter");
-            var counts = mapTokvArray(reduce(records,'eaten',null,'bites',null,0,countCombine), "key", "count");
-            $scope.labeledCounts = [{
-              key:"Key",
-              values:counts
-            }];
+            $scope.bar2data = d3.entries(reduce(records,'eaten',null,'bites',null,0,countCombine));
           }, true);
         }
       }
-
-      $scope.filters = $rootScope.filters;
     }])
 
 

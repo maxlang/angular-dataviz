@@ -13,7 +13,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
             'showValues': true,
             'staggerLabels': true,
             'widthPx' : 586,
-            'heightPx' : 86
+            'heightPx' : 286
           };
 
           //TODO: better way to handle options, esp option merging
@@ -26,26 +26,49 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
           element.append("<svg></svg>");
 
             function drawChart(data) {
+              data = [{
+                key:"Key",
+                values:data
+              }];
+
+
               element.find("svg").width(getOption('widthPx'));
               element.find("svg").height(getOption('heightPx'));
 
               nv.addGraph(function() {
                 var chart = nv.models.discreteBarChart()
-                    .x(function(d) { return data.key; })
-                    .y(function(d) { return data.value; })
-                    .staggerLabels(getOption('staggerLabels'))
-                    .tooltips(getOption('tooltips'))
-                    .showValues(getOption('showValues'))
-                    .staggerLabels(getOption('staggerLabels'));
+                    .x(function(d) { return d.key; })
+                    .y(function(d) { return d.value; })
+                    .staggerLabels(true)
+                    .tooltips(false)
+                    .showValues(true);
 
-                ///TODO fix selector
                 d3.select(element[0]).select("svg")
                     .datum(data)
                     .transition().duration(500)
                     .call(chart);
 
-                //var labels = d3.select(element).selectAll('g.nv-x g.tick')[0];
 
+//              console.log(data);
+//              console.log(data.toString());
+//
+//
+//              nv.addGraph(function() {
+//                var chart = nv.models.discreteBarChart()
+//                    .x(function(d) { return data.label; })
+//                    .y(function(d) { return data.value; })
+//                    .staggerLabels(getOption('staggerLabels'))
+//                    .tooltips(getOption('tooltips'))
+//                    .showValues(getOption('showValues'));
+//
+//                ///TODO fix selector
+//                d3.select(element[0]).select("svg")
+//                    .datum(data)
+//                    .transition().duration(500)
+//                    .call(chart);
+//
+//                //var labels = d3.select(element).selectAll('g.nv-x g.tick')[0];
+//
                 setTimeout(function() {
 
                 d3.select(element[0]).selectAll('.nv-bar').classed("selected", function(d,i) {
@@ -66,7 +89,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                   }
                   return false;
                 });
-                 },100);
+                 },10);
 
                 d3.select(element[0]).selectAll('.nv-bar').on("click",function(d, i) {
                   //TODO HACK to get around nvd3 not adding labels to the bars

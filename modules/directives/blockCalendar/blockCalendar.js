@@ -40,6 +40,12 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
       function drawChart(data) {
+        //FIXME TODO: HACK correctly use enter, exit, select instead of clearing/redrawing
+
+        element.html("");
+
+        scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+
         //TODO: take into account height
         //calculate columns based on width
         var width = getOption('widthPx');
@@ -175,7 +181,10 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
+        console.log("data changed");
+        console.log(counts);
         if(counts!==undefined && counts!==null && counts.length > 0) {
+          console.log("made it");
           drawChart(counts);
           selectRanges(scope.params.filter);
         }
