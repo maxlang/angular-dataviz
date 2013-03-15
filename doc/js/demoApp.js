@@ -117,6 +117,9 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $scope.cal1params = {};
 
+      $scope.cal1params.options = {};
+      $scope.cal1params.options.widthPx = 586;
+
       $scope.params.dateFilter = [];
 
       $scope.cal1params.filter = $scope.params.dateFilter;

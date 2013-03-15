@@ -1,4 +1,5 @@
 //TODO: add prefixes to directives
+//TODO: fix references to flexbox in css
 
 angular.module('dataviz.directives').directive('blockCalendar', [function() {
   return {
@@ -15,12 +16,12 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         'cellSizePx' : 13,
         'cellBorderPx' : 2,
         'widthPx' : 586, //TODO:
-        'heightPx' : 86
+        'heightPx' : 106
       };
 
       //TODO: better way to handle options, esp option merging
       function getOption(optionName) {
-        return scope.params && scope.params.options && optionName in scope.params.options ? scope.options[optionName] : defaultOptions[optionName];
+        return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
       }
 
       //TODO: standardize how filters are changed (don't create a new object) - use extend?
@@ -40,27 +41,31 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
       function drawChart(data) {
-        //FIXME TODO: HACK correctly use enter, exit, select instead of clearing/redrawing
-
-        element.html("");
-
-        scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
         //TODO: take into account height
         //calculate columns based on width
         var width = getOption('widthPx');
+        var height = getOption('heightPx');
+
+        //TODO: options
+        var yAxisPx = 23;
+        var xAxisPx = 25;
+
+        var chartWidth = width - yAxisPx;
+        var chartHeight = height - xAxisPx;
+
         var size = getOption('cellSizePx');
         var border = getOption('cellBorderPx');
         var totalCellSize = size + border;
 
-        var columns = Math.floor(width/(totalCellSize));
+        var columns = Math.floor(chartWidth/(totalCellSize));
 
         // current week counts as an extra column
         var start = moment().subtract('weeks',columns - 1).startOf('week');
         scope.start = start;
         var end = moment().startOf('day');
-        // current day counts as an extra day
-        var days = end.diff(start,'days', true) + 1;
+        // current day counts as an extra day, don't count partial days
+        var days = end.diff(start,'days', false) + 1;
 
         var maxCount = _.max(data, function(d) {return d.value;}).value;
 
@@ -68,12 +73,53 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         var dataMapping = {};
         var i;
         for(i = 0; i < data.length; i++) {
-          dataMapping[-start.diff(data[i].key,"days", true)] = data[i].value;
+          dataMapping[-start.diff(data[i].key,"days", false)] = data[i].value;
         }
 
         //DRAW IT
 
-        scope.svg.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
+        //FIXME TODO: HACK correctly use enter, exit, select instead of clearing/redrawing
+
+        element.html("");
+
+        scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+
+        //TODO: move styles to CSS
+
+        // month axis
+        //TODO: check this math (might need special case for small widths?)
+        var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
+
+        scope.svg.append("g").attr("width", "100%").attr("class", "x axis").selectAll("text").data(_.range(months)).enter().append("svg:text")
+            .text(function(d) { return end.clone().subtract("months", d).format("MMM"); })
+            .attr("x", function(d) { return width - 8 -  2*totalCellSize + (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;})
+            .attr("y", 0)
+            .attr("fill", "black")
+            .attr("dy",".9em");
+        //weeks
+
+        var weeks = end.diff(start.clone().startOf("week"),'weeks', false) + 1;
+
+        scope.svg.append("g").attr("width", "100%").attr("class", "week-start").selectAll("text").data(_.range(weeks)).enter().append("svg:text")
+            .text(function(d) { return start.clone().add("weeks", d).format("D"); })
+            .attr("x", function(d) { return 5 + yAxisPx + d * totalCellSize;})
+            .attr("y", 15)
+            .attr("dy",".9em");     //TODO: why is this necessary
+
+
+        // Weekday axis
+        scope.svg.append("g").attr("height", "100%").attr("class", "y axis").selectAll("text").data(_.range(7)).enter().append("text")
+            .text(function(d) { return moment().days(d).format("ddd"); })
+            .attr("dy",".9em")
+            .attr("x", 0)
+            .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
+
+
+        // actual chart
+        scope.chart = scope.svg.append("g")
+            .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
+
+        scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
             .attr("width", size)
             .attr("height", size)
@@ -91,20 +137,20 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
               scope.mousedown = d;
               var rect = d3.select(this);
               //if only 1 cell is selected
-              if(scope.svg.selectAll("rect.day.selected")[0].length===1) {
+              if(scope.chart.selectAll("rect.day.selected")[0].length===1) {
                 //if it's this cell
                 if(rect.classed("selected")) {
                   rect.classed("selected", false);
                   setSelectedRanges([]);
                 } else {
-                  scope.svg.selectAll("rect.day").classed("selected", false);
+                  scope.chart.selectAll("rect.day").classed("selected", false);
                   rect.classed("selected", true);
                   setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
                 }
               } else {
                 // if lots of cells are selected, always select (TODO: does this behavior make sense?)
                 //TODO: add a good way to deselect esp for ranges
-                scope.svg.selectAll("rect.day").classed("selected", false);
+                scope.chart.selectAll("rect.day").classed("selected", false);
                 rect.classed("selected", true);
                 var rangeStartDate = start.clone().add("days", d);
                 var rangeEndDate = start.clone().add("days", d + 1);
@@ -119,7 +165,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 var startRange = Math.min(scope.mousedown, d);
                 var endRange = Math.max(scope.mousedown, d);
 
-                scope.svg.selectAll("rect.day").classed("selected", function(rectNumber) {
+                scope.chart.selectAll("rect.day").classed("selected", function(rectNumber) {
                   return rectNumber >= startRange && rectNumber <= endRange;
                 });
 
@@ -150,9 +196,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 return dateString;
               }
             });
-
         // in case we lift up the mouse somewhere else on the page
-        d3.select("body").on("mouseup", function() {
+        d3.select("html").on("mouseup", function() {
           scope.mousedown = null;
         });
 

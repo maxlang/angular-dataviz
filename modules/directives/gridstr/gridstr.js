@@ -2,8 +2,6 @@ angular.module('dataviz.directives')
   .directive('viz-gridstr', function($timeout) {
     return {
          restrict: 'E',
-         scope: { model: '=model' },
-         template: '<ul><widget ng-repeat="item in model" widget-model="item"></div></ul>',
          link: function($scope, $element, $attributes, $controller) {
            var gridster;
            var ul = $element.find('ul');

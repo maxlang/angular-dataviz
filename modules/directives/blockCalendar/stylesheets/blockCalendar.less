@@ -1,4 +1,45 @@
 block-calendar {
+
+  * {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+
+  .week-start {
+
+    text {
+      font-size: 8px;
+      opacity: 0.3;
+      text-anchor: middle;
+    }
+
+  }
+
+  .week-start, .x.axis {
+    text {
+
+      &:hover {
+        cursor: pointer;
+        opacity: .9;
+        fill: red;
+      }
+    }
+
+  }
+
+  .x.axis text { text-anchor:left; }
+
+  text {
+    opacity: 0.7;
+    font-weight: bold;
+  }
+
+
+  display:block;
 //  .flexbox();
   position: relative;
   @default: rgb(238,238,238);
@@ -33,11 +74,12 @@ block-calendar {
     font: 10px sans-serif;
 //    .flexbox();
     margin-bottom: @vOffset;
+    margin-left: 10px;
 
     svg {
       width: 100%;
       height: 100%;
-      margin-left:9px;
+      margin-left:19px;
       margin-top:5px;
     }
 
@@ -100,13 +142,14 @@ block-calendar {
   }
 
   .y.axis {
-    top: @vOffset+7px;
+    top: 8px;
     left: 0;
 
     span {
+      line-height: 4px;
       margin-bottom: 12px;
       font-size: 0.6em;
-      opacity: 0.8
+      opacity: 0.8;
     }
   }
   .x.axis {
@@ -116,6 +159,7 @@ block-calendar {
     span {
       width: 47px;
       font-size: 0.65em;
+      display:inline;
     }
   }
   .description {
