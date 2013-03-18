@@ -137,6 +137,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
           //TODO TODO! : stop setting the selected class here since we just call the selected ranges method afterwards anyway
             .on("mousedown", function(d) {
+              d3.event.stopPropagation();
               scope.mousedown = d;
               var rect = d3.select(this);
               //if only 1 cell is selected
