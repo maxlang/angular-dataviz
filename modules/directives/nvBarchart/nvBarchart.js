@@ -48,27 +48,6 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
                     .transition().duration(500)
                     .call(chart);
 
-
-//              console.log(data);
-//              console.log(data.toString());
-//
-//
-//              nv.addGraph(function() {
-//                var chart = nv.models.discreteBarChart()
-//                    .x(function(d) { return data.label; })
-//                    .y(function(d) { return data.value; })
-//                    .staggerLabels(getOption('staggerLabels'))
-//                    .tooltips(getOption('tooltips'))
-//                    .showValues(getOption('showValues'));
-//
-//                ///TODO fix selector
-//                d3.select(element[0]).select("svg")
-//                    .datum(data)
-//                    .transition().duration(500)
-//                    .call(chart);
-//
-//                //var labels = d3.select(element).selectAll('g.nv-x g.tick')[0];
-//
                 setTimeout(function() {
 
                 d3.select(element[0]).selectAll('.nv-bar').classed("selected", function(d,i) {

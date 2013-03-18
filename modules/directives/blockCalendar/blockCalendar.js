@@ -27,7 +27,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       //TODO: standardize how filters are changed (don't create a new object) - use extend?
       function setSelectedRanges(ranges) {
         scope.$apply(function () {
-          console.log("changing filter");
           var args = [0, scope.params.filter.length].concat(ranges);
           Array.prototype.splice.apply(scope.params.filter, args);
         });
@@ -39,6 +38,10 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       d3.select(element[0]).classed("chart", true);
 
       scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+
+      //TODO: handle years
+      //TODO: multiple rows if height is large enough
+      //TODO: visually groupe months, years, and add a nicer border
 
       function drawChart(data) {
 
@@ -78,13 +81,13 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
         //DRAW IT
 
-        //FIXME TODO: HACK correctly use enter, exit, select instead of clearing/redrawing
+        //FIXME TODO: HACK correctly use enter, exit, select instead of clearing/redrawing (also redraw when the bucketed unit of time changes)
 
         element.html("");
 
         scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
-        //TODO: move styles to CSS
+        //TODO: add mouse events
 
         // month axis
         //TODO: check this math (might need special case for small widths?)
@@ -196,6 +199,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 return dateString;
               }
             });
+
         // in case we lift up the mouse somewhere else on the page
         d3.select("html").on("mouseup", function() {
           scope.mousedown = null;
@@ -206,7 +210,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       //TODO: stop using startdate
       //TODO: slightly redundant if we've changed the range
       var selectRanges = function (ranges) {
-        console.log("range change");
         if (ranges[0] && ranges[0][0] && ranges[0][1]) {
         }
         d3.select(element[0]).selectAll('rect.day').classed("selected", function(d) {
@@ -226,10 +229,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
-        console.log("data changed");
-        console.log(counts);
         if(counts!==undefined && counts!==null && counts.length > 0) {
-          console.log("made it");
           drawChart(counts);
           selectRanges(scope.params.filter);
         }
