@@ -18,7 +18,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 
           //TODO: better way to handle options, esp option merging
           function getOption(optionName) {
-            return scope.params && scope.params.options && optionName in scope.params.options ? scope.options[optionName] : defaultOptions[optionName];
+            return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
           }
 
 
@@ -116,7 +116,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 
             }, true);
 
-            scope.$watch('params.option', function() {
+            scope.$watch('params.options', function() {
               drawChart(scope.data);
             }, true);
 
