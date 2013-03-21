@@ -32,7 +32,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
             });
           }
 
-          $(document).bind('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
+          $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
             function drawChart(data) {
               data = [{

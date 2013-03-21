@@ -249,7 +249,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
   };
 
     var carnivores = ["Rex", "Allen", "Velossy"];
-    var herbivores = ["Stegasaurus", "Trice", "Bronta"];
+    var herbivores = ["Stegosaurus", "Trice", "Bronta"];
 
 
 

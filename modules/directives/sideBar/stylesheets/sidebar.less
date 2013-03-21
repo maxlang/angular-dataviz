@@ -1,0 +1,104 @@
+
+@import "elements.less";
+
+/////////////////////////////////////////////
+////   SIDEBARs
+/////////////////////////////////////////////
+
+.sidebar-sizer {
+  position:relative;
+
+  * {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+
+}
+
+.sidebars {
+  @padY: 25px;
+  @padX: 20px;
+  @containerActions: rgb(53,103,150);
+  @titleC: rgb(93,98,102);
+  @barc: rgba(108,115,122,0.9);
+  display: block !important;
+
+  ul {
+    li, sidebar {
+      @barC: rgba(118,141,168,0.1);
+      @valueC: rgba(123,129,135,0.8);
+      @barHeight: 20px;
+      @offset: 5px;
+      .flexbox();
+      color: rgb(30,30,30,.8);//@barC;
+      margin: 5px 0;
+      &:first-child { margin-top: 0; }
+      &:last-child { margin-bottom: 0; }
+      padding: 2px 0;
+      .rounded(3px);
+
+      label {
+        .flex(1);
+        padding-left: @offset;
+        font-weight: 500;
+      }
+
+      label, .value {
+        font-size: 11px;
+        line-height: @barHeight;
+        vertical-align: middle;
+        display:inline;
+      }
+
+      span.value, span.cancel {
+        color: @valueC;
+        text-align: right;
+        font-weight: bold;
+      }
+
+      span.value {
+        position: absolute;
+        height: @barHeight;
+        text-align: right;
+        //padding-right: @offset;
+        //display: block;
+        background-color: @barC;
+        right:0px;
+        .text {
+          padding-right: @offset;
+        }
+      }
+
+      &:hover {
+        background-color: darken(@barC, 75%);
+        span, label { cursor: pointer; }
+        .value { background-color: transparent; }
+      }
+      &.selected {
+        background-color: @barC;
+        label { font-weight: bold; }
+        .value { display: none; }
+        &:hover { background-color: darken(@barC, 25%); }
+
+        span.cancel {
+          font-size: 12px !important;
+          color: rgb(58, 67, 80);
+          .iconic();
+          margin: 5px 7px 0;
+          font-size: 18px;
+          opacity: 0.5;
+
+          &:hover { opacity: 1; }
+        }
+      }
+    }
+    span.more {
+      font-size: 0.65em;
+      .linkify(@containerActions);
+    }
+  }
+}
