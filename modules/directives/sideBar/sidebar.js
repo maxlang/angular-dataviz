@@ -86,7 +86,11 @@ angular.module('dataviz.directives').directive('sidebar', [function() {
               var h = getOption("heightPx");
               if(h) {
                 element.find(".sidebar-sizer").height(h);
-                scope.barLimit = Math.floor(h/25);
+                if(!scope.params.options.barLimit) {
+                  scope.barLimit = Math.floor(h/25);
+                } else {
+                  scope.barLimit = scope.params.options.barLimit;
+                }
               }
             }, true);
 
