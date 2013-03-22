@@ -94,7 +94,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
           var filterKey;
           for(filterKey in filters) {
             if(filterKey !== excludeFilter) {
-              push &= filters[filterKey].apply(record);
+              push &= filters[filterKey].applyFilter(record);
             }
           }
           if (push) {
@@ -177,11 +177,11 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $scope.$watch('bar1params.filter', function(val) {
         if (val!==null && val!==undefined && val.length > 0) {
-          $rootScope.filters.eaterFilter.selected = val[0];
+          $rootScope.filters.eaterFilter.selected = val;
         } else {
           $rootScope.filters.eaterFilter.selected = null;
         }
-      });
+      }, true);
 
       //TODO: add watch on filters.eaterFilter
 
@@ -205,11 +205,11 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $scope.$watch('bar2params.filter', function(val) {
         if (val!==null && val!==undefined && val.length > 0) {
-          $rootScope.filters.eatenFilter.selected = val[0];
+          $rootScope.filters.eatenFilter.selected = val;
         } else {
           $rootScope.filters.eatenFilter.selected = null;
         }
-      });
+      }, true);
 
       //TODO: add watch on filters.eatenFilter
 
@@ -234,17 +234,17 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     {
       to: null,
       from: null,
-      apply: function(r) { return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from); }
+      applyFilter: function(r) { return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from); }
     },
     eaterFilter:
     {
       selected: null,
-      apply: function(r) { return (!this.selected || r.eater.toUpperCase() === this.selected.toUpperCase()); }
+      applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.eater)); }
     },
     eatenFilter:
     {
       selected: null,
-      apply: function(r) { return (!this.selected || r.eaten.toUpperCase() === this.selected.toUpperCase()); }
+      applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.eaten)); }
     }
   };
 
