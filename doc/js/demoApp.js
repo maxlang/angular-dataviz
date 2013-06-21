@@ -24,11 +24,81 @@ function reduce(records, key, keyTransform, value, valueTransform, valueDefault,
   return reducedRecords;
 }
 
+//TODO: generalize
+function toNodesAndLinks(allRecords, selectedRecords, node, nodeTransform, nodeDefault, valueDefault, combineFn) {
+
+  var nodesByPerson = reduce(allRecords, 'name', null, 'state', null, [], listCombine);
+
+
+  var i;
+  var data = {
+    nodes: [],
+    links: []
+  };
+
+  var nodes = {};
+  var links = {};
+
+
+  for(i=0;i<selectedRecords.length;i++) {
+    var n = (nodeTransform && nodeTransform(selectedRecords[i][node])) || selectedRecords[i][node];
+    var prevIdx = nodesByPerson[selectedRecords[i].name].indexOf(n);
+    var prev = prevIdx <= 0 ? nodeDefault : nodesByPerson[selectedRecords[i].name][prevIdx - 1];
+
+    if(!(n in nodes)) {
+      nodes[n] = data.nodes.length;
+      data.nodes.push({
+        name:n
+      });
+    }
+
+    if(!(prev in nodes)) {
+      nodes[prev] = data.nodes.length;
+      data.nodes.push({
+        name:prev
+      });
+    }
+
+    if (!links[prev]) {
+      links[prev] = {};
+    }
+
+    if (n in links[prev]) {
+      links[prev][n] = combineFn(links[prev][n],1);
+    } else {
+      links[prev][n] = combineFn(valueDefault,1);
+    }
+
+  }
+
+  var j,k;
+
+  for (j in links) {
+    for (k in links[j]) {
+      data.links.push({
+        source: nodes[j],
+        target: nodes[k],
+        value: links[j][k]
+      });
+    }
+  }
+
+  console.log(links);
+  console.log(nodes);
+  console.log(data);
+
+  return data;
+}
+
 function sumCombine(a,b) {
   return a+b;
 }
 function countCombine(a) {
   return a+1;
+}
+
+function listCombine(a, b) {
+  return a.concat(b);
 }
 
 function timestampToDate(t) {
@@ -113,7 +183,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       $scope.params = {};
 
       ///CALENDAR 1
-      $scope.cal1data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine));
+      $scope.cal1data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'state',null,0,countCombine));
 
       $scope.cal1params = {};
 
@@ -125,7 +195,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       $scope.cal1params.filter = $scope.params.dateFilter;
 
       //CALENDAR 2
-      $scope.cal2data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
+      $scope.cal2data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'state',null,0,countCombine));
 
       $scope.cal2params = {};
 
@@ -169,7 +239,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       }
 
       // BAR CHART 1
-      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'eater',null,'bites',null,0,countCombine));
+      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'state',null,'name',null,0,countCombine));
 
       $scope.bar1params = {};
 
@@ -191,7 +261,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "eaterFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
-            $scope.bar1data = d3.entries(reduce(records,'eater',null,'bites',null,0,countCombine));
+            $scope.bar1data = d3.entries(reduce(records,'state',null,'name',null,0,countCombine));
           }, true);
         }
       }
@@ -223,6 +293,13 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
           }, true);
         }
       }
+
+     //SANKEY
+
+      $scope.sankeyData = toNodesAndLinks($rootScope.dataObject.records, $rootScope.dataObject.records, 'state', null, "No contact", 0, countCombine);
+
+
+
     }])
 
 
@@ -239,7 +316,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     eaterFilter:
     {
       selected: null,
-      applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.eater)); }
+      applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.state)); }
     },
     eatenFilter:
     {
@@ -248,37 +325,242 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
     }
   };
 
-    var carnivores = ["Rex", "Allen", "Velossy"];
-    var herbivores = ["Stegosaurus", "Trice", "Bronta"];
+    var dinosaurs = //["Rex", "Allen", "Velossy", "Stegosaurus", "Trice", "Bronta", "Tom", "Susan", "Ed", "Joe", "Bill", "Stacy", "Wilma", "Karl", "Pete", "Stan", "Lucy", "Jen", "Janet"];
+      [
+      "Les",
+      "Alyssa",
+      "Stephine",
+      "Hyo",
+      "Diann",
+      "Jamar",
+      "Rosina",
+      "Belen",
+      "Apryl",
+      "Nenita",
+      "Carmon",
+      "Laraine",
+      "Kelvin",
+      "Joaquina",
+      "Eddie",
+      "Raymond",
+      "Charles",
+      "Leontine",
+      "Jacinta",
+      "Tracie",
+      "Ivy",
+      "Corey",
+      "Julissa",
+      "Marisela",
+      "Donella",
+      "Lane",
+      "Shantay",
+      "Effie",
+      "Anisa",
+      "Yuette",
+      "Brenna",
+      "Golda",
+      "Fairy",
+      "Darrin",
+      "Evangeline",
+      "Marlin",
+      "Rodrigo",
+      "Suzanne",
+      "Elma",
+      "Launa",
+      "Tova",
+      "Tamie",
+      "Danyel",
+      "Georgann",
+      "Elna",
+      "Caterina",
+      "Faviola",
+      "Corrie",
+      "Morris",
+      "Nick",
+      "Catrina",
+      "Daphine",
+      "Tarsha",
+      "Carmelo",
+      "Shemeka",
+      "Jamel",
+      "Candice",
+      "Chelsea",
+      "Tommy",
+      "Sunny",
+      "Vance",
+      "Bee",
+      "Christin",
+      "Forrest",
+      "Meridith",
+      "Maybell",
+      "Veola",
+      "Randi",
+      "Francisco",
+      "Latoyia",
+      "Anna",
+      "Spencer",
+      "Louisa",
+      "Tova",
+      "Teresita",
+      "Cheryll",
+      "Walker",
+      "Brain",
+      "Newton",
+      "Lynna",
+      "Easter",
+      "Glynis",
+      "Afton",
+      "Grady",
+      "Dede",
+      "Bell",
+      "Coletta",
+      "Shana",
+      "Klara",
+      "Noemi",
+      "Mireille",
+      "Man",
+      "Frederic",
+      "Tifany",
+      "Steven",
+      "Tarra",
+      "Mirna",
+      "Ezra",
+      "Glenda",
+      "Lloyd"
+      ];
 
 
+
+      var states = ["No contact", "Resume", "Phone screen", "Phone screen 2", "Onsite interview", "Onsite interview 2", "Hired", "Rejected"];
+
+    var transitions = [[0, 1], [1, 2], [2, 3], [2, 4], [3, 4], [4, 5], [4, 6], [5,6], [1,7], [2,7], [3,7], [4,7], [5,7]];
+
+    var phone = [1,2];
+    var onsite = [3,4,5];
+    var reject = [8, 9, 10, 11, 12];
+    var hire = [6, 7];
+
+
+    var getGaussian = function(min, max) {
+      min = _.isNumber(min) && min || 0;
+      max = _.isNumber(max) && max || 1;
+      return min + ((Math.random() + Math.random() + Math.random()) * (max - min)/3);
+    };
 
     var populate = function(dataObj) {
         var today = new Date();
         var dayInMilliseconds = 24*60*60*1000;
         var end = today.getTime();
         var start = end - 200 * dayInMilliseconds;
+        var i, j;
+        var currentStates = {};
+
         dataObj.records = [];
         //TODO: irrelevant, but how do you make a good random time series?
-        for( ;start<=end;start+=dayInMilliseconds) {
-          var count = Math.floor(Math.pow(Math.random(), 3) * 10);
-          var i;
-          for (i=0;i<count;i++) {
-            var car = Math.floor(Math.random() * 3);
-            var veg = Math.floor(Math.random() * 3);
-            var bites = 1 + Math.floor(Math.random() * 3);
-            var time = start + Math.floor(Math.random() * dayInMilliseconds);
-            dataObj.records.push({
-              eater: carnivores[car],
-              eaten: herbivores[veg],
-              bites: bites,
-              time: time
-            })
 
+        var lastInterviewDay = start;
+        var onsiteCapped = false;
+        var phoneCapped = false;
+
+        for( ;start<=end;start+=dayInMilliseconds) {
+          var phoneInterviewDay = getGaussian(0, phoneCapped ? 5 : 10) < 2;
+          var onsiteInterviewDay = getGaussian(0, onsiteCapped ? 5 : 10 ) < 2;
+
+          if (phoneInterviewDay || onsiteInterviewDay) {
+            lastInterviewDay = start;
+          }
+
+          if (phoneInterviewDay) {
+            console.log('phone');
+            var phoneCount = 0;
+            for(i = 0; i < dinosaurs.length && phoneCount < 10; i++) {
+              if (currentStates[dinosaurs[i]] === states[1] || currentStates[dinosaurs[i]] === states[2] && getGaussian(0,10) < 8) {
+                for (j = 0; j < phone.length; j++) {
+                  if (currentStates[dinosaurs[i]] === states[transitions[phone[j]][0]]) {
+                    dataObj.records.push({
+                      name: dinosaurs[i],
+                      time: start,
+                      state: states[transitions[phone[j]][1]]
+                    });
+                    currentStates[dinosaurs[i]] = states[transitions[phone[j]][1]];
+                    phoneCount++;
+                    break;
+                  }
+                }
+              }
+            }
+            if (phoneCount === 10) {
+              phoneCapped = true;
+            } else {
+              phoneCapped = false;
+            }
+          }
+
+          if (onsiteInterviewDay) {
+            console.log('onsite');
+            var onsiteCount = 0;
+            for(i = 0; i < dinosaurs.length && onsiteCount < 2; i++) {
+              if (currentStates[dinosaurs[i]] === states[1] || currentStates[dinosaurs[i]] === states[2] && getGaussian(0,10) < 8) {
+                for (j = 0; j < onsite.length; j++) {
+                  if (currentStates[dinosaurs[i]] === states[transitions[onsite[j]][0]]) {
+                    dataObj.records.push({
+                      name: dinosaurs[i],
+                      time: start,
+                      state: states[transitions[onsite[j]][1]]
+                    });
+                    currentStates[dinosaurs[i]] = states[transitions[onsite[j]][1]];
+                    onsiteCount++;
+                    break;
+                  }
+                }
+              }
+            }
+            if (onsiteCount === 2) {
+              onsiteCapped = true;
+            } else {
+              onsiteCapped = false;
+            }
+          }
+
+
+
+          for(i = 0; i < dinosaurs.length; i++) {
+            if ((currentStates[dinosaurs[i]] === states[0] || currentStates[dinosaurs[i]] === undefined) && getGaussian(0,10) < 2) {
+              dataObj.records.push({
+                name: dinosaurs[i],
+                time: start,
+                state: states[1]
+              });
+              currentStates[dinosaurs[i]] = states[1];
+            } else if (getGaussian(0, ((start - lastInterviewDay)/dayInMilliseconds)) > 2 && ((start - lastInterviewDay)/dayInMilliseconds) < 6) {
+              for (j = 0; j < reject.length; j++) {
+                if (currentStates[dinosaurs[i]] === states[transitions[reject[j]][0]] && getGaussian(0,10) < 5) {
+                  console.log('reject');
+                  dataObj.records.push({
+                    name: dinosaurs[i],
+                    time: start,
+                    state: states[transitions[reject[j]][1]]
+                  });
+                  currentStates[dinosaurs[i]] = states[transitions[reject[j]][1]];
+                  break;
+                }
+              }
+            }
+            for (j = 0; j < hire.length; j++) {
+              if (currentStates[dinosaurs[i]] === states[transitions[hire[j]][0]] && getGaussian(0,10) < 3) {
+                console.log('hire');
+                dataObj.records.push({
+                  name: dinosaurs[i],
+                  time: start,
+                  state: states[transitions[hire[j]][1]]
+                });
+                currentStates[dinosaurs[i]] = states[transitions[hire[j]][1]];
+                break;
+              }
+            }
           }
         }
-    }
-
+    };
 
     populate($scope.dataObject);
 }]).filter('timestampToTime',function() {
