@@ -359,7 +359,7 @@ angular.module('dataviz.directives').directive('sankey', [function() {
             height = heightPx - margin.top - margin.bottom;
 
         var formatNumber = d3.format(",.0f"),
-            format = function(d) { return formatNumber(d) + " TWh"; },
+            format = function(d) { return formatNumber(d) + " candidates"; },
             color = d3.scale.category20();
 
         var svg = d3.select(element[0]).append("svg")
