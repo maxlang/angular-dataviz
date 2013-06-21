@@ -298,6 +298,15 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
 
       $scope.sankeyData = toNodesAndLinks($rootScope.dataObject.records, $rootScope.dataObject.records, 'state', null, "No contact", 0, countCombine);
 
+      var filterKey;
+      for(filterKey in $rootScope.filters) {
+        if (filterKey !== "sankeyFilter") {
+          $scope.$watch('filters.'+filterKey, function() {
+            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "sankeyFilter");
+            $scope.sankeyData = toNodesAndLinks($rootScope.dataObject.records, records, 'state', null, "No contact", 0, countCombine);
+          }, true);
+        }
+      }
 
 
     }])
