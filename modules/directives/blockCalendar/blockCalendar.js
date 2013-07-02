@@ -10,17 +10,17 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
     restrict: 'E',
     scope: {
       //TODO: DOCUMENT BETTER
-      'data': '=',   // expects an array of objects with a key and a value
-      'params' : '='   // a parameters object with the current filters, options, and highlighted data
+      data: '=',   // expects an array of objects with a key and a value
+      params: '='   // a parameters object with the current filters, options, and highlighted data
     },
     link: function(scope, element) {
       scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
 
       var defaultOptions = {
-        'cellSizePx' : 13,
-        'cellBorderPx' : 2,
-        'widthPx' : 586, //TODO:
-        'heightPx' : 106
+        cellSizePx: 13,
+        cellBorderPx: 2,
+        widthPx: 586, //TODO:
+        heightPx: 106
       };
 
       //TODO: better way to handle options, esp option merging
