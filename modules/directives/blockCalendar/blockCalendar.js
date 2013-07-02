@@ -2,6 +2,10 @@
 //TODO: fix references to flexbox in css
 
 angular.module('dataviz.directives').directive('blockCalendar', [function() {
+  function isNullOrUndefined(x) {
+    return _.isNull(x) || _.isUndefined(x);
+  }
+
   return {
     restrict: 'E',
     scope: {
@@ -165,7 +169,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
           //TODO: doublecheck re: mouseover bubbling concerns
             .on("mouseover", function(d) {
               // if we're in the middle of a click & drag
-              if(scope.mousedown !== undefined && scope.mousedown !== null) {
+              if(!isNullOrUndefined(scope.mousedown)) {
                 var startRange = Math.min(scope.mousedown, d);
                 var endRange = Math.max(scope.mousedown, d);
 
@@ -193,7 +197,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
             .append("svg:title")
             .text(function(d) {
               var dateString = start.clone().add("days", d).format("MMMM DD, YYYY");
-              if (_.has(dataMapping, d) && dataMapping[d] !== undefined && dataMapping[d] !== null) {
+              if (_.has(dataMapping, d) && !isNullOrUndefined(dataMapping[d])) {
                 var count = dataMapping[d];
                 return dateString + " : " + count + (count === 1 ? " item" : " items");
               } else {
@@ -230,7 +234,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
-        if(counts!==undefined && counts!==null && counts.length > 0) {
+        if(!isNullOrUndefined(counts) && counts.length > 0) {
           drawChart(counts);
           selectRanges(scope.params.filter);
         }
@@ -239,14 +243,14 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
       //TODO: update the options as well
       scope.$watch('params.filter',function(f) {
-        if(f!==undefined && f!==null) {
+        if(!isNullOrUndefined(f)) {
           selectRanges(f);
         }
       }, true);
 
       scope.$watch('params.options', function(o) {
         //the display options have changed, redraw the chart
-        if(scope.data!==undefined && scope.data!==null && scope.data.length > 0) {
+        if(!isNullOrUndefined(scope.data) && scope.data.length > 0) {
           drawChart(scope.data);
           selectRanges(scope.params.filter);
         }
