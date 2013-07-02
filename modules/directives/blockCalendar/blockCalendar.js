@@ -98,112 +98,112 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
         scope.svg.append("g").attr("width", "100%").attr("class", "x axis").selectAll("text").data(_.range(months)).enter().append("svg:text")
-            .text(function(d) { return end.clone().subtract("months", d).format("MMM"); })
-            .attr("x", function(d) { return width - 8 -  2*totalCellSize + (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;})
-            .attr("y", 0)
-            .attr("fill", "black")
-            .attr("dy",".9em");
+          .text(function(d) { return end.clone().subtract("months", d).format("MMM"); })
+          .attr("x", function(d) { return width - 8 -  2*totalCellSize + (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;})
+          .attr("y", 0)
+          .attr("fill", "black")
+          .attr("dy",".9em");
         //weeks
 
         var weeks = end.diff(start.clone().startOf("week"),'weeks', false) + 1;
 
         scope.svg.append("g").attr("width", "100%").attr("class", "week-start").selectAll("text").data(_.range(weeks)).enter().append("svg:text")
-            .text(function(d) { return start.clone().add("weeks", d).format("D"); })
-            .attr("x", function(d) { return 5 + yAxisPx + d * totalCellSize;})
-            .attr("y", 15)
-            .attr("dy",".9em");     //TODO: why is this necessary
+          .text(function(d) { return start.clone().add("weeks", d).format("D"); })
+          .attr("x", function(d) { return 5 + yAxisPx + d * totalCellSize;})
+          .attr("y", 15)
+          .attr("dy",".9em");     //TODO: why is this necessary
 
 
         // Weekday axis
         scope.svg.append("g").attr("height", "100%").attr("class", "y axis").selectAll("text").data(_.range(7)).enter().append("text")
-            .text(function(d) { return moment().days(d).format("ddd"); })
-            .attr("dy",".9em")
-            .attr("x", 0)
-            .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
+          .text(function(d) { return moment().days(d).format("ddd"); })
+          .attr("dy",".9em")
+          .attr("x", 0)
+          .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
 
 
         // actual chart
         scope.chart = scope.svg.append("g")
-            .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
+          .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
 
         scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
-            .classed("day", true)
-            .attr("width", size)
-            .attr("height", size)
-            .attr("stroke-width",border)
-            .attr("x", function(d) { return Math.floor(d / 7) * totalCellSize;})
-            .attr("y", function(d) { return Math.floor(d % 7) * totalCellSize;})
+          .classed("day", true)
+          .attr("width", size)
+          .attr("height", size)
+          .attr("stroke-width",border)
+          .attr("x", function(d) { return Math.floor(d / 7) * totalCellSize;})
+          .attr("y", function(d) { return Math.floor(d % 7) * totalCellSize;})
 
-          //TODO: change the data over so we don't have to keep doing date math from the startdate
+        //TODO: change the data over so we don't have to keep doing date math from the startdate
 
-          // TODO: shift click selects a consecutive range
-          // TODO: ctrl click selects a disjoint set of ranges
+        // TODO: shift click selects a consecutive range
+        // TODO: ctrl click selects a disjoint set of ranges
 
-          //TODO TODO! : stop setting the selected class here since we just call the selected ranges method afterwards anyway
-            .on("mousedown", function(d) {
-              d3.event.stopPropagation();
-              scope.mousedown = d;
-              var rect = d3.select(this);
-              //if only 1 cell is selected
-              if(scope.chart.selectAll("rect.day.selected")[0].length===1) {
-                //if it's this cell
-                if(rect.classed("selected")) {
-                  rect.classed("selected", false);
-                  setSelectedRanges([]);
-                } else {
-                  scope.chart.selectAll("rect.day").classed("selected", false);
-                  rect.classed("selected", true);
-                  setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
-                }
+        //TODO TODO! : stop setting the selected class here since we just call the selected ranges method afterwards anyway
+          .on("mousedown", function(d) {
+            d3.event.stopPropagation();
+            scope.mousedown = d;
+            var rect = d3.select(this);
+            //if only 1 cell is selected
+            if(scope.chart.selectAll("rect.day.selected")[0].length===1) {
+              //if it's this cell
+              if(rect.classed("selected")) {
+                rect.classed("selected", false);
+                setSelectedRanges([]);
               } else {
-                // if lots of cells are selected, always select (TODO: does this behavior make sense?)
-                //TODO: add a good way to deselect esp for ranges
                 scope.chart.selectAll("rect.day").classed("selected", false);
                 rect.classed("selected", true);
-                var rangeStartDate = start.clone().add("days", d);
-                var rangeEndDate = start.clone().add("days", d + 1);
-                var ranges = [[rangeStartDate, rangeEndDate]];
-                setSelectedRanges(ranges);
+                setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
               }
-            })
-          //TODO: doublecheck re: mouseover bubbling concerns
-            .on("mouseover", function(d) {
-              // if we're in the middle of a click & drag
-              if(!isNullOrUndefined(scope.mousedown)) {
-                var startRange = Math.min(scope.mousedown, d);
-                var endRange = Math.max(scope.mousedown, d);
+            } else {
+              // if lots of cells are selected, always select (TODO: does this behavior make sense?)
+              //TODO: add a good way to deselect esp for ranges
+              scope.chart.selectAll("rect.day").classed("selected", false);
+              rect.classed("selected", true);
+              var rangeStartDate = start.clone().add("days", d);
+              var rangeEndDate = start.clone().add("days", d + 1);
+              var ranges = [[rangeStartDate, rangeEndDate]];
+              setSelectedRanges(ranges);
+            }
+          })
+        //TODO: doublecheck re: mouseover bubbling concerns
+          .on("mouseover", function(d) {
+            // if we're in the middle of a click & drag
+            if(!isNullOrUndefined(scope.mousedown)) {
+              var startRange = Math.min(scope.mousedown, d);
+              var endRange = Math.max(scope.mousedown, d);
 
-                scope.chart.selectAll("rect.day").classed("selected", function(rectNumber) {
-                  return rectNumber >= startRange && rectNumber <= endRange;
-                });
+              scope.chart.selectAll("rect.day").classed("selected", function(rectNumber) {
+                return rectNumber >= startRange && rectNumber <= endRange;
+              });
 
-                setSelectedRanges([[start.clone().add("days", startRange), start.clone().add("days", endRange + 1)]]);
-              }
-            })
-            .on("mouseup", function() {
-              scope.mousedown = null;
-            })
-          //TODO: try gradient colors with hsl
-            .attr("class", function(d) {
-              var curClasses = d3.select(this).attr("class");
-              if (_.has(dataMapping, d)) {
-                curClasses += " q"+ Math.floor(dataMapping[d]/maxCount * 8) + "-9";
-              } else {
-                curClasses += " qundefined-9";
-              }
-              return curClasses;
-            })
-          //TODO: change to an onhover and make nicer
-            .append("svg:title")
-            .text(function(d) {
-              var dateString = start.clone().add("days", d).format("MMMM DD, YYYY");
-              if (_.has(dataMapping, d) && !isNullOrUndefined(dataMapping[d])) {
-                var count = dataMapping[d];
-                return dateString + " : " + count + (count === 1 ? " item" : " items");
-              } else {
-                return dateString;
-              }
-            });
+              setSelectedRanges([[start.clone().add("days", startRange), start.clone().add("days", endRange + 1)]]);
+            }
+          })
+          .on("mouseup", function() {
+            scope.mousedown = null;
+          })
+        //TODO: try gradient colors with hsl
+          .attr("class", function(d) {
+            var curClasses = d3.select(this).attr("class");
+            if (_.has(dataMapping, d)) {
+              curClasses += " q"+ Math.floor(dataMapping[d]/maxCount * 8) + "-9";
+            } else {
+              curClasses += " qundefined-9";
+            }
+            return curClasses;
+          })
+        //TODO: change to an onhover and make nicer
+          .append("svg:title")
+          .text(function(d) {
+            var dateString = start.clone().add("days", d).format("MMMM DD, YYYY");
+            if (_.has(dataMapping, d) && !isNullOrUndefined(dataMapping[d])) {
+              var count = dataMapping[d];
+              return dateString + " : " + count + (count === 1 ? " item" : " items");
+            } else {
+              return dateString;
+            }
+          });
 
         // in case we lift up the mouse somewhere else on the page
         d3.select("html").on("mouseup", function() {
@@ -239,7 +239,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
           selectRanges(scope.params.filter);
         }
       }, true);
-
 
       //TODO: update the options as well
       scope.$watch('params.filter',function(f) {
