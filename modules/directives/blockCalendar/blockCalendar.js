@@ -103,7 +103,9 @@
 
           scope.svg.append("g").attr("width", "100%").attr("class", "x axis")
             .selectAll("text").data(_.range(months)).enter().append("svg:text")
-            .text(function(d) { return end.clone().subtract("months", d).format("MMM"); })
+            .text(function(d) {
+              return end.clone().subtract("months", d).format("MMM");
+            })
             .attr("x", function(d) {
               return width - 8 - 2*totalCellSize +
                 (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
