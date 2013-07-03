@@ -79,10 +79,9 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
         //TODO: feels like there should be a better way
         var dataMapping = {};
-        var i;
-        for(i = 0; i < data.length; i++) {
-          dataMapping[-start.diff(data[i].key,"days", false)] = data[i].value;
-        }
+        data.forEach(function(d) {
+          dataMapping[-start.diff(d.key, "days", false)] = d.value;
+        });
 
         //DRAW IT
 
@@ -234,9 +233,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         }
 
         d3.select(element[0]).selectAll('rect.day').classed("selected", function(d) {
-          var i;
-          for (i=0;i<ranges.length;i++) {
-            var r = ranges[i];
+          return _.some(ranges, function(r) {
             if (r[0] && r[1]) {
               var rangeStart = -scope.start.diff(r[0], "days", true);
               var rangeEnd = -scope.start.diff(r[1], "days", true);
@@ -244,8 +241,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 return true;
               }
             }
-          }
-          return false;
+            return false;
+          });
         });
       };
 
