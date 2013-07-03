@@ -25,7 +25,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
       //TODO: better way to handle options, esp option merging
       function getOption(optionName) {
-        return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
+        return (scope.params && scope.params.options && scope.params.options[optionName]) ||
+          defaultOptions[optionName];
       }
 
       //TODO: standardize how filters are changed (don't create a new object) - use extend?
@@ -41,14 +42,14 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       //INIT
       d3.select(element[0]).classed("chart", true);
 
-      scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+      scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
+        .attr("height", "100%");
 
       //TODO: handle years
       //TODO: multiple rows if height is large enough
       //TODO: visually groupe months, years, and add a nicer border
 
       function drawChart(data) {
-
         //TODO: take into account height
         //calculate columns based on width
         var width = getOption('widthPx');
@@ -89,7 +90,8 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
         element.html("");
 
-        scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%").attr("height", "100%");
+        scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
+          .attr("height", "100%");
 
         //TODO: add mouse events
 
@@ -97,9 +99,13 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         //TODO: check this math (might need special case for small widths?)
         var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
-        scope.svg.append("g").attr("width", "100%").attr("class", "x axis").selectAll("text").data(_.range(months)).enter().append("svg:text")
+        scope.svg.append("g").attr("width", "100%").attr("class", "x axis")
+          .selectAll("text").data(_.range(months)).enter().append("svg:text")
           .text(function(d) { return end.clone().subtract("months", d).format("MMM"); })
-          .attr("x", function(d) { return width - 8 -  2*totalCellSize + (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;})
+          .attr("x", function(d) {
+            return width - 8 - 2*totalCellSize +
+              (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
+          })
           .attr("y", 0)
           .attr("fill", "black")
           .attr("dy",".9em");
@@ -107,16 +113,24 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
         var weeks = end.diff(start.clone().startOf("week"),'weeks', false) + 1;
 
-        scope.svg.append("g").attr("width", "100%").attr("class", "week-start").selectAll("text").data(_.range(weeks)).enter().append("svg:text")
-          .text(function(d) { return start.clone().add("weeks", d).format("D"); })
-          .attr("x", function(d) { return 5 + yAxisPx + d * totalCellSize;})
+        scope.svg.append("g").attr("width", "100%").attr("class", "week-start")
+          .selectAll("text").data(_.range(weeks)).enter().append("svg:text")
+          .text(function(d) {
+            return start.clone().add("weeks", d).format("D");
+          })
+          .attr("x", function(d) {
+            return 5 + yAxisPx + d * totalCellSize;
+          })
           .attr("y", 15)
           .attr("dy",".9em");     //TODO: why is this necessary
 
 
         // Weekday axis
-        scope.svg.append("g").attr("height", "100%").attr("class", "y axis").selectAll("text").data(_.range(7)).enter().append("text")
-          .text(function(d) { return moment().days(d).format("ddd"); })
+        scope.svg.append("g").attr("height", "100%").attr("class", "y axis")
+          .selectAll("text").data(_.range(7)).enter().append("text")
+          .text(function(d) {
+            return moment().days(d).format("ddd");
+          })
           .attr("dy",".9em")
           .attr("x", 0)
           .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
@@ -177,7 +191,9 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
                 return rectNumber >= startRange && rectNumber <= endRange;
               });
 
-              setSelectedRanges([[start.clone().add("days", startRange), start.clone().add("days", endRange + 1)]]);
+              setSelectedRanges([[
+                start.clone().add("days", startRange), start.clone().add("days", endRange + 1)
+              ]]);
             }
           })
           .on("mouseup", function() {
@@ -209,7 +225,6 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         d3.select("html").on("mouseup", function() {
           scope.mousedown = null;
         });
-
       }
 
       //TODO: stop using startdate
@@ -217,6 +232,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       var selectRanges = function (ranges) {
         if (ranges[0] && ranges[0][0] && ranges[0][1]) {
         }
+
         d3.select(element[0]).selectAll('rect.day').classed("selected", function(d) {
           var i;
           for (i=0;i<ranges.length;i++) {
