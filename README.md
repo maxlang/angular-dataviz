@@ -32,6 +32,7 @@ You do not need to build the project to use it - see above - but if you are work
 
 ```bash
 $ npm install
+$ bower install
 ```
 
 2. Install global dependencies `grunt`, `coffee-script`, and `testacular`:
