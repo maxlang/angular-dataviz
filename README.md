@@ -28,14 +28,12 @@ You do not need to build the project to use it - see above - but if you are work
 
 0. Install [Node.js](http://nodejs.org/) and NPM (should come with)
 
-1. Install global dependencies `grunt`, `coffee-script`, `bower`, and `testacular`:
-
+0. Install global dependencies `grunt`, `coffee-script`, `bower`, and `testacular`:
 ```bash
 $ npm install -g testacular coffee-script grunt-cli
 ```
 
-2. Install local dependencies:
-
+0. Install local dependencies:
 ```bash
 $ npm install
 $ bower install
