@@ -30,7 +30,7 @@ You do not need to build the project to use it - see above - but if you are work
 
 0. Install global dependencies `grunt`, `coffee-script`, `bower`, and `testacular`:
 ```bash
-$ npm install -g testacular coffee-script grunt-cli
+$ npm install -g testacular coffee-script grunt-cli bower
 ```
 
 0. Install local dependencies:
