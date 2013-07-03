@@ -158,9 +158,9 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
             scope.mousedown = d;
             var rect = d3.select(this);
             //if only 1 cell is selected
-            if(scope.chart.selectAll("rect.day.selected")[0].length===1) {
+            if (scope.chart.selectAll("rect.day.selected")[0].length===1) {
               //if it's this cell
-              if(rect.classed("selected")) {
+              if (rect.classed("selected")) {
                 rect.classed("selected", false);
                 setSelectedRanges([]);
               } else {
@@ -182,7 +182,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
         //TODO: doublecheck re: mouseover bubbling concerns
           .on("mouseover", function(d) {
             // if we're in the middle of a click & drag
-            if(!isNullOrUndefined(scope.mousedown)) {
+            if (!isNullOrUndefined(scope.mousedown)) {
               var startRange = Math.min(scope.mousedown, d);
               var endRange = Math.max(scope.mousedown, d);
 
@@ -247,7 +247,7 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
       };
 
       scope.$watch('data',function(counts) {
-        if(!isNullOrUndefined(counts) && counts.length > 0) {
+        if (!isNullOrUndefined(counts) && counts.length > 0) {
           drawChart(counts);
           selectRanges(scope.params.filter);
         }
@@ -255,14 +255,14 @@ angular.module('dataviz.directives').directive('blockCalendar', [function() {
 
       //TODO: update the options as well
       scope.$watch('params.filter',function(f) {
-        if(!isNullOrUndefined(f)) {
+        if (!isNullOrUndefined(f)) {
           selectRanges(f);
         }
       }, true);
 
       scope.$watch('params.options', function(o) {
         //the display options have changed, redraw the chart
-        if(!isNullOrUndefined(scope.data) && scope.data.length > 0) {
+        if (!isNullOrUndefined(scope.data) && scope.data.length > 0) {
           drawChart(scope.data);
           selectRanges(scope.params.filter);
         }
