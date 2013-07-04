@@ -201,11 +201,18 @@ block-calendar {
 
   @blue: rgb(0,186,251);
   @green: rgb(102,177,50);
+  @red: red;
 
+  // TODO (em) factor out annotation{0,1,2}
   .annotation0 {
     text {
-      fill: red;
+      fill: @red;
       font-weight: normal;
+    }
+
+    line {
+      stroke: @red;
+      stroke-width: 0.5;
     }
   }
 
@@ -214,12 +221,22 @@ block-calendar {
       fill: @blue;
       font-weight: normal;
     }
+
+    line {
+      stroke: @blue;
+      stroke-width: 0.5;
+    }
   }
 
   .annotation2 {
     text {
       fill: @green;
       font-weight: normal;
+    }
+
+    line {
+      stroke: @green;
+      stroke-width: 0.5;
     }
   }
 

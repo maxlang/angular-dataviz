@@ -133,7 +133,7 @@
             maxNumAnnotationsInWeek = m.annotations.length;
           }
           var annotationLineLength =
-                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek;
+                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek + 20;
 
           var annotationSetG = scope.svg
                 .append("g")
@@ -150,18 +150,21 @@
 
           annotationSetG
             .append("line")
+            .attr("y1", annotationTextHeight / 2)
             .attr("y2", annotationLineLength)
             .attr("x1", -2)
             .attr("x2", -2)
-            .attr("stroke", "black");
+            .attr('class', function(ann, i) {
+              return 'annotation' + (i % 3);
+            });
 
-          annotationSetG
-            .append("line")
-            .attr("y1", annotationLineLength)
-            .attr("y2", annotationLineLength)
-            .attr("x1", -2)
-            .attr("x2", size * weekGrouping - 5)
-            .attr("stroke", "black");
+//           annotationSetG
+//             .append("line")
+//             .attr("y1", annotationLineLength)
+//             .attr("y2", annotationLineLength)
+//             .attr("x1", -2)
+//             .attr("x2", size * weekGrouping - 5)
+//             .attr("stroke", "black");
 
           var annotationG = annotationSetG
                 .selectAll("text")
@@ -223,7 +226,7 @@
               .append('g');
           } else {
             calendarG = scope.svg.append("g")
-              .attr('transform', 'translate(0, ' + annotationLineLength + ')')
+              .attr('transform', 'translate(0, ' + (annotationLineLength - 5) + ')')
               .append('g');
           }
 
