@@ -123,16 +123,17 @@ angular.module('dataviz', ['dataviz.directives']);
           var annotationTextHeight = 10;
 
           var annotationG = scope.svg
-            .append("g")
-            .selectAll("text")
-            .data(scope.params.annotations || []);
-
-          var annotationTextG = annotationG
-            .enter()
-            .append("g");
+                .append("g")
+                .selectAll("text")
+                .data(scope.params.annotations || [])
+                .enter()
+                .append('g')
+                .attr('transform', function(ann) {
+                  return 'translate(' + dateXOffset(ann.date) + ', 0)';
+                });
 
           // Title.
-          annotationTextG
+          annotationG
             .append("svg:a")
             .attr('xlink:href', function(d) {
               return d.path;
@@ -141,55 +142,33 @@ angular.module('dataviz', ['dataviz.directives']);
             .text(function(d) {
               return d.title;
             })
-            .attr("x", function(d) {
-              return dateXOffset(d.date);
-            })
-            .attr("fill", "black")
             .attr("dy",".9em");
 
           // Subtitle.
-          annotationTextG
+          annotationG
             .append("svg:text")
             .text(function(d) {
               return d.subtitle;
             })
-            .attr("x", function(d) {
-              return dateXOffset(d.date);
-            })
             .attr('y', annotationTextHeight)
-            .attr("fill", "black")
             .attr("dy",".9em");
 
           // Date.
-          annotationTextG
+          annotationG
             .append("svg:text")
             .text(function(d) {
               return moment(d.date).format('MMMM D, YYYY');
             })
-            .attr("x", function(d) {
-              return dateXOffset(d.date);
-            })
             .attr('y', annotationTextHeight * 2)
-            .attr("fill", "black")
             .attr("dy",".9em");
 
           // Line.
           annotationG
-            .enter()
             .append("line")
-            .attr("y1", 0)
             .attr("y2", annotationLineLength)
-            .attr("x1", function(d) {
-              return dateXOffset(d.date) - 2;
-            })
-            .attr("x2", function(d) {
-              return dateXOffset(d.date) - 2;
-            })
-            .attr("fill", "black")
-            .attr("stroke", "black")
-            .attr("dy",".9em");
-
-
+            .attr("x1", -2)
+            .attr("x2", -2)
+            .attr("stroke", "black");
 
           //TODO: add mouse events
 
