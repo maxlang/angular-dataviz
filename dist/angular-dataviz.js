@@ -109,7 +109,8 @@ angular.module('dataviz', ['dataviz.directives']);
             return offset;
           }
 
-          var annotationLineHeight = 40;
+          var annotationLineLength = 50;
+          var annotationTextHeight = 10;
 
           var annotationG = scope.svg
             .append("g")
@@ -135,8 +136,6 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr("fill", "black")
             .attr("dy",".9em");
 
-
-
           annotationTextG
             .append("svg:text")
             .text(function(d) {
@@ -145,7 +144,19 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr("x", function(d) {
               return dateXOffset(d.date);
             })
-            .attr('y', 10)
+            .attr('y', annotationTextHeight)
+            .attr("fill", "black")
+            .attr("dy",".9em");
+
+          annotationTextG
+            .append("svg:text")
+            .text(function(d) {
+              return moment(d.date).format('MMMM D, YYYY');
+            })
+            .attr("x", function(d) {
+              return dateXOffset(d.date);
+            })
+            .attr('y', annotationTextHeight * 2)
             .attr("fill", "black")
             .attr("dy",".9em");
 
@@ -153,12 +164,12 @@ angular.module('dataviz', ['dataviz.directives']);
             .enter()
             .append("line")
             .attr("y1", 0)
-            .attr("y2", annotationLineHeight)
+            .attr("y2", annotationLineLength)
             .attr("x1", function(d) {
-              return dateXOffset(d.date);
+              return dateXOffset(d.date) - 2;
             })
             .attr("x2", function(d) {
-              return dateXOffset(d.date);
+              return dateXOffset(d.date) - 2;
             })
             .attr("fill", "black")
             .attr("stroke", "black")
@@ -172,9 +183,15 @@ angular.module('dataviz', ['dataviz.directives']);
           //TODO: check this math (might need special case for small widths?)
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
-          var calendarG = scope.svg.append("g")
-            .attr('transform', 'translate(0, ' + annotationLineHeight + ')')
-            .append('g');
+          var calendarG;
+          if (_.isEmpty(scope.params.annotations)) {
+            calendarG = scope.svg.append("g")
+              .append('g');
+          } else {
+            calendarG = scope.svg.append("g")
+              .attr('transform', 'translate(0, ' + annotationLineLength + ')')
+              .append('g');
+          }
 
           calendarG
             .append("g")
