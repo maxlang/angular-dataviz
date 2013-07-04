@@ -10,6 +10,7 @@
     "d3": false,
     "$": false,
     "nv": false,
-    "moment": false
+    "moment": false,
+    "console": true
   }
 }
