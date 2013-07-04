@@ -238,12 +238,24 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         }
       }
 
+      var stateToInt = {};
+      var numStates = 1; //0 breaks reduce fn
+      var sti = function(v) {
+          return (v in stateToInt) ? stateToInt[v] : (stateToInt[v] = numStates++);
+      };
+
       // BAR CHART 1
-      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'state',null,'name',null,0,countCombine));
+      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'state', sti,'name',null,0,countCombine));
 
       $scope.bar1params = {};
 
       $scope.bar1params.filter = [];
+
+      $scope.bar1params.options = {
+        domain: [0, 6],
+        range: [0, 100],
+        bars: 6
+      };
 
       $scope.$watch('bar1params.filter', function(val) {
         if (val!==null && val!==undefined && val.length > 0) {
@@ -261,7 +273,7 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
         if (filterKey !== "eaterFilter") {
           $scope.$watch('filters.'+filterKey, function() {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
-            $scope.bar1data = d3.entries(reduce(records,'state',null,'name',null,0,countCombine));
+            $scope.bar1data = d3.entries(reduce(records,'state',sti,'name',null,0,countCombine));
           }, true);
         }
       }
