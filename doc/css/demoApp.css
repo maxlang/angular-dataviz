@@ -20,4 +20,6 @@ nv-barchart svg {
     float:left;
 }
 
-
+block-calendar {
+  height: 300px;
+}
