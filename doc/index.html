@@ -4,7 +4,12 @@
     <title>Angular Dataviz for AngularJS</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
-    <script src="http://code.angularjs.org/1.1.3/angular.js"></script>
+    <script src="../components/angular-unstable/angular.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="../components/nvd3/nv.d3.js"></script>
+    <script src="../components/moment/moment.js"></script>
+    <script src="../components/underscore/underscore.js"></script>
+    <script src="../components/gridster/dist/jquery.gridster.js"></script>
     <script src="../dist/angular-dataviz.js"></script>
     <script src="js/prettify.js"></script>
     <script src="js/demoApp.js"></script>
@@ -20,7 +25,7 @@
       <div class="navbar-inner">
         <div class="container">
           <div class="dropdown pull-left">
-            <a class="brand dropdown-toggle" role="button" href="#"> 
+            <a class="brand dropdown-toggle" role="button" href="#">
               Angular Dataviz
             </a>
           </div>
@@ -35,16 +40,7 @@
                   <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a scrollto href="#TODODODODOD">TODO</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-                  Integrations
-                  <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a scrollto href="#TODODODODOD">TODO</a></li>
+                  <li><a scrollto href="#blockCalendar">Block Calendar</a></li>
                 </ul>
               </li>
             </ul>
@@ -107,7 +103,7 @@
         </div>
       </header>
 
-      <div class="container">
+      <div class="container" ng-controller="GlobalDataCtrl">
 
         <section id="setup">
           <h1>Getting Started</h1>
@@ -126,13 +122,57 @@
           </ol>
         </section>
 
-        <section id="TODODODOD" class="TODODOD"
-                 ng-controller="TODODOD">
-          <div class="page-header">
-            <h1>TODODODODDO</h1>
+        <section id="randomData">
+          <h1>Data (Randomly Generated)</h1>
+          <!--{{dataObject.records[0]}} -->
+          <div class="table-container" >
+            <table class="table">
+              <thead>
+                <th>Eater Name</th>
+                <th>Number of Bites</th>
+                <th>Eaten Name</th>
+                <th>Time</th>
+              </thead>
+              <tbody>
+                <tr ng-repeat="record in dataObject.records|inView:filters">
+                  <td>
+                    {{record.eater}}
+                  </td>
+                  <td>
+                    {{record.bites}}
+                  </td>
+                  <td>
+                    {{record.eaten}}
+                  </td>
+                  <td>
+                    {{record.time|timestampToTime}}
+                  </td>
+
+                </tr>
+
+              </tbody>
+            </table>
           </div>
-        </section>
+
+          <section id="blockCalendar" class="blockCalendar">
+            <div class="page-header">
+              <!--<h1>Block Calendar</h1> -->
+
+              <div ng-controller="dashboardCtrl">
+                <input ng-model="cal1params.options.widthPx"></input>
+                <block-calendar data="cal1data" params="cal1params"></block-calendar>
+                <block-calendar data="cal2data" params="cal2params"></block-calendar>
+                <nv-barchart data="bar1data" params="bar1params"></nv-barchart>
+                <!-- <nv-barchart data="bar2data" params="bar2params"></nv-barchart>
+                     <nv-barchart data="bar2data" params="bar2params"></nv-barchart> -->
+                <sidebar data="bar2data" params="bar2params"></sidebar>
+              </div>
+
+            </div>
+          </section>
       </div>
     </div>
+
+    <script src="http://localhost:35729/livereload.js"></script>
   </body>
 </html>

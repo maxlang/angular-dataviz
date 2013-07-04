@@ -5,10 +5,10 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-recess');
 
   // Project configuration.
   grunt.initConfig({
@@ -42,25 +42,18 @@ module.exports = function (grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
-    recess: {
-      dist: {
-        src: ['common/**/*.less', 'modules/**/*.less'],
-        dest: 'dist/<%= pkg.name %>.css',
-        options: {
-          compile: true
-        }
+     less: {
+      options: {
       },
-      min: {
-        src: '<%= recess.dist.dest %>',
-        dest: 'dist/<%= pkg.name %>.min.css',
-        options: {
-          compress: true
+      dist: {
+        files: {
+          'dist/<%= pkg.name %>.css': ['modules/**/*.less']
         }
       }
     },
     jshint: {
-      gruntfile: {
-        src: 'Gruntfile.js'
+      options: {
+        jshintrc: '.jshintrc'
       },
       src: {
         src: ['modules/**/*.js', '!modules/**/test/*.js']
@@ -71,38 +64,17 @@ module.exports = function (grunt) {
     },
     watch: {
       files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less'],
-      tasks: ['build', 'test']
+      tasks: ['build', 'test'],
+      options: {
+        livereload: true
+      }
     }
   });
 
   // Default task.
   grunt.registerTask('default', ['build', 'test']);
 
-  grunt.registerTask('build', 'build all or some of the angular-dataviz modules', function () {
-
-    var jsBuildFiles = grunt.config('concat.dist.src');
-    var lessBuildFiles = [];
-
-    if (this.args.length > 0) {
-
-      this.args.forEach(function(moduleName) {
-        var modulejs = grunt.file.expandFiles('modules/*/' + moduleName + '/*.js');
-        var moduleless = grunt.file.expandFiles('modules/*/' + moduleName + '/stylesheets/*.less', 'modules/*/' + moduleName + '/*.less');
-
-        jsBuildFiles = jsBuildFiles.concat(modulejs);
-        lessBuildFiles = lessBuildFiles.concat(moduleless);
-      });
-
-      grunt.config('concat.dist.src', jsBuildFiles);
-      grunt.config('recess.dist.src', lessBuildFiles);
-
-    } else {
-      grunt.config('concat.dist.src', jsBuildFiles.concat(['modules/*/*/*.js']));
-      grunt.config('recess.dist.src', lessBuildFiles.concat(grunt.config('recess.dist.src')));
-    }
-
-    grunt.task.run(['jshint', 'concat', 'recess:dist']);
-  });
+  grunt.registerTask('build', ['jshint', 'concat', 'less:dist']);
 
   grunt.registerTask('server', 'start testacular server', function () {
     //Mark the task as async but never call done, so the server stays up
