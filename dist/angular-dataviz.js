@@ -96,7 +96,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .map(function(anns, week) {
                   return {
                     week: parseInt(week, 10), // TODO why does this turn into string?
-                    annotations: anns
+                    annotations: _(anns).sortBy('date').take(3).value()
                   };
                 })
                 .value();
