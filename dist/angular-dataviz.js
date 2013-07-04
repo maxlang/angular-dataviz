@@ -99,27 +99,48 @@ angular.module('dataviz', ['dataviz.directives']);
           scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
 
+          function dateXOffset(date) {
+            var d_ = moment(date);
+            var weeksFromStart = d_.diff(start, 'weeks');
 
-          scope.svg
+            var offset = weeksFromStart * totalCellSize;
+            console.log('weeks diff', weeksFromStart, offset);
+
+            return offset;
+          }
+
+          var annotationG = scope.svg
             .append("g")
             .selectAll("text")
-            .data(scope.params.annotations || [])
+            .data(scope.params.annotations || []);
+
+          annotationG
             .enter()
             .append("svg:text")
             .text(function(d) {
               return d.title;
             })
             .attr("x", function(d) {
-              var d_ = moment(d.date);
-              var weeksFromStart = d_.diff(start, 'weeks');
-
-              var offset = weeksFromStart * totalCellSize;
-              console.log('weeks diff', weeksFromStart, offset);
-
-              return offset;
+              return dateXOffset(d.date);
             })
             .attr("fill", "black")
             .attr("dy",".9em");
+
+          annotationG
+            .enter()
+            .append("line")
+            .attr("y1", 0)
+            .attr("y2", 20)
+            .attr("x1", function(d) {
+              return dateXOffset(d.date);
+            })
+            .attr("x2", function(d) {
+              return dateXOffset(d.date);
+            })
+            .attr("fill", "black")
+            .attr("stroke", "black")
+            .attr("dy",".9em");
+
 
 
           //TODO: add mouse events
