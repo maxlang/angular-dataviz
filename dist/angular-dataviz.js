@@ -82,15 +82,16 @@ angular.module('dataviz', ['dataviz.directives']);
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
+          var weekGrouping = 5;
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
           function weeksFromStart(date) {
             return moment(date).diff(start, 'weeks');
           }
 
-          var annotationsByWeek = _.chain(scope.params.annotations || [])
+          var annotationsByWeek = _(scope.params.annotations || [])
                 .groupBy(function(a) {
-                  return weeksFromStart(a.date);
+                  return Math.floor(weeksFromStart(a.date) / weekGrouping);
                 })
                 .map(function(anns, week) {
                   return {
@@ -143,7 +144,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .enter()
                 .append('g')
                 .attr('transform', function(ann) {
-                  return 'translate(' + weekXOffset(ann.week) + ', 0)';
+                  return 'translate(' + (weekXOffset(ann.week) * weekGrouping) + ', 0)';
                 });
 
           annotationSetG
@@ -151,6 +152,14 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr("y2", annotationLineLength)
             .attr("x1", -2)
             .attr("x2", -2)
+            .attr("stroke", "black");
+
+          annotationSetG
+            .append("line")
+            .attr("y1", annotationLineLength)
+            .attr("y2", annotationLineLength)
+            .attr("x1", -2)
+            .attr("x2", size * weekGrouping - 5)
             .attr("stroke", "black");
 
           var annotationG = annotationSetG
