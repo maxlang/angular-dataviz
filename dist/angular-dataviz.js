@@ -23,18 +23,6 @@ angular.module('dataviz', ['dataviz.directives']);
       link: function(scope, element) {
         scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
 
-
-        var annotations = [{
-          date: Date.now() - (60 * 24 * 60 * 60 * 1000),
-          title: 'testo title',
-          subtitle: 'testo subtitle'
-        }, {
-          date: Date.now() - (120 * 24 * 60 * 60 * 1000),
-          title: 'testo title 2',
-          subtitle: 'testo subtitle 2'
-        }];
-
-
         var defaultOptions = {
           cellSizePx: 13,
           cellBorderPx: 2,
@@ -131,12 +119,11 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr("dy",".9em");
 
 
-
           scope.svg.append("g")
             .attr("width", "100%")
             //.attr("class", "x axis")
             .selectAll("text")
-            .data(annotations)
+            .data(scope.params.annotations || [])
             .enter()
             .append("svg:text")
             .text(function(d) {
