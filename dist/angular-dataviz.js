@@ -137,7 +137,11 @@ angular.module('dataviz', ['dataviz.directives']);
             maxNumAnnotationsInWeek = m.annotations.length;
           }
           var annotationLineLength =
-                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek;
+                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek + 20;
+
+          function annotationClass(ann, i) {
+            return 'annotation' + (i % 3);
+          }
 
           var annotationSetG = scope.svg
                 .append("g")
@@ -145,27 +149,30 @@ angular.module('dataviz', ['dataviz.directives']);
                 .data(annotationsByWeek)
                 .enter()
                 .append('g')
-                .attr('class', function(ann, i) {
-                  return 'annotation' + (i % 3);
-                })
+                .attr('class', annotationClass)
                 .attr('transform', function(ann) {
                   return 'translate(' + (weekXOffset(ann.week) * weekGrouping) + ', 0)';
                 });
 
           annotationSetG
             .append("line")
+            .attr("y1", annotationTextHeight / 2)
             .attr("y2", annotationLineLength)
-            .attr("x1", -2)
-            .attr("x2", -2)
-            .attr("stroke", "black");
+            .attr('class', annotationClass);
 
           annotationSetG
-            .append("line")
-            .attr("y1", annotationLineLength)
-            .attr("y2", annotationLineLength)
-            .attr("x1", -2)
-            .attr("x2", size * weekGrouping - 5)
-            .attr("stroke", "black");
+            .append('circle')
+            .attr('cy', annotationLineLength + 4)
+            .attr('r', 1)
+            .attr('class', annotationClass);
+
+//           annotationSetG
+//             .append("line")
+//             .attr("y1", annotationLineLength)
+//             .attr("y2", annotationLineLength)
+//             .attr("x1", -2)
+//             .attr("x2", size * weekGrouping - 5)
+//             .attr("stroke", "black");
 
           var annotationG = annotationSetG
                 .selectAll("text")
@@ -176,7 +183,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .append('g')
                 .attr('transform', function(ann, i) {
                   var vOffset = i * annotationTextHeight * annotationLines;
-                  return 'translate(0, ' + vOffset + ')';
+                  return 'translate(5, ' + vOffset + ')';
                 });
 
           // Title.
@@ -227,7 +234,7 @@ angular.module('dataviz', ['dataviz.directives']);
               .append('g');
           } else {
             calendarG = scope.svg.append("g")
-              .attr('transform', 'translate(0, ' + annotationLineLength + ')')
+              .attr('transform', 'translate(0, ' + (annotationLineLength - 5) + ')')
               .append('g');
           }
 

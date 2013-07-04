@@ -135,15 +135,17 @@
           var annotationLineLength =
                 annotationLines * annotationTextHeight * maxNumAnnotationsInWeek + 20;
 
+          function annotationClass(ann, i) {
+            return 'annotation' + (i % 3);
+          }
+
           var annotationSetG = scope.svg
                 .append("g")
                 .selectAll("text")
                 .data(annotationsByWeek)
                 .enter()
                 .append('g')
-                .attr('class', function(ann, i) {
-                  return 'annotation' + (i % 3);
-                })
+                .attr('class', annotationClass)
                 .attr('transform', function(ann) {
                   return 'translate(' + (weekXOffset(ann.week) * weekGrouping) + ', 0)';
                 });
@@ -152,11 +154,13 @@
             .append("line")
             .attr("y1", annotationTextHeight / 2)
             .attr("y2", annotationLineLength)
-            .attr("x1", -2)
-            .attr("x2", -2)
-            .attr('class', function(ann, i) {
-              return 'annotation' + (i % 3);
-            });
+            .attr('class', annotationClass);
+
+          annotationSetG
+            .append('circle')
+            .attr('cy', annotationLineLength + 4)
+            .attr('r', 1)
+            .attr('class', annotationClass);
 
 //           annotationSetG
 //             .append("line")
@@ -175,7 +179,7 @@
                 .append('g')
                 .attr('transform', function(ann, i) {
                   var vOffset = i * annotationTextHeight * annotationLines;
-                  return 'translate(0, ' + vOffset + ')';
+                  return 'translate(5, ' + vOffset + ')';
                 });
 
           // Title.
