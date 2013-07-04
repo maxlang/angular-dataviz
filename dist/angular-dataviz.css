@@ -203,6 +203,9 @@ block-calendar .annotation2 text {
   fill: #66b132;
   font-weight: normal;
 }
+block-calendar .annotationDate text {
+  fill: #bbb;
+}
 block-calendar .annotations {
   margin: 15px 12px 0 34px;
 }

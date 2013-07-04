@@ -124,7 +124,8 @@ angular.module('dataviz', ['dataviz.directives']);
             return weekXOffset(weeksFromStart(date));
           }
 
-          var annotationTextHeight = 10;
+          var annotationTextHeight = 15;
+          var annotationLines = 3;
 
           var maxNumAnnotationsInWeek;
           if (_.isEmpty(annotationsByWeek)) {
@@ -135,7 +136,8 @@ angular.module('dataviz', ['dataviz.directives']);
             });
             maxNumAnnotationsInWeek = m.annotations.length;
           }
-          var annotationLineLength = 5 * annotationTextHeight * maxNumAnnotationsInWeek;
+          var annotationLineLength =
+                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek;
 
           var annotationSetG = scope.svg
                 .append("g")
@@ -173,7 +175,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .enter()
                 .append('g')
                 .attr('transform', function(ann, i) {
-                  var vOffset = i * annotationTextHeight * 4;
+                  var vOffset = i * annotationTextHeight * annotationLines;
                   return 'translate(0, ' + vOffset + ')';
                 });
 
@@ -184,27 +186,33 @@ angular.module('dataviz', ['dataviz.directives']);
               return d.path;
             })
             .append('text')
+            .attr('font-size', 13)
             .text(function(d) {
               return d.title;
             })
             .attr("dy",".9em");
 
           // Subtitle.
-          annotationG
-            .append("svg:text")
-            .text(function(d) {
-              return d.subtitle;
-            })
-            .attr('y', annotationTextHeight)
-            .attr("dy",".9em");
+//           annotationG
+//             .append("svg:text")
+//             .text(function(d) {
+//               return d.subtitle;
+//             })
+//             .attr('y', annotationTextHeight)
+//             .attr("dy",".9em");
 
           // Date.
           annotationG
+            .append('g')
+            .attr('class', 'annotationDate')
             .append("svg:text")
             .text(function(d) {
               return moment(d.date).format('MMMM D, YYYY');
             })
-            .attr('y', annotationTextHeight * 2)
+            .attr('class', 'annotationDate')
+            .attr('font-size', 10)
+            //.style('fill', '#bbb')
+            .attr('y', annotationTextHeight)
             .attr("dy",".9em");
 
           //TODO: add mouse events
