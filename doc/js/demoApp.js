@@ -127,7 +127,9 @@ module
 
     $scope.cal1params.filter = $scope.params.dateFilter;
 
-    var date1 = Date.now() - (60 * 24 * 60 * 60 * 1000);
+    var DAY_MS = 24 * 60 * 60 * 1000;
+
+    var date1 = Date.now() - (60 * DAY_MS);
     $scope.cal1params.annotations = [{
       date: date1,
       title: 'First Title',
@@ -139,10 +141,15 @@ module
       subtitle: 'second subtitle',
       path: '/test/a2.html'
     }, {
-      date: Date.now() - (120 * 24 * 60 * 60 * 1000),
+      date: date1 - (7 * DAY_MS),
+      title: 'Third Title',
+      subtitle: 'third subtitle',
+      path: '/test/a3.html'
+    }, {
+      date: Date.now() - (120 * DAY_MS),
       title: 'testo title 2',
       subtitle: 'testo subtitle 2',
-      path: '/test/a3.html'
+      path: '/test/a4.html'
     }];
 
     //CALENDAR 2
