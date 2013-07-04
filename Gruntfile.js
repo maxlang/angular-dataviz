@@ -66,7 +66,7 @@ module.exports = function (grunt) {
       files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less'],
       tasks: ['build', 'test'],
       options: {
-        livereload: true
+        livereload: 35730
       }
     }
   });
