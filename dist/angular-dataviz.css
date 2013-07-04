@@ -191,6 +191,18 @@ block-calendar .legend li:last-child,
 block-calendar .legend li:nth-child(2) {
   margin-left: 10px;
 }
+block-calendar .annotation0 text {
+  fill: red;
+  font-weight: normal;
+}
+block-calendar .annotation1 text {
+  fill: #00bafb;
+  font-weight: normal;
+}
+block-calendar .annotation2 text {
+  fill: #66b132;
+  font-weight: normal;
+}
 block-calendar .annotations {
   margin: 15px 12px 0 34px;
 }

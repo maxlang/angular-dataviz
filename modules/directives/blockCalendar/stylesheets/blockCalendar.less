@@ -8,27 +8,22 @@ block-calendar {
     user-select: none;
   }
 
-
   .week-start {
-
     text {
       font-size: 8px;
       opacity: 0.3;
       text-anchor: middle;
     }
-
   }
 
   .week-start, .x.axis {
     text {
-
       &:hover {
         cursor: pointer;
         opacity: .9;
         fill: red;
       }
     }
-
   }
 
   .x.axis text { text-anchor:left; }
@@ -37,7 +32,6 @@ block-calendar {
     opacity: 0.7;
     font-weight: bold;
   }
-
 
   display:block;
 //  .flexbox();
@@ -204,10 +198,34 @@ block-calendar {
       &:last-child, &:nth-child(2) { margin-left: 10px; }
     }
   }
+
+  @blue: rgb(0,186,251);
+  @green: rgb(102,177,50);
+
+  .annotation0 {
+    text {
+      fill: red;
+      font-weight: normal;
+    }
+  }
+
+  .annotation1 {
+    text {
+      fill: @blue;
+      font-weight: normal;
+    }
+  }
+
+  .annotation2 {
+    text {
+      fill: @green;
+      font-weight: normal;
+    }
+  }
+
   .annotations {
-    @blue: rgb(0,186,251);
-    @green: rgb(102,177,50);
     @spanOffset: 2px;
+
     margin: 15px 12px 0 34px;
 //    .flexbox();
     li {

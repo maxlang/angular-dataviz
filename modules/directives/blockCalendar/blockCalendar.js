@@ -139,6 +139,9 @@
                 .data(annotationsByWeek)
                 .enter()
                 .append('g')
+                .attr('class', function(ann, i) {
+                  return 'annotation' + (i % 3);
+                })
                 .attr('transform', function(ann) {
                   return 'translate(' + (weekXOffset(ann.week) * weekGrouping) + ', 0)';
                 });
