@@ -109,13 +109,18 @@ angular.module('dataviz', ['dataviz.directives']);
             return offset;
           }
 
+          var annotationLineHeight = 40;
+
           var annotationG = scope.svg
             .append("g")
             .selectAll("text")
             .data(scope.params.annotations || []);
 
-          annotationG
+          var annotationTextG = annotationG
             .enter()
+            .append("g");
+
+          annotationTextG
             .append("svg:text")
             .text(function(d) {
               return d.title;
@@ -126,11 +131,23 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr("fill", "black")
             .attr("dy",".9em");
 
+          annotationTextG
+            .append("svg:text")
+            .text(function(d) {
+              return d.subtitle;
+            })
+            .attr("x", function(d) {
+              return dateXOffset(d.date);
+            })
+            .attr('y', 10)
+            .attr("fill", "black")
+            .attr("dy",".9em");
+
           annotationG
             .enter()
             .append("line")
             .attr("y1", 0)
-            .attr("y2", 20)
+            .attr("y2", annotationLineHeight)
             .attr("x1", function(d) {
               return dateXOffset(d.date);
             })
@@ -150,7 +167,7 @@ angular.module('dataviz', ['dataviz.directives']);
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
           var calendarG = scope.svg.append("g")
-            .attr('transform', 'translate(0, 20)')
+            .attr('transform', 'translate(0, ' + annotationLineHeight + ')')
             .append('g');
 
           calendarG
