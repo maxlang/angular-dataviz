@@ -127,11 +127,13 @@ angular.module('demoApp', ['dataviz'], function($locationProvider) {
       $scope.cal1params.annotations = [{
         date: Date.now() - (60 * 24 * 60 * 60 * 1000),
         title: 'testo title',
-        subtitle: 'testo subtitle'
+        subtitle: 'testo subtitle',
+        path: '/test/a1.html'
       }, {
         date: Date.now() - (120 * 24 * 60 * 60 * 1000),
         title: 'testo title 2',
-        subtitle: 'testo subtitle 2'
+        subtitle: 'testo subtitle 2',
+        path: '/test/a2.html'
       }];
 
       //CALENDAR 2

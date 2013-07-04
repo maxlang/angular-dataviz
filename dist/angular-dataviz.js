@@ -121,7 +121,11 @@ angular.module('dataviz', ['dataviz.directives']);
             .append("g");
 
           annotationTextG
-            .append("svg:text")
+            .append("svg:a")
+            .attr('xlink:href', function(d) {
+              return d.path;
+            })
+            .append('text')
             .text(function(d) {
               return d.title;
             })
@@ -130,6 +134,8 @@ angular.module('dataviz', ['dataviz.directives']);
             })
             .attr("fill", "black")
             .attr("dy",".9em");
+
+
 
           annotationTextG
             .append("svg:text")
