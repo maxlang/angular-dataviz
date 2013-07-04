@@ -14,6 +14,7 @@
     "nvd3": "~1.0.0-beta",
     "moment": "~2.0.0",
     "underscore": "~1.4.4",
-    "gridster": "latest"
+    "gridster": "latest",
+    "google-code-prettify": "~1.0.0"
   }
 }
