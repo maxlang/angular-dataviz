@@ -111,21 +111,54 @@
           scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
 
-          function dateXOffset(date) {
-            return weeksFromStart(date) * totalCellSize;
+          function weekXOffset(week) {
+            return week * totalCellSize;
           }
 
-          var annotationLineLength = 50;
+          function dateXOffset(date) {
+            return weekXOffset(weeksFromStart(date));
+          }
+
           var annotationTextHeight = 10;
 
-          var annotationG = scope.svg
+          var maxNumAnnotationsInWeek;
+          if (_.isEmpty(annotationsByWeek)) {
+            maxNumAnnotationsInWeek = 1;
+          } else {
+            var m = _.max(annotationsByWeek, function(x) {
+              return x.annotations.length;
+            });
+            maxNumAnnotationsInWeek = m.annotations.length;
+          }
+          var annotationLineLength = 5 * annotationTextHeight * maxNumAnnotationsInWeek;
+
+          var annotationSetG = scope.svg
                 .append("g")
                 .selectAll("text")
-                .data(scope.params.annotations || [])
+                .data(annotationsByWeek)
                 .enter()
                 .append('g')
                 .attr('transform', function(ann) {
-                  return 'translate(' + dateXOffset(ann.date) + ', 0)';
+                  return 'translate(' + weekXOffset(ann.week) + ', 0)';
+                });
+
+          annotationSetG
+            .append("line")
+            .attr("y2", annotationLineLength)
+            .attr("x1", -2)
+            .attr("x2", -2)
+            .attr("stroke", "black");
+
+          var annotationG = annotationSetG
+                .selectAll("text")
+                .data(function(d) {
+                  return d.annotations;
+                })
+                .enter()
+                .append('g')
+                .attr('transform', function(ann, i) {
+                  var vOffset = i * annotationTextHeight * 4;
+                  return 'translate(0, ' + vOffset + ')';
                 });
 
           // Title.
@@ -157,14 +190,6 @@
             })
             .attr('y', annotationTextHeight * 2)
             .attr("dy",".9em");
-
-          // Line.
-          annotationG
-            .append("line")
-            .attr("y2", annotationLineLength)
-            .attr("x1", -2)
-            .attr("x2", -2)
-            .attr("stroke", "black");
 
           //TODO: add mouse events
 
