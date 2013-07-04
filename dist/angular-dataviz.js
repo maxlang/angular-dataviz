@@ -99,35 +99,14 @@ angular.module('dataviz', ['dataviz.directives']);
           scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
 
-          //TODO: add mouse events
 
-          // month axis
-          //TODO: check this math (might need special case for small widths?)
-          var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
-
-          scope.svg.append("g").attr("width", "100%").attr("class", "x axis")
-            .selectAll("text").data(_.range(months)).enter().append("svg:text")
-            .text(function(d) {
-              return end.clone().subtract("months", d).format("MMM");
-            })
-            .attr("x", function(d) {
-              return width - 8 - 2*totalCellSize +
-                (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
-            })
-            .attr("y", 0)
-            .attr("fill", "black")
-            .attr("dy",".9em");
-
-
-          scope.svg.append("g")
-            .attr("width", "100%")
-            //.attr("class", "x axis")
+          scope.svg
+            .append("g")
             .selectAll("text")
             .data(scope.params.annotations || [])
             .enter()
             .append("svg:text")
             .text(function(d) {
-              console.log('***data***', d);
               return d.title;
             })
             .attr("x", function(d) {
@@ -138,6 +117,32 @@ angular.module('dataviz', ['dataviz.directives']);
               console.log('weeks diff', weeksFromStart, offset);
 
               return offset;
+            })
+            .attr("fill", "black")
+            .attr("dy",".9em");
+
+
+          //TODO: add mouse events
+
+          // month axis
+          //TODO: check this math (might need special case for small widths?)
+          var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
+
+          var calendarG = scope.svg.append("g")
+            .attr('transform', 'translate(0, 20)')
+            .append('g');
+
+          calendarG
+            .append("g")
+            .attr("width", "100%")
+            .attr("class", "x axis")
+            .selectAll("text").data(_.range(months)).enter().append("svg:text")
+            .text(function(d) {
+              return end.clone().subtract("months", d).format("MMM");
+            })
+            .attr("x", function(d) {
+              return width - 8 - 2*totalCellSize +
+                (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
             })
             .attr("y", 0)
             .attr("fill", "black")
@@ -152,7 +157,8 @@ angular.module('dataviz', ['dataviz.directives']);
           console.log('***start', start);
           console.log('***weeks', weeks);
 
-          scope.svg.append("g").attr("width", "100%").attr("class", "week-start")
+          calendarG
+            .append("g").attr("width", "100%").attr("class", "week-start")
             .selectAll("text").data(_.range(weeks)).enter().append("svg:text")
             .text(function(d) {
               return start.clone().add("weeks", d).format("D");
@@ -165,7 +171,7 @@ angular.module('dataviz', ['dataviz.directives']);
 
 
           // Weekday axis
-          scope.svg.append("g").attr("height", "100%").attr("class", "y axis")
+          calendarG.append("g").attr("height", "100%").attr("class", "y axis")
             .selectAll("text").data(_.range(7)).enter().append("text")
             .text(function(d) {
               return moment().days(d).format("ddd");
@@ -176,7 +182,7 @@ angular.module('dataviz', ['dataviz.directives']);
 
 
           // actual chart
-          scope.chart = scope.svg.append("g")
+          scope.chart = calendarG.append("g")
             .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
