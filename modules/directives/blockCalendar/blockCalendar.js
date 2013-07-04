@@ -80,6 +80,22 @@
 
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
+          function weeksFromStart(date) {
+            return moment(date).diff(start, 'weeks');
+          }
+
+          var annotationsByWeek = _.chain(scope.params.annotations || [])
+                .groupBy(function(a) {
+                  return weeksFromStart(a.date);
+                })
+                .map(function(anns, week) {
+                  return {
+                    week: parseInt(week, 10), // TODO why does this turn into string?
+                    annotations: anns
+                  };
+                })
+                .value();
+
           //TODO: feels like there should be a better way
           var dataMapping = {};
           data.forEach(function(d) {
@@ -96,13 +112,7 @@
             .attr("height", "100%");
 
           function dateXOffset(date) {
-            var d_ = moment(date);
-            var weeksFromStart = d_.diff(start, 'weeks');
-
-            var offset = weeksFromStart * totalCellSize;
-            console.log('weeks diff', weeksFromStart, offset);
-
-            return offset;
+            return weeksFromStart(date) * totalCellSize;
           }
 
           var annotationLineLength = 50;
@@ -117,6 +127,7 @@
             .enter()
             .append("g");
 
+          // Title.
           annotationTextG
             .append("svg:a")
             .attr('xlink:href', function(d) {
@@ -132,6 +143,7 @@
             .attr("fill", "black")
             .attr("dy",".9em");
 
+          // Subtitle.
           annotationTextG
             .append("svg:text")
             .text(function(d) {
@@ -144,6 +156,7 @@
             .attr("fill", "black")
             .attr("dy",".9em");
 
+          // Date.
           annotationTextG
             .append("svg:text")
             .text(function(d) {
@@ -156,6 +169,7 @@
             .attr("fill", "black")
             .attr("dy",".9em");
 
+          // Line.
           annotationG
             .enter()
             .append("line")
@@ -205,14 +219,7 @@
             .attr("fill", "black")
             .attr("dy",".9em");
 
-
-          //weeks
-
           var weeks = end.diff(start.clone().startOf("week"), 'weeks', false) + 1;
-
-          console.log('***end', end, start);
-          console.log('***start', start);
-          console.log('***weeks', weeks);
 
           calendarG
             .append("g").attr("width", "100%").attr("class", "week-start")
