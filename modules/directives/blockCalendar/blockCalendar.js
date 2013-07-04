@@ -19,6 +19,18 @@
       link: function(scope, element) {
         scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
 
+
+        var annotations = [{
+          date: Date.now() - (60 * 24 * 60 * 60 * 1000),
+          title: 'testo title',
+          subtitle: 'testo subtitle'
+        }, {
+          date: Date.now() - (120 * 24 * 60 * 60 * 1000),
+          title: 'testo title 2',
+          subtitle: 'testo subtitle 2'
+        }];
+
+
         var defaultOptions = {
           cellSizePx: 13,
           cellBorderPx: 2,
@@ -113,9 +125,41 @@
             .attr("y", 0)
             .attr("fill", "black")
             .attr("dy",".9em");
+
+
+
+          scope.svg.append("g")
+            .attr("width", "100%")
+            //.attr("class", "x axis")
+            .selectAll("text")
+            .data(annotations)
+            .enter()
+            .append("svg:text")
+            .text(function(d) {
+              console.log('***data***', d);
+              return d.title;
+            })
+            .attr("x", function(d) {
+              var d_ = moment(d.date);
+              var weeksFromStart = d_.diff(start, 'weeks');
+
+              var offset = weeksFromStart * totalCellSize;
+              console.log('weeks diff', weeksFromStart, offset);
+
+              return offset;
+            })
+            .attr("y", 0)
+            .attr("fill", "black")
+            .attr("dy",".9em");
+
+
           //weeks
 
-          var weeks = end.diff(start.clone().startOf("week"),'weeks', false) + 1;
+          var weeks = end.diff(start.clone().startOf("week"), 'weeks', false) + 1;
+
+          console.log('***end', end, start);
+          console.log('***start', start);
+          console.log('***weeks', weeks);
 
           scope.svg.append("g").attr("width", "100%").attr("class", "week-start")
             .selectAll("text").data(_.range(weeks)).enter().append("svg:text")
