@@ -183,7 +183,12 @@
                   return 'translate(5, ' + vOffset + ')';
                 });
 
+          function truncate(str, n) {
+            return str.length < n ? str : (str.substr(0, n) + '...');
+          }
+
           // Title.
+          var MAX_TITLE_LEN = 10;
           annotationG
             .append("svg:a")
             .attr('xlink:href', function(d) {
@@ -192,7 +197,7 @@
             .append('text')
             .attr('font-size', 13)
             .text(function(d) {
-              return d.title;
+              return truncate(d.title, MAX_TITLE_LEN); // TODO (em) truncate via styling instead of code.
             })
             .attr("dy",".9em");
 

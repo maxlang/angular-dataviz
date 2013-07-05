@@ -89,6 +89,7 @@ angular.module('dataviz', ['dataviz.directives']);
             return moment(date).diff(start, 'weeks');
           }
 
+          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationsByWeek = _(scope.params.annotations || [])
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / weekGrouping);
@@ -96,7 +97,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .map(function(anns, week) {
                   return {
                     week: parseInt(week, 10), // TODO why does this turn into string?
-                    annotations: _(anns).sortBy('date').take(3).value()
+                    annotations: _(anns).sortBy('date').take(N_ANNOTATIONS_SHOWN_PER_GROUP).value()
                   };
                 })
                 .value();
@@ -186,7 +187,12 @@ angular.module('dataviz', ['dataviz.directives']);
                   return 'translate(5, ' + vOffset + ')';
                 });
 
+          function truncate(str, n) {
+            return str.length < n ? str : (str.substr(0, n) + '...');
+          }
+
           // Title.
+          var MAX_TITLE_LEN = 10;
           annotationG
             .append("svg:a")
             .attr('xlink:href', function(d) {
@@ -195,7 +201,7 @@ angular.module('dataviz', ['dataviz.directives']);
             .append('text')
             .attr('font-size', 13)
             .text(function(d) {
-              return d.title;
+              return truncate(d.title, MAX_TITLE_LEN); // TODO (em) truncate via styling instead of code.
             })
             .attr("dy",".9em");
 
