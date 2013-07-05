@@ -85,6 +85,7 @@
             return moment(date).diff(start, 'weeks');
           }
 
+          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationsByWeek = _(scope.params.annotations || [])
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / weekGrouping);
@@ -92,7 +93,7 @@
                 .map(function(anns, week) {
                   return {
                     week: parseInt(week, 10), // TODO why does this turn into string?
-                    annotations: _(anns).sortBy('date').take(3).value()
+                    annotations: _(anns).sortBy('date').take(N_ANNOTATIONS_SHOWN_PER_GROUP).value()
                   };
                 })
                 .value();
