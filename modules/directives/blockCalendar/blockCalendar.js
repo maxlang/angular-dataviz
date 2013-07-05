@@ -61,6 +61,11 @@
           //TODO: options
           var yAxisPx = 23;
           var xAxisPx = 25;
+          var weekGrouping = 2;
+          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
+          var annotationTextHeight = 15;
+          var annotationLines = 3;
+          var MAX_TITLE_LEN = 10;
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
@@ -78,14 +83,13 @@
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
-          var weekGrouping = 5;
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
           function weeksFromStart(date) {
             return moment(date).diff(start, 'weeks');
           }
 
-          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
+
           var annotationsByWeek = _(scope.params.annotations || [])
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / weekGrouping);
@@ -120,9 +124,6 @@
           function dateXOffset(date) {
             return weekXOffset(weeksFromStart(date));
           }
-
-          var annotationTextHeight = 15;
-          var annotationLines = 3;
 
           var maxNumAnnotationsInWeek;
           if (_.isEmpty(annotationsByWeek)) {
@@ -188,7 +189,6 @@
           }
 
           // Title.
-          var MAX_TITLE_LEN = 10;
           annotationG
             .append("svg:a")
             .attr('xlink:href', function(d) {
