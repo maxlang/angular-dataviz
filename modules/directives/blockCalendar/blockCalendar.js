@@ -64,8 +64,9 @@
           var weekGrouping = 2;
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationTextHeight = 15;
-          var annotationLines = 3;
+          var annotationLines = 2;
           var MAX_TITLE_LEN = 10;
+          var ANNOTATION_Y_SPACING = 5;
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
@@ -135,7 +136,7 @@
             maxNumAnnotationsInWeek = m.annotations.length;
           }
           var annotationLineLength =
-                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek + 20;
+                (annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING) * maxNumAnnotationsInWeek + 20;
 
           function annotationClass(ann, i) {
             return 'annotation' + (i % 3);
@@ -180,7 +181,7 @@
                 .enter()
                 .append('g')
                 .attr('transform', function(ann, i) {
-                  var vOffset = i * annotationTextHeight * annotationLines;
+                  var vOffset = i * (annotationTextHeight + ANNOTATION_Y_SPACING) * annotationLines;
                   return 'translate(5, ' + vOffset + ')';
                 });
 
