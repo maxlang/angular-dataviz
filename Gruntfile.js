@@ -44,7 +44,6 @@ module.exports = function (grunt) {
     },
      less: {
       options: {
-        dumpLineNumbers: 'all'
       },
       dist: {
         files: {
@@ -53,8 +52,8 @@ module.exports = function (grunt) {
       }
     },
     jshint: {
-      gruntfile: {
-        src: 'Gruntfile.js'
+      options: {
+        jshintrc: '.jshintrc'
       },
       src: {
         src: ['modules/**/*.js', '!modules/**/test/*.js']
@@ -65,7 +64,10 @@ module.exports = function (grunt) {
     },
     watch: {
       files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less'],
-      tasks: ['build', 'test']
+      tasks: ['build', 'test'],
+      options: {
+        livereload: 35730
+      }
     }
   });
 
