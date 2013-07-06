@@ -155,6 +155,9 @@ angular.module('dataviz', ['dataviz.directives']);
           }
 
           var annotationsByWeek = _(annotations)
+                .filter(function(a) {
+                  return a.date > start.valueOf() && a.date < end.valueOf();
+                })
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / WEEK_GROUPING);
                 })
