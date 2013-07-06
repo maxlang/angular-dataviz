@@ -203,51 +203,31 @@ block-calendar {
   @green: rgb(102,177,50);
   @red: red;
 
-  // TODO (em) factor out annotation{0,1,2}
-
-  .annotation0 {
+  .annotation (@annotationColor) {
     text {
-      fill: @red;
+      fill: @annotationColor;
     }
 
     line {
-      stroke: @red;
+      stroke: @annotationColor;
     }
 
     circle {
-      stroke: @red;
-      fill: @red;
+      stroke: @annotationColor;
+      fill: @annotationColor;
     }
+  }
+
+  .annotation0 {
+    .annotation(@red);
   }
 
   .annotation1 {
-    text {
-      fill: @blue;
-    }
-
-    line {
-      stroke: @blue;
-    }
-
-    circle {
-      stroke: @blue;
-      fill: @blue;
-    }
+    .annotation(@blue);
   }
 
   .annotation2 {
-    text {
-      fill: @green;
-    }
-
-    line {
-      stroke: @green;
-    }
-
-    circle {
-      stroke: @green;
-      fill: @green;
-    }
+    .annotation(@green);
   }
 
   .annotation-date {
