@@ -165,8 +165,8 @@ angular.module('dataviz', ['dataviz.directives']);
                 .value();
 
           var weekCounts = {};
-          annotationsByWeek.forEach(function(a) {
-            weekCounts[a.week] = (weekCounts[a.week] || 0) + a.annotations.length;
+          annotationsByWeek.forEach(function(s) {
+            weekCounts[s.week] = (weekCounts[s.week] || 0) + s.annotations.length;
           });
 
           var overlapCount = overlapCounts(0, weeksFromStart(end), weekCounts, ANNOTATION_COLS);
@@ -210,14 +210,14 @@ angular.module('dataviz', ['dataviz.directives']);
                 .enter()
                 .append('g')
                 .attr('class', annotationClass)
-                .attr('transform', function(ann) {
-                  return translate(weekXOffset(ann.week) * WEEK_GROUPING, 0);
+                .attr('transform', function(s) {
+                  return translate(weekXOffset(s.week) * WEEK_GROUPING, 0);
                 });
 
           annotationSetG
             .append("line")
-            .attr("y1", function(d) {
-              var o = overlapCount[d.week] || 0;
+            .attr("y1", function(s) {
+              var o = overlapCount[s.week] || 0;
               return - o * annotationHeight;
             })
             .attr("y2", -5)
@@ -230,9 +230,9 @@ angular.module('dataviz', ['dataviz.directives']);
 
           var annotationTextSetG = annotationSetG
                 .append('g')
-                .attr('transform', function(ann) {
-                  var o = overlapCount[ann.week] || 0;
-                  return translate(0, - (o - ann.annotations.length + 1) * annotationHeight);
+                .attr('transform', function(s) {
+                  var o = overlapCount[s.week] || 0;
+                  return translate(0, - (o - s.annotations.length + 1) * annotationHeight);
                 });
 
           var annotationG = annotationTextSetG
