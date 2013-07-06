@@ -116,10 +116,10 @@
           //TODO: options
           var yAxisPx = 23;
           var xAxisPx = 25;
-          var weekGrouping = 1;
+          var WEEK_GROUPING = 1;
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
-          var annotationTextHeight = 15;
-          var annotationLines = 2;
+          var ANNOTATION_TEXT_HEIGHT = 15;
+          var ANNOTATION_LINES = 2;
           var MAX_TITLE_LEN = 18;
           var ANNOTATION_Y_SPACING = 5;
           var ANNOTATION_COLS = 8;
@@ -150,7 +150,7 @@
 
           var annotationsByWeek = _(annotations)
                 .groupBy(function(a) {
-                  return Math.floor(weeksFromStart(a.date) / weekGrouping);
+                  return Math.floor(weeksFromStart(a.date) / WEEK_GROUPING);
                 })
                 .map(function(anns, week) {
                   return {
@@ -191,7 +191,7 @@
             return weekXOffset(weeksFromStart(date));
           }
 
-          var annotationHeight = annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING;
+          var annotationHeight = ANNOTATION_LINES * ANNOTATION_TEXT_HEIGHT + ANNOTATION_Y_SPACING;
           var maxAnnotationLineLength = annotationHeight * maxOverlapHeight + 20;
 
           function annotationClass(ann, i) {
@@ -207,7 +207,7 @@
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(ann) {
-                  return translate(weekXOffset(ann.week) * weekGrouping, 0);
+                  return translate(weekXOffset(ann.week) * WEEK_GROUPING, 0);
                 });
 
           annotationSetG
@@ -265,7 +265,7 @@
               return moment(d.date).format('MMMM D, YYYY');
             })
             .attr('font-size', 10)
-            .attr('y', annotationTextHeight)
+            .attr('y', ANNOTATION_TEXT_HEIGHT)
             .attr("dy",".9em");
 
           //TODO: add mouse events
