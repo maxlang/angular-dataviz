@@ -269,6 +269,7 @@ angular.module('dataviz', ['dataviz.directives']);
             .text(function(d) {
               return truncate(d.title, MAX_TITLE_LEN); // TODO (em) truncate via styling instead of code.
             })
+            .attr('class', 'annotationTitle')
             .attr("dy",".9em");
 
           // Subtitle.

@@ -193,11 +193,9 @@ block-calendar .legend li:nth-child(2) {
 }
 block-calendar .annotation0 text {
   fill: #ff0000;
-  font-weight: bold;
 }
 block-calendar .annotation0 line {
   stroke: #ff0000;
-  stroke-width: 1;
 }
 block-calendar .annotation0 circle {
   stroke: #ff0000;
@@ -205,11 +203,9 @@ block-calendar .annotation0 circle {
 }
 block-calendar .annotation1 text {
   fill: #00bafb;
-  font-weight: bold;
 }
 block-calendar .annotation1 line {
   stroke: #00bafb;
-  stroke-width: 1;
 }
 block-calendar .annotation1 circle {
   stroke: #00bafb;
@@ -217,11 +213,9 @@ block-calendar .annotation1 circle {
 }
 block-calendar .annotation2 text {
   fill: #66b132;
-  font-weight: bold;
 }
 block-calendar .annotation2 line {
   stroke: #66b132;
-  stroke-width: 1;
 }
 block-calendar .annotation2 circle {
   stroke: #66b132;
