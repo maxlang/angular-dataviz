@@ -128,6 +128,7 @@ module
     $scope.cal1params.filter = $scope.params.dateFilter;
 
     var DAY_MS = 24 * 60 * 60 * 1000;
+    var WEEK_MS = 7 * DAY_MS;
 
     var date1 = Date.now() - (60 * DAY_MS);
     $scope.cal1params.annotations = [{
@@ -141,13 +142,23 @@ module
       subtitle: 'second subtitle',
       path: '/test/a2.html'
     }, {
-      date: date1 - (7 * DAY_MS),
+      date: date1 - WEEK_MS,
+      title: 'Third Title',
+      subtitle: 'third subtitle',
+      path: '/test/a3.html'
+    }, {
+      date: date1 - (2 * WEEK_MS),
       title: 'Third Title',
       subtitle: 'third subtitle',
       path: '/test/a3.html'
     }, {
       date: Date.now() - (120 * DAY_MS),
       title: 'testo title 2',
+      subtitle: 'testo subtitle 2',
+      path: '/test/a4.html'
+    }, {
+      date: Date.now() - (180 * DAY_MS),
+      title: 'testo title 2 really long really long really long really long',
       subtitle: 'testo subtitle 2',
       path: '/test/a4.html'
     }];
