@@ -195,16 +195,6 @@ angular.module('dataviz', ['dataviz.directives']);
             return weekXOffset(weeksFromStart(date));
           }
 
-          var maxNumAnnotationsInWeek;
-          if (_.isEmpty(annotationsByWeek)) {
-            maxNumAnnotationsInWeek = 1;
-          } else {
-            var m = _.max(annotationsByWeek, function(x) {
-              return x.annotations.length;
-            });
-            maxNumAnnotationsInWeek = m.annotations.length;
-          }
-
           var annotationHeight = annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING;
           var maxAnnotationLineLength = annotationHeight * maxOverlapHeight + 20;
 
