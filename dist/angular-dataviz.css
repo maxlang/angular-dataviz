@@ -221,7 +221,7 @@ block-calendar .annotation2 circle {
   stroke: #66b132;
   fill: #66b132;
 }
-block-calendar .annotationDate text {
+block-calendar .annotation-date text {
   fill: #bbb;
   font-weight: normal;
 }

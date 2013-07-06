@@ -211,8 +211,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(ann) {
-                  var xOffset = weekXOffset(ann.week) * weekGrouping;
-                  return translate(xOffset, 0);
+                  return translate(weekXOffset(ann.week) * weekGrouping, 0);
                 });
 
           annotationSetG
@@ -233,8 +232,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .append('g')
                 .attr('transform', function(ann) {
                   var o = overlapCount[ann.week] || 0;
-                  var yOffset = - (o - ann.annotations.length + 1) * annotationHeight;
-                  return translate(0, yOffset);
+                  return translate(0, - (o - ann.annotations.length + 1) * annotationHeight);
                 });
 
           var annotationG = annotationTextSetG
@@ -245,8 +243,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .enter()
                 .append('g')
                 .attr('transform', function(ann, i) {
-                  var vOffset = -annotationHeight * i;
-                  return translate(5, vOffset);
+                  return translate(5, -annotationHeight * i);
                 });
 
           // Title.
@@ -258,22 +255,20 @@ angular.module('dataviz', ['dataviz.directives']);
             .append('text')
             .attr('font-size', 13)
             .text(function(d) {
-              return truncate(d.title, MAX_TITLE_LEN); // TODO (em) truncate via styling instead of code.
+              // TODO (em) truncate via styling instead of code.
+              return truncate(d.title, MAX_TITLE_LEN);
             })
-            .attr('class', 'annotationTitle')
             .attr("dy",".9em");
 
           // Date.
           annotationG
             .append('g')
-            .attr('class', 'annotationDate')
+            .attr('class', 'annotation-date')
             .append("svg:text")
             .text(function(d) {
               return moment(d.date).format('MMMM D, YYYY');
             })
-            .attr('class', 'annotationDate')
             .attr('font-size', 10)
-            //.style('fill', '#bbb')
             .attr('y', annotationTextHeight)
             .attr("dy",".9em");
 
@@ -283,15 +278,9 @@ angular.module('dataviz', ['dataviz.directives']);
           //TODO: check this math (might need special case for small widths?)
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
-          var calendarG;
-          if (_.isEmpty(annotations)) {
-            calendarG = scope.svg.append("g")
-              .append('g');
-          } else {
-            calendarG = scope.svg.append("g")
-              .attr('transform', translate(0, maxAnnotationLineLength - 5))
-              .append('g');
-          }
+          var calendarG = scope.svg.append("g")
+                .attr('transform', translate(0, maxAnnotationLineLength - 5))
+                .append('g');
 
           calendarG
             .append("g")
