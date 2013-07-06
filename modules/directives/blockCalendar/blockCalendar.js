@@ -152,7 +152,10 @@
 
           var annotationsByWeek = _(annotations)
                 .filter(function(a) {
-                  return a.date > start.valueOf() && a.date < end.valueOf();
+                  var ws = weeksFromStart(a.date);
+                  var we = moment(a.date).diff(end, 'weeks');
+                  // NOTE/TODO (em) first 2 weeks after 'start' are not rendered (?)
+                  return ws >= 2 && we <= 0;
                 })
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / WEEK_GROUPING);
