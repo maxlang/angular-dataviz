@@ -113,7 +113,7 @@ angular.module('dataviz', ['dataviz.directives']);
           var yAxisPx = 23;
           var xAxisPx = 25;
           var weekGrouping = 1;
-          var N_ANNOTATIONS_SHOWN_PER_GROUP = 300;
+          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationTextHeight = 15;
           var annotationLines = 2;
           var MAX_TITLE_LEN = 10;
@@ -165,6 +165,7 @@ angular.module('dataviz', ['dataviz.directives']);
           console.log('weekCounts is', weekCounts);
 
           var overlapCount = overlapCounts(0, weeksFromStart(end), weekCounts, ANNOTATION_COLS);
+          var maxOverlapHeight = _.max(_.values(overlapCount));
 
           //TODO: feels like there should be a better way
           var dataMapping = {};
@@ -199,9 +200,9 @@ angular.module('dataviz', ['dataviz.directives']);
             maxNumAnnotationsInWeek = m.annotations.length;
           }
 
-          var EXTRA_ROWS = 5;
+          var EXTRA_ROWS = 0;
           var annotationHeight = annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING;
-          var maxAnnotationLineLength = annotationHeight * (maxNumAnnotationsInWeek + EXTRA_ROWS) + 20;
+          var maxAnnotationLineLength = annotationHeight * (maxOverlapHeight + EXTRA_ROWS) + 20;
 
           function annotationClass(ann, i) {
             return 'annotation' + (i % 3);
