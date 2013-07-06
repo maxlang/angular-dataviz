@@ -183,14 +183,6 @@
           scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
 
-          function weekXOffset(week) {
-            return week * totalCellSize;
-          }
-
-          function dateXOffset(date) {
-            return weekXOffset(weeksFromStart(date));
-          }
-
           var annotationHeight = ANNOTATION_LINES * ANNOTATION_TEXT_HEIGHT + ANNOTATION_Y_SPACING;
           var maxAnnotationLineLength = annotationHeight * maxOverlapHeight + 20;
 
@@ -207,7 +199,7 @@
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(s) {
-                  return translate(weekXOffset(s.week) * WEEK_GROUPING, 0);
+                  return translate(s.week * totalCellSize * WEEK_GROUPING, 0);
                 });
 
           annotationSetG
@@ -224,14 +216,12 @@
             .attr('r', 1)
             .attr('class', annotationClass);
 
-          var annotationTextSetG = annotationSetG
+          var annotationG = annotationSetG
                 .append('g')
                 .attr('transform', function(s) {
                   var o = overlapCount[s.week] || 0;
                   return translate(0, - (o - s.annotations.length + 1) * annotationHeight);
-                });
-
-          var annotationG = annotationTextSetG
+                })
                 .selectAll("text")
                 .data(function(d) {
                   return d.annotations;
