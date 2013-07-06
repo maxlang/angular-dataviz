@@ -112,9 +112,9 @@
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationTextHeight = 15;
           var annotationLines = 2;
-          var MAX_TITLE_LEN = 10;
+          var MAX_TITLE_LEN = 15;
           var ANNOTATION_Y_SPACING = 5;
-          var ANNOTATION_COLS = 6;
+          var ANNOTATION_COLS = 5;
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
