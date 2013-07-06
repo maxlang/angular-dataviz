@@ -112,9 +112,9 @@
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var annotationTextHeight = 15;
           var annotationLines = 2;
-          var MAX_TITLE_LEN = 15;
+          var MAX_TITLE_LEN = 18;
           var ANNOTATION_Y_SPACING = 5;
-          var ANNOTATION_COLS = 5;
+          var ANNOTATION_COLS = 8;
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
@@ -158,7 +158,6 @@
           annotationsByWeek.forEach(function(a) {
             weekCounts[a.week] = (weekCounts[a.week] || 0) + a.annotations.length;
           });
-          console.log('weekCounts is', weekCounts);
 
           var overlapCount = overlapCounts(0, weeksFromStart(end), weekCounts, ANNOTATION_COLS);
           var maxOverlapHeight = _.max(_.values(overlapCount));
@@ -319,7 +318,6 @@
               return width - 8 - 2*totalCellSize +
                 (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
             })
-            .attr("y", 0)
             .attr("fill", "black")
             .attr("dy",".9em");
 
@@ -345,7 +343,6 @@
               return moment().days(d).format("ddd");
             })
             .attr("dy",".9em")
-            .attr("x", 0)
             .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
 
 
