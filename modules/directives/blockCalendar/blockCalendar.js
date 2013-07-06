@@ -116,6 +116,8 @@
           //TODO: options
           var yAxisPx = 23;
           var xAxisPx = 25;
+
+          // Annotation settings.
           var WEEK_GROUPING = 1;
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var ANNOTATION_TEXT_HEIGHT = 15;
@@ -220,7 +222,7 @@
                 .append('g')
                 .attr('transform', function(s) {
                   var o = overlapCount[s.week] || 0;
-                  return translate(0, - (o - s.annotations.length + 1) * annotationHeight);
+                  return translate(5, - (o - s.annotations.length + 1) * annotationHeight);
                 })
                 .selectAll("text")
                 .data(function(d) {
@@ -229,7 +231,7 @@
                 .enter()
                 .append('g')
                 .attr('transform', function(ann, i) {
-                  return translate(5, -annotationHeight * i);
+                  return translate(0, -annotationHeight * i);
                 });
 
           // Title.
