@@ -236,34 +236,4 @@ block-calendar {
       font-weight: normal;
     }
   }
-
-  .annotations {
-    @spanOffset: 2px;
-
-    margin: 15px 12px 0 34px;
-//    .flexbox();
-    li {
-//      .flex(1);
-      font-size: 0.75em;
-      line-height: 1.2em;
-      font-weight: bold;
-      position: relative;
-
-      span {
-        font-size: 0.8em;
-        color: rgb(192,192,192);
-        display: block;
-        margin-top: -1*@spanOffset;
-      }
-      &.introduced {
-        color: @blue;
-        span.pointer { display: none; }
-      }
-      &.last-comm {
-        color: @blue;
-        text-align: right;
-        span.pointer { display: none; }
-      }
-    }
-  }
 }

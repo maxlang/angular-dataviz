@@ -225,34 +225,6 @@ block-calendar .annotation-date text {
   fill: #bbb;
   font-weight: normal;
 }
-block-calendar .annotations {
-  margin: 15px 12px 0 34px;
-}
-block-calendar .annotations li {
-  font-size: 0.75em;
-  line-height: 1.2em;
-  font-weight: bold;
-  position: relative;
-}
-block-calendar .annotations li span {
-  font-size: 0.8em;
-  color: #c0c0c0;
-  display: block;
-  margin-top: -2px;
-}
-block-calendar .annotations li.introduced {
-  color: #00bafb;
-}
-block-calendar .annotations li.introduced span.pointer {
-  display: none;
-}
-block-calendar .annotations li.last-comm {
-  color: #00bafb;
-  text-align: right;
-}
-block-calendar .annotations li.last-comm span.pointer {
-  display: none;
-}
 
 .selected rect {
   stroke: #000;
