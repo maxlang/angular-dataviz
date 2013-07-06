@@ -120,10 +120,10 @@
           // Annotation settings.
           var WEEK_GROUPING = 1;
           var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
-          var ANNOTATION_TEXT_HEIGHT = 15;
+          var ANNOTATION_TEXT_HEIGHT = 13;
           var ANNOTATION_LINES = 2;
           var MAX_TITLE_LEN = 18;
-          var ANNOTATION_Y_SPACING = 5;
+          var ANNOTATION_Y_SPACING = 9;
           var ANNOTATION_COLS = 8;
 
           var chartWidth = width - yAxisPx;
@@ -208,7 +208,7 @@
             .append("line")
             .attr("y1", function(s) {
               var o = overlapCount[s.week] || 0;
-              return - o * annotationHeight;
+              return - (o * annotationHeight + 10);
             })
             .attr("y2", -5)
             .attr('class', annotationClass);
@@ -245,8 +245,7 @@
             .text(function(d) {
               // TODO (em) truncate via styling instead of code.
               return truncate(d.title, MAX_TITLE_LEN);
-            })
-            .attr("dy",".9em");
+            });
 
           // Date.
           annotationG
@@ -257,8 +256,7 @@
               return moment(d.date).format('MMMM D, YYYY');
             })
             .attr('font-size', 10)
-            .attr('y', ANNOTATION_TEXT_HEIGHT)
-            .attr("dy",".9em");
+            .attr('y', ANNOTATION_TEXT_HEIGHT);
 
           //TODO: add mouse events
 
