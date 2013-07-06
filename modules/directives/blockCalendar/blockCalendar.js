@@ -4,6 +4,14 @@
   //TODO: add prefixes to directives
   //TODO: fix references to flexbox in css
 
+  function truncate(str, n) {
+    return str.length < n ? str : (str.substr(0, n) + '...');
+  }
+
+  function isNullOrUndefined(x) {
+    return _.isNull(x) || _.isUndefined(x);
+  }
+
   function overlapCounts(start, end, weekCounts, cols) {
     var h = {};
     var k = {};
@@ -52,10 +60,6 @@
 //   }
 
   angular.module('dataviz.directives').directive('blockCalendar', [function() {
-    function isNullOrUndefined(x) {
-      return _.isNull(x) || _.isUndefined(x);
-    }
-
     return {
       restrict: 'E',
       scope: {
@@ -140,7 +144,6 @@
             return moment(date).diff(start, 'weeks');
           }
 
-
           var annotationsByWeek = _(annotations)
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / weekGrouping);
@@ -152,7 +155,6 @@
                   };
                 })
                 .value();
-
 
           var weekCounts = {};
           annotationsByWeek.forEach(function(a) {
@@ -195,9 +197,8 @@
             maxNumAnnotationsInWeek = m.annotations.length;
           }
 
-          var EXTRA_ROWS = 0;
           var annotationHeight = annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING;
-          var maxAnnotationLineLength = annotationHeight * (maxOverlapHeight + EXTRA_ROWS) + 20;
+          var maxAnnotationLineLength = annotationHeight * maxOverlapHeight + 20;
 
           function annotationClass(ann, i) {
             return 'annotation' + (i % 3);
@@ -250,10 +251,6 @@
                   return 'translate(5, ' + vOffset + ')';
                 });
 
-          function truncate(str, n) {
-            return str.length < n ? str : (str.substr(0, n) + '...');
-          }
-
           // Title.
           annotationG
             .append("svg:a")
@@ -267,15 +264,6 @@
             })
             .attr('class', 'annotationTitle')
             .attr("dy",".9em");
-
-          // Subtitle.
-//           annotationG
-//             .append("svg:text")
-//             .text(function(d) {
-//               return d.subtitle;
-//             })
-//             .attr('y', annotationTextHeight)
-//             .attr("dy",".9em");
 
           // Date.
           annotationG
@@ -298,7 +286,7 @@
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
           var calendarG;
-          if (_.isEmpty(scope.params.annotations)) {
+          if (_.isEmpty(annotations)) {
             calendarG = scope.svg.append("g")
               .append('g');
           } else {
