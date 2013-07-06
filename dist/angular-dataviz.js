@@ -8,6 +8,53 @@ angular.module('dataviz', ['dataviz.directives']);
   //TODO: add prefixes to directives
   //TODO: fix references to flexbox in css
 
+  function overlapCounts(start, end, weekCounts, cols) {
+    var h = {};
+    var k = {};
+
+    function wc(x) {
+      return weekCounts[x] || 0;
+    }
+
+    for (var i = end; i > start; --i) {
+      h[i] = (k[i] || 0) + wc(i);
+      //console.log('i', i, 'k[i]', k[i], 'wc(i)', wc(i), 'h[i]', h[i]);
+
+      if (wc(i) > 0) {
+        for (var j = i - 1; j > i - cols; --j) {
+          k[j] = h[i];
+        }
+      }
+    }
+
+    return h;
+  }
+
+//   function overlapCountsFwd(start, end, weekCounts) {
+//     var N = 3;
+//     var h = {};
+//     var k = {};
+
+//     function wc(x) {
+//       return weekCounts[x] || 0;
+//     }
+
+//     k[start] = 0;
+//     _.range(start, end).forEach(function(i) {
+//       h[i] = (k[i] || 0) + wc(i);
+//       console.log('i', i, 'k[i]', k[i], 'wc(i)', wc(i), 'h[i]', h[i]);
+
+//       if (wc(i) > 0) {
+//       _.range(i + 1, i + N).forEach(function(j) {
+//         //k[j] = (k[j] || 0) + wc(i);
+//         k[j] = h[i]; //+ wc(i);
+//       });
+//       }
+//     });
+
+//     return h;
+//   }
+
   angular.module('dataviz.directives').directive('blockCalendar', [function() {
     function isNullOrUndefined(x) {
       return _.isNull(x) || _.isUndefined(x);
@@ -65,11 +112,13 @@ angular.module('dataviz', ['dataviz.directives']);
           //TODO: options
           var yAxisPx = 23;
           var xAxisPx = 25;
-          var weekGrouping = 2;
-          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
+          var weekGrouping = 1;
+          var N_ANNOTATIONS_SHOWN_PER_GROUP = 300;
           var annotationTextHeight = 15;
-          var annotationLines = 3;
+          var annotationLines = 2;
           var MAX_TITLE_LEN = 10;
+          var ANNOTATION_Y_SPACING = 5;
+          var ANNOTATION_COLS = 6;
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
@@ -79,6 +128,8 @@ angular.module('dataviz', ['dataviz.directives']);
           var totalCellSize = size + border;
 
           var columns = Math.floor(chartWidth/(totalCellSize));
+
+          var annotations = scope.params.annotations || [];
 
           // current week counts as an extra column
           var start = moment().subtract('weeks',columns - 1).startOf('week');
@@ -94,7 +145,7 @@ angular.module('dataviz', ['dataviz.directives']);
           }
 
 
-          var annotationsByWeek = _(scope.params.annotations || [])
+          var annotationsByWeek = _(annotations)
                 .groupBy(function(a) {
                   return Math.floor(weeksFromStart(a.date) / weekGrouping);
                 })
@@ -105,6 +156,15 @@ angular.module('dataviz', ['dataviz.directives']);
                   };
                 })
                 .value();
+
+
+          var weekCounts = {};
+          annotationsByWeek.forEach(function(a) {
+            weekCounts[a.week] = (weekCounts[a.week] || 0) + a.annotations.length;
+          });
+          console.log('weekCounts is', weekCounts);
+
+          var overlapCount = overlapCounts(0, weeksFromStart(end), weekCounts, ANNOTATION_COLS);
 
           //TODO: feels like there should be a better way
           var dataMapping = {};
@@ -138,8 +198,10 @@ angular.module('dataviz', ['dataviz.directives']);
             });
             maxNumAnnotationsInWeek = m.annotations.length;
           }
-          var annotationLineLength =
-                annotationLines * annotationTextHeight * maxNumAnnotationsInWeek + 20;
+
+          var EXTRA_ROWS = 5;
+          var annotationHeight = annotationLines * annotationTextHeight + ANNOTATION_Y_SPACING;
+          var maxAnnotationLineLength = annotationHeight * (maxNumAnnotationsInWeek + EXTRA_ROWS) + 20;
 
           function annotationClass(ann, i) {
             return 'annotation' + (i % 3);
@@ -147,36 +209,40 @@ angular.module('dataviz', ['dataviz.directives']);
 
           var annotationSetG = scope.svg
                 .append("g")
+                .attr('transform', 'translate(0, ' + maxAnnotationLineLength + ')')
                 .selectAll("text")
                 .data(annotationsByWeek)
                 .enter()
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(ann) {
-                  return 'translate(' + (weekXOffset(ann.week) * weekGrouping) + ', 0)';
+                  var xOffset = weekXOffset(ann.week) * weekGrouping;
+                  return 'translate(' + xOffset + ', 0)';
                 });
 
           annotationSetG
             .append("line")
-            .attr("y1", annotationTextHeight / 2)
-            .attr("y2", annotationLineLength)
+            .attr("y1", function(d) {
+              var o = overlapCount[d.week] || 0;
+              return - o * annotationHeight;
+            })
+            .attr("y2", -5)
             .attr('class', annotationClass);
 
           annotationSetG
             .append('circle')
-            .attr('cy', annotationLineLength + 4)
             .attr('r', 1)
             .attr('class', annotationClass);
 
-//           annotationSetG
-//             .append("line")
-//             .attr("y1", annotationLineLength)
-//             .attr("y2", annotationLineLength)
-//             .attr("x1", -2)
-//             .attr("x2", size * weekGrouping - 5)
-//             .attr("stroke", "black");
+          var annotationTextSetG = annotationSetG
+                .append('g')
+                .attr('transform', function(ann) {
+                  var o = overlapCount[ann.week] || 0;
+                  var yOffset = - (o - ann.annotations.length + 1) * annotationHeight;
+                  return 'translate(0, ' + yOffset + ')';
+                });
 
-          var annotationG = annotationSetG
+          var annotationG = annotationTextSetG
                 .selectAll("text")
                 .data(function(d) {
                   return d.annotations;
@@ -184,7 +250,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .enter()
                 .append('g')
                 .attr('transform', function(ann, i) {
-                  var vOffset = i * annotationTextHeight * annotationLines;
+                  var vOffset = -annotationHeight * i;
                   return 'translate(5, ' + vOffset + ')';
                 });
 
@@ -240,7 +306,7 @@ angular.module('dataviz', ['dataviz.directives']);
               .append('g');
           } else {
             calendarG = scope.svg.append("g")
-              .attr('transform', 'translate(0, ' + (annotationLineLength - 5) + ')')
+              .attr('transform', 'translate(0, ' + (maxAnnotationLineLength - 5) + ')')
               .append('g');
           }
 
