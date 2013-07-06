@@ -16,6 +16,10 @@ angular.module('dataviz', ['dataviz.directives']);
     return _.isNull(x) || _.isUndefined(x);
   }
 
+  function translate(x, y) {
+    return 'translate(' + x + ', ' + y + ')';
+  }
+
   function overlapCounts(start, end, weekCounts, cols) {
     var h = {};
     var k = {};
@@ -210,7 +214,7 @@ angular.module('dataviz', ['dataviz.directives']);
 
           var annotationSetG = scope.svg
                 .append("g")
-                .attr('transform', 'translate(0, ' + maxAnnotationLineLength + ')')
+                .attr('transform', translate(0, maxAnnotationLineLength))
                 .selectAll("text")
                 .data(annotationsByWeek)
                 .enter()
@@ -218,7 +222,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .attr('class', annotationClass)
                 .attr('transform', function(ann) {
                   var xOffset = weekXOffset(ann.week) * weekGrouping;
-                  return 'translate(' + xOffset + ', 0)';
+                  return translate(xOffset, 0);
                 });
 
           annotationSetG
@@ -240,7 +244,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .attr('transform', function(ann) {
                   var o = overlapCount[ann.week] || 0;
                   var yOffset = - (o - ann.annotations.length + 1) * annotationHeight;
-                  return 'translate(0, ' + yOffset + ')';
+                  return translate(0, yOffset);
                 });
 
           var annotationG = annotationTextSetG
@@ -252,7 +256,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .append('g')
                 .attr('transform', function(ann, i) {
                   var vOffset = -annotationHeight * i;
-                  return 'translate(5, ' + vOffset + ')';
+                  return translate(5, vOffset);
                 });
 
           // Title.
@@ -295,7 +299,7 @@ angular.module('dataviz', ['dataviz.directives']);
               .append('g');
           } else {
             calendarG = scope.svg.append("g")
-              .attr('transform', 'translate(0, ' + (maxAnnotationLineLength - 5) + ')')
+              .attr('transform', translate(0, maxAnnotationLineLength - 5))
               .append('g');
           }
 
@@ -341,7 +345,7 @@ angular.module('dataviz', ['dataviz.directives']);
 
           // actual chart
           scope.chart = calendarG.append("g")
-            .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
+            .attr("transform", translate(yAxisPx, xAxisPx));
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
