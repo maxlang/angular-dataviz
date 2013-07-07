@@ -78,7 +78,8 @@
           cellSizePx: 13,
           cellBorderPx: 2,
           widthPx: 586, //TODO:
-          heightPx: 106
+          heightPx: 106,
+          endTime: Date.now()
         };
 
         //TODO: better way to handle options, esp option merging
@@ -135,12 +136,14 @@
 
           var columns = Math.floor(chartWidth/(totalCellSize));
 
+          var endTime = getOption('endTime');
+
           var annotations = scope.params.annotations || [];
 
           // current week counts as an extra column
-          var start = moment().subtract('weeks',columns - 1).startOf('week');
+          var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
-          var end = moment().startOf('day');
+          var end = moment(endTime).startOf('day');
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
@@ -308,7 +311,7 @@
           calendarG.append("g").attr("height", "100%").attr("class", "y axis")
             .selectAll("text").data(_.range(7)).enter().append("text")
             .text(function(d) {
-              return moment().days(d).format("ddd");
+              return moment(endTime).days(d).format("ddd");
             })
             .attr("dy",".9em")
             .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
