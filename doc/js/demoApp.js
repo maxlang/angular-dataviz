@@ -122,6 +122,7 @@ module
 
     $scope.cal1params.options = {};
     $scope.cal1params.options.widthPx = 586;
+    $scope.cal1params.options.endTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
 
     $scope.params.dateFilter = [];
 

@@ -23,7 +23,8 @@
           cellSizePx: 13,
           cellBorderPx: 2,
           widthPx: 586, //TODO:
-          heightPx: 106
+          heightPx: 106,
+          endTime: Date.now()
         };
 
         //TODO: better way to handle options, esp option merging
@@ -71,9 +72,9 @@
 
           var columns = Math.floor(chartWidth/(totalCellSize));
 
-          // current week counts as an extra column
-          var endTime = Date.now();
+          var endTime = getOption('endTime');
 
+          // current week counts as an extra column
           var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
           var end = moment(endTime).startOf('day');
