@@ -236,7 +236,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 })
                 .selectAll("text")
                 .data(function(d) {
-                  return d.annotations;
+                  return d.annotations.reverse();
                 })
                 .enter()
                 .append('g')
