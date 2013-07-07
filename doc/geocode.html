@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="geocodeApp" id="top">
+<head>
+  <title>Angular Dataviz for AngularJS</title>
+
+  <meta charset="utf-8"> <!-- for d3 -->
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="../components/angular-unstable/angular.js"></script>
+  <script src="../components/moment/moment.js"></script>
+  <script src="../components/lodash/dist/lodash.js"></script>
+  <script src="../components/angular-ui-utils/modules/event/event.js"></script>
+
+  <script src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+  <script src="../components/angular-ui-map/src/map.js"></script>
+  <script src="../dist/angular-dataviz.js"></script>
+
+  <script src="js/geocodeApp.js"></script>
+
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../dist/angular-dataviz.css">
+  <link rel="stylesheet" href="../components/google-code-prettify/src/prettify.css">
+  <link rel="stylesheet" href="css/doc.css">
+  <link rel="stylesheet" href="css/demoApp.css">
+</head>
+<body ng-controller="mainCtrl">
+Input json (array of maps):
+<textarea ng-model="inputJson"></textarea>
+<button type="button" ng-click="addLocations()">Submit</button>
+maps with location added:
+<textarea ng-bind="outputJson|json"></textarea>
+</body>
+</html>

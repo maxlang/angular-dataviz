@@ -1,0 +1,2236 @@
+[
+  {
+    "code": "00000",
+    "name": "UNABLE TO GEOCODE THE LOCATION"
+  },
+  {
+    "code": "10180",
+    "name": "Abilene, TX",
+    "lat": 32.4487364,
+    "lng": -99.73314390000002
+  },
+  {
+    "code":"10380",
+    "name":"Aguadilla-Isabela-San Sebastian, PR",
+    "lat": 18.3475548,
+    "lng": -67.04645909999999
+  },
+  {
+    "code":"10420",
+    "name":"Akron, OH",
+    "lat": 41.0814447,
+    "lng": -81.5190053
+  },
+  {
+    "code":"10500",
+    "name":"Albany, GA",
+    "lat": 31.5785074,
+    "lng": -84.15574099999998
+  },
+  {
+    "code":"10580",
+    "name":"Albany-Schenectady-Troy, NY",
+    "lat": 42.5989687,
+    "lng": -74.70952969999996
+  },
+  {
+    "code":"10740",
+    "name":"Albuquerque, NM",
+    "lat": 35.110703,
+    "lng": -106.60999099999998
+  },
+  {
+    "code":"10780",
+    "name":"Alexandria, LA",
+    "lat": 31.3112936,
+    "lng": -92.44513710000001
+  },
+  {
+    "code":"10900",
+    "name":"Allentown-Bethlehem-Easton, PA-NJ",
+    "lat": 40.6449892,
+    "lng": -75.36453689999996
+  },
+  {
+    "code":"11020",
+    "name":"Altoona, PA",
+    "lat": 40.5186809,
+    "lng": -78.3947359
+  },
+  {
+    "code":"11100",
+    "name":"Amarillo, TX",
+    "lat": 35.2219971,
+    "lng": -101.83129689999998
+  },
+  {
+    "code":"11180",
+    "name":"Ames, IA",
+    "lat": 42.02335,
+    "lng": -93.62562200000002
+  },
+  {
+    "code":"11260",
+    "name":"Anchorage, AK",
+    "lat": 61.2180556,
+    "lng": -149.90027780000003
+  },
+  {
+    "code":"11300",
+    "name":"Anderson, IN",
+    "lat": 40.1053196,
+    "lng": -85.68025410000001
+  },
+  {
+    "code":"11340",
+    "name":"Anderson, SC",
+    "lat": 34.5034394,
+    "lng": -82.65013320000003
+  },
+  {
+    "code":"11460",
+    "name":"Ann Arbor, MI",
+    "lat": 42.2808256,
+    "lng": -83.74303780000002
+  },
+  {
+    "code":"11500",
+    "name":"Anniston-Oxford, AL",
+    "lat": 33.6148124,
+    "lng": -85.78574930000002
+  },
+  {
+    "code":"11540",
+    "name":"Appleton, WI",
+    "lat": 44.2619309,
+    "lng": -88.4153847
+  },
+  {
+    "code":"11700",
+    "name":"Asheville, NC",
+    "lat": 35.5950581,
+    "lng": -82.55148689999999
+  },
+  {
+    "code":"12020",
+    "name":"Athens-Clarke County, GA",
+    "lat": 33.95,
+    "lng": -83.3833333
+  },
+  {
+    "code":"12060",
+    "name":"Atlanta-Sandy Springs-Marietta, GA",
+    "lat": 33.9021267,
+    "lng": -84.44117260000002
+  },
+  {
+    "code":"12100",
+    "name":"Atlantic City, NJ",
+    "lat": 39.3642834,
+    "lng": -74.42292659999998
+  },
+  {
+    "code":"12220",
+    "name":"Auburn-Opelika, AL",
+    "lat": 32.6186603,
+    "lng": -85.46082369999999
+  },
+  {
+    "code":"12260",
+    "name":"Augusta-Richmond County, GA-SC",
+    "lat": 33.4734978,
+    "lng": -82.01051480000001
+  },
+  {
+    "code":"12420",
+    "name":"Austin-Round Rock, TX",
+    "lat": 30.4835707,
+    "lng": -97.73677800000002
+  },
+  {
+    "code":"12540",
+    "name":"Bakersfield, CA",
+    "lat": 35.3732921,
+    "lng": -119.01871249999999
+  },
+  {
+    "code":"12580",
+    "name":"Baltimore-Towson, MD",
+    "lat": 39.4014955,
+    "lng": -76.60191250000003
+  },
+  {
+    "code":"12620",
+    "name":"Bangor, ME",
+    "lat": 44.80118210000001,
+    "lng": -68.77781379999999
+  },
+  {
+    "code":"12700",
+    "name":"Barnstable Town, MA",
+    "lat": 41.7,
+    "lng": -70.30000000000001
+  },
+  {
+    "code":"12940",
+    "name":"Baton Rouge, LA",
+    "lat": 30.4582829,
+    "lng": -91.1403196
+  },
+  {
+    "code":"12980",
+    "name":"Battle Creek, MI",
+    "lat": 42.3211522,
+    "lng": -85.17971419999998
+  },
+  {
+    "code":"13020",
+    "name":"Bay City, MI",
+    "lat": 43.5944677,
+    "lng": -83.8888647
+  },
+  {
+    "code":"13140",
+    "name":"Beaumont-Port Arthur, TX",
+    "lat": 29.9851829,
+    "lng": -94.06133599999998
+  },
+  {
+    "code":"13380",
+    "name":"Bellingham, WA",
+    "lat": 48.7595529,
+    "lng": -122.48822489999998
+  },
+  {
+    "code":"13460",
+    "name":"Bend, OR",
+    "lat": 44.0581728,
+    "lng": -121.31530959999998
+  },
+  {
+    "code":"13740",
+    "name":"Billings, MT",
+    "lat": 45.7832856,
+    "lng": -108.5006904
+  },
+  {
+    "code":"13780",
+    "name":"Binghamton, NY",
+    "lat": 42.09868669999999,
+    "lng": -75.91797380000003
+  },
+  {
+    "code":"13820",
+    "name":"Birmingham-Hoover, AL",
+    "lat": 33.3780274,
+    "lng": -86.8039488
+  },
+  {
+    "code":"13900",
+    "name":"Bismarck, ND",
+    "lat": 46.8083268,
+    "lng": -100.78373920000001
+  },
+  {
+    "code":"13980",
+    "name":"Blacksburg-Christiansburg-Radford, VA",
+    "lat": 37.1704999,
+    "lng": -80.51890000000003
+  },
+  {
+    "code":"14020",
+    "name":"Bloomington, IN",
+    "lat": 39.165325,
+    "lng": -86.52638569999999
+  },
+  {
+    "code":"14060",
+    "name":"Bloomington-Normal, IL",
+    "lat": 40.4842027,
+    "lng": -88.99368729999998
+  },
+  {
+    "code":"14260",
+    "name":"Boise City-Nampa, ID",
+    "lat": 43.5909991,
+    "lng": -116.27678550000002
+  },
+  {
+    "code":"14460",
+    "name":"Boston-Cambridge-Quincy, MA-NH",
+    "lat": 43.1938516,
+    "lng": -71.57239529999998
+  },
+  {
+    "code":"14500",
+    "name":"Boulder, CO",
+    "lat": 40.0149856,
+    "lng": -105.27054559999999
+  },
+  {
+    "code":"14540",
+    "name":"Bowling Green, KY",
+    "lat": 36.9903199,
+    "lng": -86.44360180000001
+  },
+  {
+    "code":"14740",
+    "name":"Bremerton-Silverdale, WA",
+    "lat": 47.57155059999999,
+    "lng": -122.63882409999997
+  },
+  {
+    "code":"14860",
+    "name":"Bridgeport-Stamford-Norwalk, CT",
+    "lat": 41.1175966,
+    "lng": -73.4078968
+  },
+  {
+    "code":"14980",
+    "name":"Bristol, VA",
+    "lat": 36.595141,
+    "lng": -82.18880890000003
+  },
+  {
+    "code":"15180",
+    "name":"Brownsville-Harlingen, TX",
+    "lat": 25.9728461,
+    "lng": -97.51230670000001
+  },
+  {
+    "code":"15260",
+    "name":"Brunswick, GA",
+    "lat": 31.1499528,
+    "lng": -81.49148939999998
+  },
+  {
+    "code":"15380",
+    "name":"Buffalo-Niagara Falls, NY",
+    "lat": 43.0013801,
+    "lng": -78.82238059999997
+  },
+  {
+    "code":"15500",
+    "name":"Burlington, NC",
+    "lat": 36.0956918,
+    "lng": -79.4377991
+  },
+  {
+    "code":"15540",
+    "name":"Burlington-South Burlington, VT",
+    "lat": 44.477208,
+    "lng": -73.216204
+  },
+  {
+    "code":"15940",
+    "name":"Canton-Massillon, OH",
+    "lat": 40.9150088,
+    "lng": -81.43688639999999
+  },
+  {
+    "code":"15980",
+    "name":"Cape Coral-Fort Myers, FL",
+    "lat": 26.6630286,
+    "lng": -81.95348150000001
+  },
+  {
+    "code":"16180",
+    "name":"Carson City, NV",
+    "lat": 39.1637984,
+    "lng": -119.76740340000003
+  },
+  {
+    "code":"16220",
+    "name":"Casper, WY",
+    "lat": 42.866632,
+    "lng": -106.31308100000001
+  },
+  {
+    "code":"16300",
+    "name":"Cedar Rapids, IA",
+    "lat": 41.9778795,
+    "lng": -91.66562320000003
+  },
+  {
+    "code":"16580",
+    "name":"Champaign-Urbana, IL",
+    "lat": 40.1105875,
+    "lng": -88.20726969999998
+  },
+  {
+    "code":"16620",
+    "name":"Charleston, WV",
+    "lat": 38.3498195,
+    "lng": -81.6326234
+  },
+  {
+    "code":"16700",
+    "name":"Charleston-North Charleston, SC",
+    "lat": 32.8546197,
+    "lng": -79.9748103
+  },
+  {
+    "code":"16740",
+    "name":"Charlotte-Gastonia-Concord, NC-SC",
+    "lat": 33.836081,
+    "lng": -81.1637245
+  },
+  {
+    "code":"16820",
+    "name":"Charlottesville, VA",
+    "lat": 38.0293059,
+    "lng": -78.47667810000002
+  },
+  {
+    "code":"16860",
+    "name":"Chattanooga, TN-GA",
+    "lat": 35.0382215,
+    "lng": -85.35496499999999
+  },
+  {
+    "code":"16940",
+    "name":"Cheyenne, WY",
+    "lat": 41.1399814,
+    "lng": -104.82024619999999
+  },
+  {
+    "code":"16980",
+    "name":"Chicago-Naperville-Joliet, IL-IN-WI",
+    "lat": 42.1097729,
+    "lng": -88.03089490000002
+  },
+  {
+    "code":"17020",
+    "name":"Chico, CA",
+    "lat": 39.7284944,
+    "lng": -121.83747770000002
+  },
+  {
+    "code":"17140",
+    "name":"Cincinnati-Middletown, OH-KY-IN",
+    "lat": 39.4241422,
+    "lng": -84.18571150000002
+  },
+  {
+    "code":"17300",
+    "name":"Clarksville, TN-KY",
+    "lat": 36.7597612,
+    "lng": -87.69755399999997
+  },
+  {
+    "code":"17420",
+    "name":"Cleveland, TN",
+    "lat": 35.1595182,
+    "lng": -84.87661149999997
+  },
+  {
+    "code":"17460",
+    "name":"Cleveland-Elyria-Mentor, OH",
+    "lat": 41.6661573,
+    "lng": -81.33955200000003
+  },
+  {
+    "code":"17660",
+    "name":"Coeur d'Alene, ID",
+    "lat": 47.6776832,
+    "lng": -116.78046640000002
+  },
+  {
+    "code":"17780",
+    "name":"College Station-Bryan, TX",
+    "lat": 30.569577,
+    "lng": -96.30829799999998
+  },
+  {
+    "code":"17820",
+    "name":"Colorado Springs, CO",
+    "lat": 38.8338816,
+    "lng": -104.8213634
+  },
+  {
+    "code":"17860",
+    "name":"Columbia, MO",
+    "lat": 38.9517053,
+    "lng": -92.33407239999997
+  },
+  {
+    "code":"17900",
+    "name":"Columbia, SC",
+    "lat": 34.0007104,
+    "lng": -81.03481440000002
+  },
+  {
+    "code":"17980",
+    "name":"Columbus, GA-AL",
+    "lat": 32.5228697,
+    "lng": -84.85679319999997
+  },
+  {
+    "code":"18020",
+    "name":"Columbus, IN",
+    "lat": 39.2014404,
+    "lng": -85.92137960000002
+  },
+  {
+    "code":"18140",
+    "name":"Columbus, OH",
+    "lat": 39.9611755,
+    "lng": -82.99879420000002
+  },
+  {
+    "code":"18580",
+    "name":"Corpus Christi, TX",
+    "lat": 27.8005828,
+    "lng": -97.39638100000002
+  },
+  {
+    "code":"18700",
+    "name":"Corvallis, OR",
+    "lat": 44.5645659,
+    "lng": -123.2620435
+  },
+  {
+    "code":"19060",
+    "name":"Cumberland, MD-WV",
+    "lat": 39.5617065,
+    "lng": -78.79295300000001
+  },
+  {
+    "code":"19100",
+    "name":"Dallas-Fort Worth-Arlington, TX",
+    "lat": 32.7717158,
+    "lng": -96.98534740000002
+  },
+  {
+    "code":"19140",
+    "name":"Dalton, GA",
+    "lat": 34.7698021,
+    "lng": -84.97022279999999
+  },
+  {
+    "code":"19180",
+    "name":"Danville, IL",
+    "lat": 40.124481,
+    "lng": -87.63002069999999
+  },
+  {
+    "code":"19260",
+    "name":"Danville, VA",
+    "lat": 36.5859718,
+    "lng": -79.39502279999999
+  },
+  {
+    "code":"19340",
+    "name":"Davenport-Moline-Rock Island, IA-IL",
+    "lat": 41.4934467,
+    "lng": -90.5382133
+  },
+  {
+    "code":"19380",
+    "name":"Dayton, OH",
+    "lat": 39.7589478,
+    "lng": -84.19160690000001
+  },
+  {
+    "code":"19460",
+    "name":"Decatur, AL",
+    "lat": 34.6059253,
+    "lng": -86.98334169999998
+  },
+  {
+    "code":"19500",
+    "name":"Decatur, IL",
+    "lat": 39.8403147,
+    "lng": -88.9548001
+  },
+  {
+    "code":"19660",
+    "name":"Deltona-Daytona Beach-Ormond Beach, FL",
+    "lat": 29.2858129,
+    "lng": -81.05588940000001
+  },
+  {
+    "code":"19740",
+    "name":"Denver-Aurora, CO",
+    "lat": 39.7294319,
+    "lng": -104.83191950000003
+  },
+  {
+    "code":"19780",
+    "name":"Des Moines-West Des Moines, IA",
+    "lat": 41.6944501,
+    "lng": -93.90626880000002
+  },
+  {
+    "code":"19820",
+    "name":"Detroit-Warren-Livonia, MI",
+    "lat": 42.3414204,
+    "lng": -83.27357789999996
+  },
+  {
+    "code":"20020",
+    "name":"Dothan, AL",
+    "lat": 31.2232313,
+    "lng": -85.39048880000001
+  },
+  {
+    "code":"20100",
+    "name":"Dover, DE",
+    "lat": 39.158168,
+    "lng": -75.52436820000003
+  },
+  {
+    "code":"20220",
+    "name":"Dubuque, IA",
+    "lat": 42.5005583,
+    "lng": -90.66457179999998
+  },
+  {
+    "code":"20260",
+    "name":"Duluth, MN-WI",
+    "lat": 47.7395106,
+    "lng": -92.36239209999997
+  },
+  {
+    "code":"20500",
+    "name":"Durham, NC",
+    "lat": 35.9940329,
+    "lng": -78.898619
+  },
+  {
+    "code":"20740",
+    "name":"Eau Claire, WI",
+    "lat": 44.811349,
+    "lng": -91.49849410000002
+  },
+  {
+    "code":"20940",
+    "name":"El Centro, CA",
+    "lat": 32.792,
+    "lng": -115.5630514
+  },
+  {
+    "code":"21060",
+    "name":"Elizabethtown, KY",
+    "lat": 37.7030646,
+    "lng": -85.8649408
+  },
+  {
+    "code":"21140",
+    "name":"Elkhart-Goshen, IN",
+    "lat": 41.5822716,
+    "lng": -85.83443829999999
+  },
+  {
+    "code":"21300",
+    "name":"Elmira, NY",
+    "lat": 42.0897965,
+    "lng": -76.8077338
+  },
+  {
+    "code":"21340",
+    "name":"El Paso, TX",
+    "lat": 31.7587198,
+    "lng": -106.4869314
+  },
+  {
+    "code":"21500",
+    "name":"Erie, PA",
+    "lat": 42.12922409999999,
+    "lng": -80.085059
+  },
+  {
+    "code":"21660",
+    "name":"Eugene-Springfield, OR",
+    "lat": 43.9610092,
+    "lng": -122.66182270000002
+  },
+  {
+    "code":"21780",
+    "name":"Evansville, IN-KY",
+    "lat": 38.039119,
+    "lng": -87.61863790000001
+  },
+  {
+    "code":"21820",
+    "name":"Fairbanks, AK",
+    "lat": 64.8377778,
+    "lng": -147.71638889999997
+  },
+  {
+    "code":"21940",
+    "name":"Fajardo, PR",
+    "lat": 18.3257366,
+    "lng": -65.65237300000001
+  },
+  {
+    "code":"22020",
+    "name":"Fargo, ND-MN",
+    "lat": 47.071168,
+    "lng": -97.12155790000003
+  },
+  {
+    "code":"22140",
+    "name":"Farmington, NM",
+    "lat": 36.72805830000001,
+    "lng": -108.21868560000001
+  },
+  {
+    "code":"22180",
+    "name":"Fayetteville, NC",
+    "lat": 35.0526641,
+    "lng": -78.87835849999999
+  },
+  {
+    "code":"22220",
+    "name":"Fayetteville-Springdale-Rogers, AR-MO",
+    "lat": 36.1703497,
+    "lng": -94.13090669999997
+  },
+  {
+    "code":"22380",
+    "name":"Flagstaff, AZ",
+    "lat": 35.2013516,
+    "lng": -111.639249
+  },
+  {
+    "code":"22420",
+    "name":"Flint, MI",
+    "lat": 43.0125274,
+    "lng": -83.68745619999999
+  },
+  {
+    "code":"22460",
+    "name":"Florence, AL",
+    "lat": 34.79981,
+    "lng": -87.67725100000001
+  },
+  {
+    "code":"22500",
+    "name":"Florence, SC",
+    "lat": 34.1954331,
+    "lng": -79.7625625
+  },
+  {
+    "code":"22520",
+    "name":"Florence-Muscle Shoals, AL",
+    "lat": 34.8148561,
+    "lng": -87.6426644
+  },
+  {
+    "code":"22540",
+    "name":"Fond du Lac, WI",
+    "lat": 43.7730448,
+    "lng": -88.4470508
+  },
+  {
+    "code":"22660",
+    "name":"Fort Collins-Loveland, CO",
+    "lat": 40.447631,
+    "lng": -105.01088700000003
+  },
+  {
+    "code":"22900",
+    "name":"Fort Smith, AR-OK",
+    "lat": 35.3046944,
+    "lng": -94.5624426
+  },
+  {
+    "code":"23020",
+    "name":"Fort Walton Beach-Crestview-Destin, FL",
+    "lat": 30.0334303,
+    "lng": -85.54282839999996
+  },
+  {
+    "code":"23060",
+    "name":"Fort Wayne, IN",
+    "lat": 41.079273,
+    "lng": -85.13935129999999
+  },
+  {
+    "code":"23420",
+    "name":"Fresno, CA",
+    "lat": 36.7468422,
+    "lng": -119.7725868
+  },
+  {
+    "code":"23460",
+    "name":"Gadsden, AL",
+    "lat": 34.014264,
+    "lng": -86.00663859999997
+  },
+  {
+    "code":"23540",
+    "name":"Gainesville, FL",
+    "lat": 29.6516344,
+    "lng": -82.32482619999996
+  },
+  {
+    "code":"23580",
+    "name":"Gainesville, GA",
+    "lat": 34.2978794,
+    "lng": -83.82406630000003
+  },
+  {
+    "code":"24020",
+    "name":"Glens Falls, NY",
+    "lat": 43.3095164,
+    "lng": -73.6440058
+  },
+  {
+    "code":"24140",
+    "name":"Goldsboro, NC",
+    "lat": 35.3848841,
+    "lng": -77.99276509999999
+  },
+  {
+    "code":"24220",
+    "name":"Grand Forks, ND-MN",
+    "lat": 48.0037819,
+    "lng": -97.35945249999997
+  },
+  {
+    "code":"24300",
+    "name":"Grand Junction, CO",
+    "lat": 39.0638705,
+    "lng": -108.55064859999999
+  },
+  {
+    "code":"24340",
+    "name":"Grand Rapids-Wyoming, MI",
+    "lat": 42.882761,
+    "lng": -85.71832599999999
+  },
+  {
+    "code":"24500",
+    "name":"Great Falls, MT",
+    "lat": 47.50806,
+    "lng": -111.29519700000003
+  },
+  {
+    "code":"24540",
+    "name":"Greeley, CO",
+    "lat": 40.4233142,
+    "lng": -104.7091322
+  },
+  {
+    "code":"24580",
+    "name":"Green Bay, WI",
+    "lat": 44.51915899999999,
+    "lng": -88.01982599999997
+  },
+  {
+    "code":"24660",
+    "name":"Greensboro-High Point, NC",
+    "lat": 36.0726354,
+    "lng": -79.79197540000001
+  },
+  {
+    "code":"24780",
+    "name":"Greenville, NC",
+    "lat": 35.612661,
+    "lng": -77.36635380000001
+  },
+  {
+    "code":"24860",
+    "name":"Greenville, SC",
+    "lat": 34.85261759999999,
+    "lng": -82.39401040000001
+  },
+  {
+    "code":"25020",
+    "name":"Guayama, PR",
+    "lat": 17.9837136,
+    "lng": -66.11773140000003
+  },
+  {
+    "code":"25060",
+    "name":"Gulfport-Biloxi, MS",
+    "lat": 30.41338,
+    "lng": -89.07295799999997
+  },
+  {
+    "code":"25180",
+    "name":"Hagerstown-Martinsburg, MD-WV",
+    "lat": 38.5976262,
+    "lng": -80.45490259999997
+  },
+  {
+    "code":"25260",
+    "name":"Hanford-Corcoran, CA",
+    "lat": 36.3274502,
+    "lng": -119.6456844
+  },
+  {
+    "code":"25420",
+    "name":"Harrisburg-Carlisle, PA",
+    "lat": 40.2291372,
+    "lng": -77.14817729999999
+  },
+  {
+    "code":"25500",
+    "name":"Harrisonburg, VA",
+    "lat": 38.4495688,
+    "lng": -78.86891550000001
+  },
+  {
+    "code":"25540",
+    "name":"Hartford-West Hartford-East Hartford, CT",
+    "lat": 41.776902,
+    "lng": -72.67943819999999
+  },
+  {
+    "code":"25620",
+    "name":"Hattiesburg, MS",
+    "lat": 31.3271189,
+    "lng": -89.2903392
+  },
+  {
+    "code":"25860",
+    "name":"Hickory-Lenoir-Morganton, NC",
+    "lat": 35.7454071,
+    "lng": -81.68481880000002
+  },
+  {
+    "code":"25980",
+    "name":"Hinesville-Fort Stewart, GA",
+    "lat": 31.9873146,
+    "lng": -81.60350619999997
+  },
+  {
+    "code":"26100",
+    "name":"Holland-Grand Haven, MI",
+    "lat": 42.9933771,
+    "lng": -86.21875209999996
+  },
+  {
+    "code":"26180",
+    "name":"Honolulu, HI",
+    "lat": 21.3069444,
+    "lng": -157.85833330000003
+  },
+  {
+    "code":"26300",
+    "name":"Hot Springs, AR",
+    "lat": 34.5037004,
+    "lng": -93.05517950000001
+  },
+  {
+    "code":"26380",
+    "name":"Houma-Bayou Cane-Thibodaux, LA",
+    "lat": 29.7957633,
+    "lng": -90.82287099999996
+  },
+  {
+    "code":"26420",
+    "name":"Houston-Sugar Land-Baytown, TX",
+    "lat": 29.7355047,
+    "lng": -94.97742740000001
+  },
+  {
+    "code":"26580",
+    "name":"Huntington-Ashland, WV-KY-OH",
+    "lat": 40.4172871,
+    "lng": -82.90712300000001
+  },
+  {
+    "code":"26620",
+    "name":"Huntsville, AL",
+    "lat": 34.7303688,
+    "lng": -86.58610369999997
+  },
+  {
+    "code":"26820",
+    "name":"Idaho Falls, ID",
+    "lat": 43.49165139999999,
+    "lng": -112.03396450000002
+  },
+  {
+    "code":"26900",
+    "name":"Indianapolis-Carmel, IN",
+    "lat": 39.7616739,
+    "lng": -86.41873079999999
+  },
+  {
+    "code":"26980",
+    "name":"Iowa City, IA",
+    "lat": 41.6611277,
+    "lng": -91.53016830000001
+  },
+  {
+    "code":"27060",
+    "name":"Ithaca, NY",
+    "lat": 42.4439614,
+    "lng": -76.50188070000002
+  },
+  {
+    "code":"27100",
+    "name":"Jackson, MI",
+    "lat": 42.245869,
+    "lng": -84.40134619999998
+  },
+  {
+    "code":"27140",
+    "name":"Jackson, MS",
+    "lat": 32.2987573,
+    "lng": -90.18481029999998
+  },
+  {
+    "code":"27180",
+    "name":"Jackson, TN",
+    "lat": 35.6145169,
+    "lng": -88.81394690000002
+  },
+  {
+    "code":"27260",
+    "name":"Jacksonville, FL",
+    "lat": 30.3321838,
+    "lng": -81.65565099999998
+  },
+  {
+    "code":"27340",
+    "name":"Jacksonville, NC",
+    "lat": 34.7540524,
+    "lng": -77.4302414
+  },
+  {
+    "code":"27500",
+    "name":"Janesville, WI",
+    "lat": 42.6827885,
+    "lng": -89.01872220000001
+  },
+  {
+    "code":"27620",
+    "name":"Jefferson City, MO",
+    "lat": 38.57670170000001,
+    "lng": -92.17351639999998
+  },
+  {
+    "code":"27740",
+    "name":"Johnson City, TN",
+    "lat": 36.3134397,
+    "lng": -82.3534727
+  },
+  {
+    "code":"27780",
+    "name":"Johnstown, PA",
+    "lat": 40.32674069999999,
+    "lng": -78.9219698
+  },
+  {
+    "code":"27860",
+    "name":"Jonesboro, AR",
+    "lat": 35.84229670000001,
+    "lng": -90.70427899999999
+  },
+  {
+    "code":"27900",
+    "name":"Joplin, MO",
+    "lat": 37.08422710000001,
+    "lng": -94.513281
+  },
+  {
+    "code":"28020",
+    "name":"Kalamazoo-Portage, MI",
+    "lat": 42.2011538,
+    "lng": -85.58000219999997
+  },
+  {
+    "code":"28100",
+    "name":"Kankakee-Bradley, IL",
+    "lat": 41.14197679999999,
+    "lng": -87.8611535
+  },
+  {
+    "code":"28140",
+    "name":"Kansas City, MO-KS",
+    "lat": 39.0653602,
+    "lng": -94.5624426
+  },
+  {
+    "code":"28420",
+    "name":"Kennewick-Richland-Pasco, WA",
+    "lat": 46.1093145,
+    "lng": -119.19947660000003
+  },
+  {
+    "code":"28660",
+    "name":"Killeen-Temple-Fort Hood, TX",
+    "lat": 31.13,
+    "lng": -97.77999999999997
+  },
+  {
+    "code":"28700",
+    "name":"Kingsport-Bristol-Bristol, TN-VA",
+    "lat": 35.8142327,
+    "lng": -86.1180627
+  },
+  {
+    "code":"28740",
+    "name":"Kingston, NY",
+    "lat": 41.9270367,
+    "lng": -73.99736080000002
+  },
+  {
+    "code":"28940",
+    "name":"Knoxville, TN",
+    "lat": 35.9606384,
+    "lng": -83.92073920000001
+  },
+  {
+    "code":"29020",
+    "name":"Kokomo, IN",
+    "lat": 40.486427,
+    "lng": -86.1336033
+  },
+  {
+    "code":"29100",
+    "name":"La Crosse, WI-MN",
+    "lat": 43.7051652,
+    "lng": -91.443469
+  },
+  {
+    "code":"29140",
+    "name":"Lafayette, IN",
+    "lat": 40.4167022,
+    "lng": -86.87528689999999
+  },
+  {
+    "code":"29180",
+    "name":"Lafayette, LA",
+    "lat": 30.2240897,
+    "lng": -92.01984270000003
+  },
+  {
+    "code":"29340",
+    "name":"Lake Charles, LA",
+    "lat": 30.2265949,
+    "lng": -93.21737580000001
+  },
+  {
+    "code":"29460",
+    "name":"Lakeland, FL",
+    "lat": 28.0394654,
+    "lng": -81.94980420000002
+  },
+  {
+    "code":"29540",
+    "name":"Lancaster, PA",
+    "lat": 40.0378755,
+    "lng": -76.30551439999999
+  },
+  {
+    "code":"29620",
+    "name":"Lansing-East Lansing, MI",
+    "lat": 42.761266,
+    "lng": -84.54278149999999
+  },
+  {
+    "code":"29700",
+    "name":"Laredo, TX",
+    "lat": 27.506407,
+    "lng": -99.50754210000002
+  },
+  {
+    "code":"29740",
+    "name":"Las Cruces, NM",
+    "lat": 32.3199396,
+    "lng": -106.76365379999999
+  },
+  {
+    "code":"29820",
+    "name":"Las Vegas-Paradise, NV",
+    "lat": 36.0971945,
+    "lng": -115.1466648
+  },
+  {
+    "code":"29940",
+    "name":"Lawrence, KS",
+    "lat": 38.9716689,
+    "lng": -95.23525010000003
+  },
+  {
+    "code":"30020",
+    "name":"Lawton, OK",
+    "lat": 34.6035669,
+    "lng": -98.39592909999999
+  },
+  {
+    "code":"30140",
+    "name":"Lebanon, PA",
+    "lat": 40.3409251,
+    "lng": -76.41134970000002
+  },
+  {
+    "code":"30300",
+    "name":"Lewiston, ID-WA",
+    "lat": 46.3113738,
+    "lng": -117.04561239999998
+  },
+  {
+    "code":"30340",
+    "name":"Lewiston-Auburn, ME",
+    "lat": 44.0939499,
+    "lng": -70.15829439999999
+  },
+  {
+    "code":"30460",
+    "name":"Lexington-Fayette, KY",
+    "lat": 38.0405837,
+    "lng": -84.50371640000003
+  },
+  {
+    "code":"30620",
+    "name":"Lima, OH",
+    "lat": 40.742551,
+    "lng": -84.10522559999998
+  },
+  {
+    "code":"30700",
+    "name":"Lincoln, NE",
+    "lat": 40.806862,
+    "lng": -96.68167900000003
+  },
+  {
+    "code":"30780",
+    "name":"Little Rock-North Little Rock, AR",
+    "lat": 34.833332,
+    "lng": -92.25389100000001
+  },
+  {
+    "code":"30860",
+    "name":"Logan, UT-ID",
+    "lat": 41.9077667,
+    "lng": -111.7614661
+  },
+  {
+    "code":"30980",
+    "name":"Longview, TX",
+    "lat": 32.5007037,
+    "lng": -94.74048909999999
+  },
+  {
+    "code":"31020",
+    "name":"Longview, WA",
+    "lat": 46.1381676,
+    "lng": -122.93816720000001
+  },
+  {
+    "code":"31100",
+    "name":"Los Angeles-Long Beach-Santa Ana, CA",
+    "lat": 33.7590122,
+    "lng": -118.13128619999998
+  },
+  {
+    "code":"31140",
+    "name":"Louisville-Jefferson County, KY-IN",
+    "lat": 38.3964426,
+    "lng": -85.4375574
+  },
+  {
+    "code":"31180",
+    "name":"Lubbock, TX",
+    "lat": 33.5778631,
+    "lng": -101.8551665
+  },
+  {
+    "code":"31340",
+    "name":"Lynchburg, VA",
+    "lat": 37.4137536,
+    "lng": -79.14224639999998
+  },
+  {
+    "code":"31420",
+    "name":"Macon, GA",
+    "lat": 32.8406946,
+    "lng": -83.6324022
+  },
+  {
+    "code":"31460",
+    "name":"Madera, CA",
+    "lat": 36.9613356,
+    "lng": -120.06071759999998
+  },
+  {
+    "code":"31540",
+    "name":"Madison, WI",
+    "lat": 43.0730517,
+    "lng": -89.40123019999999
+  },
+  {
+    "code":"31700",
+    "name":"Manchester-Nashua, NH",
+    "lat": 42.77995,
+    "lng": -71.47718480000003
+  },
+  {
+    "code":"31900",
+    "name":"Mansfield, OH",
+    "lat": 40.75839,
+    "lng": -82.51544710000002
+  },
+  {
+    "code":"32420",
+    "name":"Mayaguez, PR",
+    "lat": 18.2013452,
+    "lng": -67.14515489999997
+  },
+  {
+    "code":"32580",
+    "name":"McAllen-Edinburg-Mission, TX",
+    "lat": 26.2064888,
+    "lng": -98.2431747
+  },
+  {
+    "code":"32780",
+    "name":"Medford, OR",
+    "lat": 42.3265152,
+    "lng": -122.87559490000001
+  },
+  {
+    "code":"32820",
+    "name":"Memphis, TN-MS-AR",
+    "lat": 35.0387247,
+    "lng": -89.8505012
+  },
+  {
+    "code":"32900",
+    "name":"Merced, CA",
+    "lat": 37.3021632,
+    "lng": -120.48296770000002
+  },
+  {
+    "code":"33100",
+    "name":"Miami-Fort Lauderdale-Miami Beach, FL",
+    "lat": 25.790654,
+    "lng": -80.1300455
+  },
+  {
+    "code":"33140",
+    "name":"Michigan City-La Porte, IN",
+    "lat": 41.70753939999999,
+    "lng": -86.89502970000001
+  },
+  {
+    "code":"33260",
+    "name":"Midland, TX",
+    "lat": 31.9973456,
+    "lng": -102.07791459999999
+  },
+  {
+    "code":"33340",
+    "name":"Milwaukee-Waukesha-West Allis, WI",
+    "lat": 43.0166806,
+    "lng": -88.00703149999998
+  },
+  {
+    "code":"33460",
+    "name":"Minneapolis-St. Paul-Bloomington, MN-WI",
+    "lat": 44.9389111,
+    "lng": -93.11775549999999
+  },
+  {
+    "code":"33540",
+    "name":"Missoula, MT",
+    "lat": 46.8605189,
+    "lng": -114.01950099999999
+  },
+  {
+    "code":"33660",
+    "name":"Mobile, AL",
+    "lat": 30.6943566,
+    "lng": -88.0430541
+  },
+  {
+    "code":"33700",
+    "name":"Modesto, CA",
+    "lat": 37.63909719999999,
+    "lng": -120.99687819999997
+  },
+  {
+    "code":"33740",
+    "name":"Monroe, LA",
+    "lat": 32.5093109,
+    "lng": -92.1193012
+  },
+  {
+    "code":"33780",
+    "name":"Monroe, MI",
+    "lat": 41.9164343,
+    "lng": -83.39771009999998
+  },
+  {
+    "code":"33860",
+    "name":"Montgomery, AL",
+    "lat": 32.3668052,
+    "lng": -86.29996890000001
+  },
+  {
+    "code":"34060",
+    "name":"Morgantown, WV",
+    "lat": 39.629526,
+    "lng": -79.9558968
+  },
+  {
+    "code":"34100",
+    "name":"Morristown, TN",
+    "lat": 36.2139814,
+    "lng": -83.29489219999999
+  },
+  {
+    "code":"34580",
+    "name":"Mount Vernon-Anacortes, WA",
+    "lat": 48.437341,
+    "lng": -122.36947600000002
+  },
+  {
+    "code":"34620",
+    "name":"Muncie, IN",
+    "lat": 40.1933767,
+    "lng": -85.3863599
+  },
+  {
+    "code":"34740",
+    "name":"Muskegon-Norton Shores, MI",
+    "lat": 43.1689044,
+    "lng": -86.2639461
+  },
+  {
+    "code":"34820",
+    "name":"Myrtle Beach-Conway-North Myrtle Beach, SC",
+    "lat": 33.7459722,
+    "lng": -78.9529976
+  },
+  {
+    "code":"34900",
+    "name":"Napa, CA",
+    "lat": 38.2975381,
+    "lng": -122.28686500000003
+  },
+  {
+    "code":"34940",
+    "name":"Naples-Marco Island, FL",
+    "lat": 26.1420358,
+    "lng": -81.7948103
+  },
+  {
+    "code":"34980",
+    "name":"Nashville-Davidson--Murfreesboro, TN",
+    "lat": 35.8143864,
+    "lng": -86.11817780000001
+  },
+  {
+    "code":"35300",
+    "name":"New Haven-Milford, CT",
+    "lat": 41.2306979,
+    "lng": -73.06403599999999
+  },
+  {
+    "code":"35380",
+    "name":"New Orleans-Metairie-Kenner, LA",
+    "lat": 29.9845296,
+    "lng": -90.2044525
+  },
+  {
+    "code":"35620",
+    "name":"New York-Northern New Jersey-Long Island, NY-NJ-PA",
+    "lat": 41.2033216,
+    "lng": -77.19452469999999
+  },
+  {
+    "code":"35660",
+    "name":"Niles-Benton Harbor, MI",
+    "lat": 42.1043594,
+    "lng": -86.44535510000003
+  },
+  {
+    "code":"35980",
+    "name":"Norwich-New London, CT",
+    "lat": 41.5242649,
+    "lng": -72.07591049999996
+  },
+  {
+    "code":"36100",
+    "name":"Ocala, FL",
+    "lat": 29.1871986,
+    "lng": -82.14009229999999
+  },
+  {
+    "code":"36140",
+    "name":"Ocean City, NJ",
+    "lat": 39.2776156,
+    "lng": -74.5746001
+  },
+  {
+    "code":"36220",
+    "name":"Odessa, TX",
+    "lat": 31.8456816,
+    "lng": -102.36764310000001
+  },
+  {
+    "code":"36260",
+    "name":"Ogden-Clearfield, UT",
+    "lat": 41.1524505,
+    "lng": -111.9989425
+  },
+  {
+    "code":"36420",
+    "name":"Oklahoma City, OK",
+    "lat": 35.4675602,
+    "lng": -97.51642759999999
+  },
+  {
+    "code":"36500",
+    "name":"Olympia, WA",
+    "lat": 47.0378741,
+    "lng": -122.90069510000001
+  },
+  {
+    "code":"36540",
+    "name":"Omaha-Council Bluffs, NE-IA",
+    "lat": 41.3514517,
+    "lng": -95.87759640000002
+  },
+  {
+    "code":"36740",
+    "name":"Orlando-Kissimmee, FL",
+    "lat": 28.5828156,
+    "lng": -81.33994139999999
+  },
+  {
+    "code":"36780",
+    "name":"Oshkosh-Neenah, WI",
+    "lat": 44.2003965,
+    "lng": -88.51785180000002
+  },
+  {
+    "code":"36980",
+    "name":"Owensboro, KY",
+    "lat": 37.7719074,
+    "lng": -87.11116759999999
+  },
+  {
+    "code":"37100",
+    "name":"Oxnard-Thousand Oaks-Ventura, CA",
+    "lat": 34.1843781,
+    "lng": -118.89356809999998
+  },
+  {
+    "code":"37340",
+    "name":"Palm Bay-Melbourne-Titusville, FL",
+    "lat": 28.371276,
+    "lng": -80.80232810000001
+  },
+  {
+    "code":"37460",
+    "name":"Panama City-Lynn Haven, FL",
+    "lat": 30.22926,
+    "lng": -85.60991790000003
+  },
+  {
+    "code":"37620",
+    "name":"Parkersburg-Marietta-Vienna, WV-OH",
+    "lat": 39.2637209,
+    "lng": -81.55548799999997
+  },
+  {
+    "code":"37700",
+    "name":"Pascagoula, MS",
+    "lat": 30.3657552,
+    "lng": -88.55612719999999
+  },
+  {
+    "code":"37860",
+    "name":"Pensacola-Ferry Pass-Brent, FL",
+    "lat": 30.5034474,
+    "lng": -87.2348738
+  },
+  {
+    "code":"37900",
+    "name":"Peoria, IL",
+    "lat": 40.6936488,
+    "lng": -89.58898640000001
+  },
+  {
+    "code":"37980",
+    "name":"Philadelphia-Camden-Wilmington, PA-NJ-DE-MD",
+    "lat": 39.952335,
+    "lng": -75.16378900000001
+  },
+  {
+    "code":"38060",
+    "name":"Phoenix-Mesa-Scottsdale, AZ",
+    "lat": 33.48374,
+    "lng": -111.91647790000002
+  },
+  {
+    "code":"38220",
+    "name":"Pine Bluff, AR",
+    "lat": 34.2284312,
+    "lng": -92.0031955
+  },
+  {
+    "code":"38300",
+    "name":"Pittsburgh, PA",
+    "lat": 40.44062479999999,
+    "lng": -79.99588640000002
+  },
+  {
+    "code":"38340",
+    "name":"Pittsfield, MA",
+    "lat": 42.4500845,
+    "lng": -73.24538239999998
+  },
+  {
+    "code":"38540",
+    "name":"Pocatello, ID",
+    "lat": 42.8713032,
+    "lng": -112.44553439999999
+  },
+  {
+    "code":"38660",
+    "name":"Ponce, PR",
+    "lat": 18.0110768,
+    "lng": -66.61406160000001
+  },
+  {
+    "code":"38860",
+    "name":"Portland-South Portland-Biddeford, ME",
+    "lat": 44.4324412,
+    "lng": -69.5323009
+  },
+  {
+    "code":"38900",
+    "name":"Portland-Vancouver-Beaverton, OR-WA",
+    "lat": 45.5809394,
+    "lng": -122.7077056
+  },
+  {
+    "code":"38940",
+    "name":"Port St. Lucie-Fort Pierce, FL",
+    "lat": 27.3674109,
+    "lng": -80.41346859999999
+  },
+  {
+    "code":"39100",
+    "name":"Poughkeepsie-Newburgh-Middletown, NY",
+    "lat": 41.4459271,
+    "lng": -74.42293410000002
+  },
+  {
+    "code":"39140",
+    "name":"Prescott, AZ",
+    "lat": 34.5400242,
+    "lng": -112.4685025
+  },
+  {
+    "code":"39300",
+    "name":"Providence-New Bedford-Fall River, RI-MA",
+    "lat": 42.4072107,
+    "lng": -71.38243740000001
+  },
+  {
+    "code":"39340",
+    "name":"Provo-Orem, UT",
+    "lat": 40.322725,
+    "lng": -111.64600940000003
+  },
+  {
+    "code":"39380",
+    "name":"Pueblo, CO",
+    "lat": 38.2544472,
+    "lng": -104.6091409
+  },
+  {
+    "code":"39460",
+    "name":"Punta Gorda, FL",
+    "lat": 26.9297836,
+    "lng": -82.04536640000003
+  },
+  {
+    "code":"39540",
+    "name":"Racine, WI",
+    "lat": 42.7261309,
+    "lng": -87.7828523
+  },
+  {
+    "code":"39580",
+    "name":"Raleigh-Cary, NC",
+    "lat": 35.7795897,
+    "lng": -78.63817870000003
+  },
+  {
+    "code":"39660",
+    "name":"Rapid City, SD",
+    "lat": 44.0805434,
+    "lng": -103.23101489999999
+  },
+  {
+    "code":"39740",
+    "name":"Reading, PA",
+    "lat": 40.3356483,
+    "lng": -75.92687469999998
+  },
+  {
+    "code":"39820",
+    "name":"Redding, CA",
+    "lat": 40.5865396,
+    "lng": -122.3916754
+  },
+  {
+    "code":"39900",
+    "name":"Reno-Sparks, NV",
+    "lat": 39.5054675,
+    "lng": -119.6926861
+  },
+  {
+    "code":"40060",
+    "name":"Richmond, VA",
+    "lat": 37.5407246,
+    "lng": -77.4360481
+  },
+  {
+    "code":"40140",
+    "name":"Riverside-San Bernardino-Ontario, CA",
+    "lat": 34.0633443,
+    "lng": -117.65088760000003
+  },
+  {
+    "code":"40220",
+    "name":"Roanoke, VA",
+    "lat": 37.2709704,
+    "lng": -79.9414266
+  },
+  {
+    "code":"40340",
+    "name":"Rochester, MN",
+    "lat": 44.0234,
+    "lng": -92.46294999999998
+  },
+  {
+    "code":"40380",
+    "name":"Rochester, NY",
+    "lat": 43.16103,
+    "lng": -77.6109219
+  },
+  {
+    "code":"40420",
+    "name":"Rockford, IL",
+    "lat": 42.2711311,
+    "lng": -89.0939952
+  },
+  {
+    "code":"40580",
+    "name":"Rocky Mount, NC",
+    "lat": 35.9382103,
+    "lng": -77.79053390000001
+  },
+  {
+    "code":"40660",
+    "name":"Rome, GA",
+    "lat": 34.257038,
+    "lng": -85.16467260000002
+  },
+  {
+    "code":"40900",
+    "name":"Sacramento--Arden-Arcade--Roseville, CA",
+    "lat": 38.654163,
+    "lng": -121.3879078
+  },
+  {
+    "code":"40980",
+    "name":"Saginaw-Saginaw Township North, MI",
+    "lat": 43.4600896,
+    "lng": -84.0061091
+  },
+  {
+    "code":"41060",
+    "name":"St. Cloud, MN",
+    "lat": 45.5579451,
+    "lng": -94.1632404
+  },
+  {
+    "code":"41100",
+    "name":"St. George, UT",
+    "lat": 37.0952778,
+    "lng": -113.57805559999997
+  },
+  {
+    "code":"41140",
+    "name":"St. Joseph, MO-KS",
+    "lat": 39.7995828,
+    "lng": -94.81059549999998
+  },
+  {
+    "code":"41180",
+    "name":"St. Louis, MO-IL",
+    "lat": 38.8196814,
+    "lng": -90.45023679999997
+  },
+  {
+    "code":"41420",
+    "name":"Salem, OR",
+    "lat": 44.9428975,
+    "lng": -123.03509630000002
+  },
+  {
+    "code":"41500",
+    "name":"Salinas, CA",
+    "lat": 36.6777372,
+    "lng": -121.65550129999997
+  },
+  {
+    "code":"41540",
+    "name":"Salisbury, MD",
+    "lat": 38.3606736,
+    "lng": -75.59936920000001
+  },
+  {
+    "code":"41620",
+    "name":"Salt Lake City, UT",
+    "lat": 40.7607793,
+    "lng": -111.89104739999999
+  },
+  {
+    "code":"41660",
+    "name":"San Angelo, TX",
+    "lat": 31.4637723,
+    "lng": -100.43703749999997
+  },
+  {
+    "code":"41700",
+    "name":"San Antonio, TX",
+    "lat": 29.4241219,
+    "lng": -98.49362819999999
+  },
+  {
+    "code":"41740",
+    "name":"San Diego-Carlsbad-San Marcos, CA",
+    "lat": 33.119715,
+    "lng": -117.23505539999996
+  },
+  {
+    "code":"41780",
+    "name":"Sandusky, OH",
+    "lat": 41.4489396,
+    "lng": -82.70796050000001
+  },
+  {
+    "code":"41860",
+    "name":"San Francisco-Oakland-Fremont, CA",
+    "lat": 37.6909682,
+    "lng": -122.31075169999997
+  },
+  {
+    "code":"41900",
+    "name":"San German-Cabo Rojo, PR",
+    "lat": 18.0866265,
+    "lng": -67.14573469999999
+  },
+  {
+    "code":"41940",
+    "name":"San Jose-Sunnyvale-Santa Clara, CA",
+    "lat": 37.2592831,
+    "lng": -121.86764640000001
+  },
+  {
+    "code":"41980",
+    "name":"San Juan-Caguas-Guaynabo, PR",
+    "lat": 18.4663338,
+    "lng": -66.1057217
+  },
+  {
+    "code":"42020",
+    "name":"San Luis Obispo-Paso Robles, CA",
+    "lat": 35.6322789,
+    "lng": -120.66418699999997
+  },
+  {
+    "code":"42060",
+    "name":"Santa Barbara-Santa Maria, CA",
+    "lat": 34.9530337,
+    "lng": -120.43571910000003
+  },
+  {
+    "code":"42100",
+    "name":"Santa Cruz-Watsonville, CA",
+    "lat": 36.910231,
+    "lng": -121.75689460000001
+  },
+  {
+    "code":"42140",
+    "name":"Santa Fe, NM",
+    "lat": 35.6869752,
+    "lng": -105.93779899999998
+  },
+  {
+    "code":"42220",
+    "name":"Santa Rosa-Petaluma, CA",
+    "lat": 38.2678918,
+    "lng": -122.6351282
+  },
+  {
+    "code":"42260",
+    "name":"Sarasota-Bradenton-Venice, FL",
+    "lat": 27.061499,
+    "lng": -82.40846340000002
+  },
+  {
+    "code":"42340",
+    "name":"Savannah, GA",
+    "lat": 32.0835407,
+    "lng": -81.09983419999998
+  },
+  {
+    "code":"42540",
+    "name":"Scranton--Wilkes-Barre, PA",
+    "lat": 41.3362461,
+    "lng": -75.7311489
+  },
+  {
+    "code":"42660",
+    "name":"Seattle-Tacoma-Bellevue, WA",
+    "lat": 47.4393448,
+    "lng": -122.26132419999999
+  },
+  {
+    "code":"42680",
+    "name":"Sebastian-Vero Beach, FL",
+    "lat": 27.6947732,
+    "lng": -80.54384499999998
+  },
+  {
+    "code":"43100",
+    "name":"Sheboygan, WI",
+    "lat": 43.7508284,
+    "lng": -87.71452999999997
+  },
+  {
+    "code":"43300",
+    "name":"Sherman-Denison, TX",
+    "lat": 33.7787175,
+    "lng": -96.55698819999998
+  },
+  {
+    "code":"43340",
+    "name":"Shreveport-Bossier City, LA",
+    "lat": 32.5251516,
+    "lng": -93.75017889999998
+  },
+  {
+    "code":"43580",
+    "name":"Sioux City, IA-NE-SD",
+    "lat": 42.445678,
+    "lng": -96.49297969999998
+  },
+  {
+    "code":"43620",
+    "name":"Sioux Falls, SD",
+    "lat": 43.5499749,
+    "lng": -96.70032700000002
+  },
+  {
+    "code":"43780",
+    "name":"South Bend-Mishawaka, IN-MI",
+    "lat": 41.661354,
+    "lng": -86.29709980000001
+  },
+  {
+    "code":"43900",
+    "name":"Spartanburg, SC",
+    "lat": 34.9495672,
+    "lng": -81.9320482
+  },
+  {
+    "code":"44060",
+    "name":"Spokane, WA",
+    "lat": 47.6587802,
+    "lng": -117.4260466
+  },
+  {
+    "code":"44100",
+    "name":"Springfield, IL",
+    "lat": 39.78172130000001,
+    "lng": -89.65014810000002
+  },
+  {
+    "code":"44140",
+    "name":"Springfield, MA",
+    "lat": 42.1014831,
+    "lng": -72.589811
+  },
+  {
+    "code":"44180",
+    "name":"Springfield, MO",
+    "lat": 37.2089572,
+    "lng": -93.29229889999999
+  },
+  {
+    "code":"44220",
+    "name":"Springfield, OH",
+    "lat": 39.9242266,
+    "lng": -83.8088171
+  },
+  {
+    "code":"44300",
+    "name":"State College, PA",
+    "lat": 40.7933949,
+    "lng": -77.8600012
+  },
+  {
+    "code":"44700",
+    "name":"Stockton, CA",
+    "lat": 37.9577016,
+    "lng": -121.29077960000001
+  },
+  {
+    "code":"44940",
+    "name":"Sumter, SC",
+    "lat": 33.9204354,
+    "lng": -80.34146929999997
+  },
+  {
+    "code":"45060",
+    "name":"Syracuse, NY",
+    "lat": 43.0481221,
+    "lng": -76.14742439999998
+  },
+  {
+    "code":"45220",
+    "name":"Tallahassee, FL",
+    "lat": 30.4382559,
+    "lng": -84.28073289999998
+  },
+  {
+    "code":"45300",
+    "name":"Tampa-St. Petersburg-Clearwater, FL",
+    "lat": 27.9249117,
+    "lng": -82.5943072
+  },
+  {
+    "code":"45460",
+    "name":"Terre Haute, IN",
+    "lat": 39.4667034,
+    "lng": -87.41390919999998
+  },
+  {
+    "code":"45500",
+    "name":"Texarkana, TX-Texarkana, AR",
+    "lat": 33.421756,
+    "lng": -94.04307999999997
+  },
+  {
+    "code":"45780",
+    "name":"Toledo, OH",
+    "lat": 41.6639383,
+    "lng": -83.55521199999998
+  },
+  {
+    "code":"45820",
+    "name":"Topeka, KS",
+    "lat": 39.0558235,
+    "lng": -95.68901849999997
+  },
+  {
+    "code":"45940",
+    "name":"Trenton-Ewing, NJ",
+    "lat": 40.21901099999999,
+    "lng": -74.75443999999999
+  },
+  {
+    "code":"46060",
+    "name":"Tucson, AZ",
+    "lat": 32.2217429,
+    "lng": -110.92647899999997
+  },
+  {
+    "code":"46140",
+    "name":"Tulsa, OK",
+    "lat": 36.1539816,
+    "lng": -95.992775
+  },
+  {
+    "code":"46220",
+    "name":"Tuscaloosa, AL",
+    "lat": 33.2098407,
+    "lng": -87.56917349999998
+  },
+  {
+    "code":"46340",
+    "name":"Tyler, TX",
+    "lat": 32.3512601,
+    "lng": -95.30106239999998
+  },
+  {
+    "code":"46540",
+    "name":"Utica-Rome, NY",
+    "lat": 43.160171,
+    "lng": -75.33797800000002
+  },
+  {
+    "code":"46660",
+    "name":"Valdosta, GA",
+    "lat": 30.8327022,
+    "lng": -83.27848510000001
+  },
+  {
+    "code":"46700",
+    "name":"Vallejo-Fairfield, CA",
+    "lat": 38.256253,
+    "lng": -121.92809699999998
+  },
+  {
+    "code":"47020",
+    "name":"Victoria, TX",
+    "lat": 28.8052674,
+    "lng": -97.0035982
+  },
+  {
+    "code":"47220",
+    "name":"Vineland-Millville-Bridgeton, NJ",
+    "lat": 39.4680532,
+    "lng": -75.14937120000002
+  },
+  {
+    "code":"47260",
+    "name":"Virginia Beach-Norfolk-Newport News, VA-NC",
+    "lat": 36.7504482,
+    "lng": -76.27079420000001
+  },
+  {
+    "code":"47300",
+    "name":"Visalia-Porterville, CA",
+    "lat": 36.06523,
+    "lng": -119.01676789999999
+  },
+  {
+    "code":"47380",
+    "name":"Waco, TX",
+    "lat": 31.549333,
+    "lng": -97.14666950000003
+  },
+  {
+    "code":"47580",
+    "name":"Warner Robins, GA",
+    "lat": 32.6086111,
+    "lng": -83.63805560000003
+  },
+  {
+    "code":"47900",
+    "name":"Washington-Arlington-Alexandria, DC-VA-MD-WV",
+    "lat": 38.9897306,
+    "lng": -77.41000939999998
+  },
+  {
+    "code":"47940",
+    "name":"Waterloo-Cedar Falls, IA",
+    "lat": 42.5102632,
+    "lng": -92.38629730000002
+  },
+  {
+    "code":"48140",
+    "name":"Wausau, WI",
+    "lat": 44.9591352,
+    "lng": -89.6301221
+  },
+  {
+    "code":"48260",
+    "name":"Weirton-Steubenville, WV-OH",
+    "lat": 40.3697905,
+    "lng": -80.6339638
+  },
+  {
+    "code":"48300",
+    "name":"Wenatchee, WA",
+    "lat": 47.4234599,
+    "lng": -120.3103494
+  },
+  {
+    "code":"48540",
+    "name":"Wheeling, WV-OH",
+    "lat": 40.0325848,
+    "lng": -80.89865020000002
+  },
+  {
+    "code":"48620",
+    "name":"Wichita, KS",
+    "lat": 37.68888889999999,
+    "lng": -97.33611109999998
+  },
+  {
+    "code":"48660",
+    "name":"Wichita Falls, TX",
+    "lat": 33.9137085,
+    "lng": -98.4933873
+  },
+  {
+    "code":"48700",
+    "name":"Williamsport, PA",
+    "lat": 41.2411897,
+    "lng": -77.00107860000003
+  },
+  {
+    "code":"48900",
+    "name":"Wilmington, NC",
+    "lat": 34.2257255,
+    "lng": -77.94471020000003
+  },
+  {
+    "code":"49020",
+    "name":"Winchester, VA-WV",
+    "lat": 39.3167232,
+    "lng": -78.38422270000001
+  },
+  {
+    "code":"49180",
+    "name":"Winston-Salem, NC",
+    "lat": 36.09985959999999,
+    "lng": -80.244216
+  },
+  {
+    "code":"49340",
+    "name":"Worcester, MA",
+    "lat": 42.2625932,
+    "lng": -71.8022934
+  },
+  {
+    "code":"49420",
+    "name":"Yakima, WA",
+    "lat": 46.6020711,
+    "lng": -120.50589869999999
+  },
+  {
+    "code":"49500",
+    "name":"Yauco, PR",
+    "lat": 18.0908754,
+    "lng": -66.8677563
+  },
+  {
+    "code":"49620",
+    "name":"York-Hanover, PA",
+    "lat": 39.8006553,
+    "lng": -76.98303579999998
+  },
+  {
+    "code":"49660",
+    "name":"Youngstown-Warren-Boardman, OH-PA",
+    "lat": 41.0799329,
+    "lng": -80.6632103
+  },
+  {
+    "code":"49700",
+    "name":"Yuba City, CA",
+    "lat": 39.1404477,
+    "lng": -121.61691080000003
+  },
+  {
+    "code":"49740",
+    "name":"Yuma, AZ",
+    "lat": 32.6926512,
+    "lng": -114.62769159999999
+  },
+  {
+    "code":"99999",
+    "name":"NON-METROPOLITAN LOCATION"
+  }
+]
