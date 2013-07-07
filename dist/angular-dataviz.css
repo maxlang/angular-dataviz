@@ -191,33 +191,39 @@ block-calendar .legend li:last-child,
 block-calendar .legend li:nth-child(2) {
   margin-left: 10px;
 }
-block-calendar .annotations {
-  margin: 15px 12px 0 34px;
+block-calendar .annotation0 text {
+  fill: #ff0000;
 }
-block-calendar .annotations li {
-  font-size: 0.75em;
-  line-height: 1.2em;
-  font-weight: bold;
-  position: relative;
+block-calendar .annotation0 line {
+  stroke: #ff0000;
 }
-block-calendar .annotations li span {
-  font-size: 0.8em;
-  color: #c0c0c0;
-  display: block;
-  margin-top: -2px;
+block-calendar .annotation0 circle {
+  stroke: #ff0000;
+  fill: #ff0000;
 }
-block-calendar .annotations li.introduced {
-  color: #00bafb;
+block-calendar .annotation1 text {
+  fill: #00bafb;
 }
-block-calendar .annotations li.introduced span.pointer {
-  display: none;
+block-calendar .annotation1 line {
+  stroke: #00bafb;
 }
-block-calendar .annotations li.last-comm {
-  color: #00bafb;
-  text-align: right;
+block-calendar .annotation1 circle {
+  stroke: #00bafb;
+  fill: #00bafb;
 }
-block-calendar .annotations li.last-comm span.pointer {
-  display: none;
+block-calendar .annotation2 text {
+  fill: #66b132;
+}
+block-calendar .annotation2 line {
+  stroke: #66b132;
+}
+block-calendar .annotation2 circle {
+  stroke: #66b132;
+  fill: #66b132;
+}
+block-calendar .annotation-date text {
+  fill: #bbb;
+  font-weight: normal;
 }
 
 .selected rect {
