@@ -72,9 +72,11 @@
           var columns = Math.floor(chartWidth/(totalCellSize));
 
           // current week counts as an extra column
-          var start = moment().subtract('weeks',columns - 1).startOf('week');
+          var endTime = Date.now();
+
+          var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
-          var end = moment().startOf('day');
+          var end = moment(endTime).startOf('day');
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
@@ -133,7 +135,7 @@
           scope.svg.append("g").attr("height", "100%").attr("class", "y axis")
             .selectAll("text").data(_.range(7)).enter().append("text")
             .text(function(d) {
-              return moment().days(d).format("ddd");
+              return moment(endTime).days(d).format("ddd");
             })
             .attr("dy",".9em")
             .attr("x", 0)
