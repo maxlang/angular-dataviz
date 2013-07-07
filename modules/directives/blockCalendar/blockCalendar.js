@@ -147,7 +147,7 @@
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
           function weeksFromStart(date) {
-            return moment(date).diff(start, 'weeks');
+            return moment(date).diff(start, 'weeks') + 2;
           }
 
           var annotationsByWeek = _(annotations)
