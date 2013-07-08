@@ -83,7 +83,8 @@ angular.module('dataviz', ['dataviz.directives']);
           cellBorderPx: 2,
           widthPx: 586, //TODO:
           heightPx: 106,
-          endTime: Date.now()
+          endTime: Date.now(),
+          numAnnotationsShownPerGroup: 3
         };
 
         //TODO: better way to handle options, esp option merging
@@ -124,7 +125,6 @@ angular.module('dataviz', ['dataviz.directives']);
 
           // Annotation settings.
           var WEEK_GROUPING = 1;
-          var N_ANNOTATIONS_SHOWN_PER_GROUP = 5;
           var ANNOTATION_TEXT_HEIGHT = 13;
           var ANNOTATION_LINES = 2;
           var MAX_TITLE_LEN = 18;
@@ -140,6 +140,7 @@ angular.module('dataviz', ['dataviz.directives']);
 
           var columns = Math.floor(chartWidth/(totalCellSize));
 
+          var numAnnotationsShownPerGroup = getOption('numAnnotationsShownPerGroup');
           var endTime = getOption('endTime');
 
           var annotations = scope.params.annotations || [];
@@ -170,7 +171,7 @@ angular.module('dataviz', ['dataviz.directives']);
                 .map(function(anns, week) {
                   return {
                     week: parseInt(week, 10), // TODO why does this turn into string?
-                    annotations: _(anns).sortBy('date').take(N_ANNOTATIONS_SHOWN_PER_GROUP).value()
+                    annotations: _(anns).sortBy('date').take(numAnnotationsShownPerGroup).value()
                   };
                 })
                 .value();
