@@ -89,11 +89,13 @@
             defaultOptions[optionName];
         }
 
+        var filter = (scope.params && scope.params.filter) ? scope.params.filter : [];
+
         //TODO: standardize how filters are changed (don't create a new object) - use extend?
         function setSelectedRanges(ranges) {
           scope.$apply(function () {
-            var args = [0, scope.params.filter.length].concat(ranges);
-            Array.prototype.splice.apply(scope.params.filter, args);
+            var args = [0, filter.length].concat(ranges);
+            Array.prototype.splice.apply(filter, args);
           });
         }
 
@@ -139,7 +141,7 @@
           var numAnnotationsShownPerGroup = getOption('numAnnotationsShownPerGroup');
           var endTime = getOption('endTime');
 
-          var annotations = scope.params.annotations || [];
+          var annotations = (scope.params && scope.params.annotations) ? scope.params.annotations : [];
 
           // current week counts as an extra column
           var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
@@ -432,7 +434,7 @@
         scope.$watch('data',function(counts) {
           if (!isNullOrUndefined(counts) && counts.length > 0) {
             drawChart(counts);
-            selectRanges(scope.params.filter);
+            selectRanges(filter);
           }
         }, true);
 
@@ -447,7 +449,7 @@
           //the display options have changed, redraw the chart
           if (!isNullOrUndefined(scope.data) && scope.data.length > 0) {
             drawChart(scope.data);
-            selectRanges(scope.params.filter);
+            selectRanges(filter);
           }
         }, true);
       }
