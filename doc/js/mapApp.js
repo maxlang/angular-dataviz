@@ -267,8 +267,10 @@ module
 
         $scope.mapParams = {
           options: {
-            heatmap: true
-          }
+            heatmap: true,
+            cluster: true
+          },
+          filter: []
         }
 
       });
