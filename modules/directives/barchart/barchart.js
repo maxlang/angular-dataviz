@@ -23,9 +23,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             'snap' : true
           };
 
+
+
           //TODO: better way to handle options, esp option merging
           function getOption(optionName) {
-            return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
+            return _.defaults(scope.params.options, defaultOptions)[optionName];
+            //return (scope.params && scope.params.options && !_scope.params.options[optionName]) || defaultOptions[optionName];
           }
 
 
@@ -33,14 +36,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           element.append("<svg></svg>");
 
           function setSelected(extent) {
-            console.log('set sel');
             scope.$apply(function () {
               scope.params.filter.splice(0, scope.params.filter.length, extent);
             });
           }
 
           function setBrush(extent) {
-            console.log('set brush');
             scope.brush.extent(extent);
           }
 
@@ -51,7 +52,16 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               .on("brushend", brushend);
 
           function brushed() {
-            console.log('brushed');
+            if (getOption('snap')) {
+              var extent = scope.brush.extent();
+              var domain = getOption('domain');
+              var buckets = getOption('bars');
+              var range = domain[1] - domain[0];
+              var step = range/buckets;
+              extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
+              scope.brush.extent(extent);
+            }
+
             if (getOption('realtime')) {
               setSelected(scope.brush.extent());
             }
