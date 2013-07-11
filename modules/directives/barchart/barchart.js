@@ -18,7 +18,9 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             'margins': {top:10, left: 10, bottom:20, right: 10},
             'domain' : 'auto',
             'range' : 'auto',
-            'bars' : null
+            'bars' : null,
+            'realtime' : true,
+            'snap' : true
           };
 
           //TODO: better way to handle options, esp option merging
@@ -45,10 +47,16 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
           scope.brush = d3.svg.brush()
-              .on("brush", brushed);
+              .on("brush", brushed)
+              .on("brushend", brushend);
 
           function brushed() {
             console.log('brushed');
+            if (getOption('realtime')) {
+              setSelected(scope.brush.extent());
+            }
+          }
+          function brushend() {
             setSelected(scope.brush.extent());
           }
 
