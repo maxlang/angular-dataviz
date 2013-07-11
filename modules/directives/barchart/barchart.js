@@ -39,7 +39,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
           function setBrush(extent) {
             console.log('set brush');
-            scope.brush.extent = extent;
+            scope.brush.extent(extent);
           }
 
           $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
@@ -49,7 +49,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
           function brushed() {
             console.log('brushed');
-            setSelected(scope.brush.extent);
+            setSelected(scope.brush.extent());
           }
 
             function drawChart(data) {
