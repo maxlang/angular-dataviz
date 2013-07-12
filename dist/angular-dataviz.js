@@ -24,7 +24,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             'range' : 'auto',
             'bars' : null,
             'realtime' : true,
-            'snap' : true
+            'snap' : false
           };
 
 
@@ -46,7 +46,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           }
 
           function setBrush(extent) {
-            scope.brush.extent(extent);
+            if (!extent) {
+              scope.brush.clear();
+            } else {
+              scope.brush.extent(extent);
+              scope.brush(d3.select(this)); //might cause infinite loop?
+            }
           }
 
           $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
@@ -56,18 +61,19 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               .on("brushend", brushend);
 
           function brushed() {
-            if (getOption('snap')) {
-              var extent = scope.brush.extent();
+            var extent = scope.brush.extent();
+            if (getOption('snap') && extent && extent.length === 2) {
               var domain = getOption('domain');
               var buckets = getOption('bars');
               var range = domain[1] - domain[0];
               var step = range/buckets;
               extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
               scope.brush.extent(extent);
+              scope.brush(d3.select(this)); //apply change
             }
 
             if (getOption('realtime')) {
-              setSelected(scope.brush.extent());
+              setSelected(extent);
             }
           }
           function brushend() {
