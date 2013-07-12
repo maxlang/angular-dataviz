@@ -137,7 +137,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
 
               g.selectAll('rect').data(data).enter().append('rect')
-                  .attr('x', function(d, i) { return x(i);})
+                  .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
                   .attr('y', function(d, i) { return y(d.value); })
                   .attr('width', barWidth)
                   .attr('height', function(d, i) { return h - y(d.value); })
