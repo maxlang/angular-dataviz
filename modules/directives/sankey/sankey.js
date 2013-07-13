@@ -8,7 +8,7 @@ angular.module('dataviz.directives').directive('sankey', [function() {
     restrict: 'E',
     scope: {
       //TODO: DOCUMENT BETTER
-      'data': '=',   // expects an array of objects with a key and a value
+      'data': '=',   // expects an array of objects with an array of nodes and an array of links
       'params' : '='   // a parameters object with the current filters, options, and highlighted data
     },
     link: function(scope, element) {
