@@ -46,8 +46,9 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               scope.brush.clear();
             } else {
               scope.brush.extent(extent);
-              //scope.brush(d3.select(this)); //might cause infinite loop?
             }
+            var brush = d3.select(element[0]).select('.x.brush');
+            scope.brush(brush);
           }
 
           $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
