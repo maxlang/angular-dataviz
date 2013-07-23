@@ -21,7 +21,11 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
           center: new google.maps.LatLng(39.232253,-98.539124),
           zoom: 4,
           mapTypeId: google.maps.MapTypeId.ROADMAP
-        }
+        },
+        alwaysRedraw: false,
+        weightsBasedOnBounds: false,
+        latKey: 'lat',
+        lngKey: 'lng'
       };
 
       var options = defaultOptions;
@@ -33,9 +37,20 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
         redrawMarkers($scope.data);
       });
 
+      var bounds = null;
+
       $scope.boundsChanged = function() {
-        redrawMarkers($scope.data);
+        if ((!bounds && $scope.myMap.getBounds()) || options.alwaysRedraw) {
+          bounds = $scope.myMap.getBounds();
+          redrawMarkers($scope.data);
+        }
       };
+
+      $scope.$watch('params.filter', function(f) {
+        if (f) {
+          redrawMarkers($scope.data);
+        }
+      }, true);
 
 
 
@@ -82,6 +97,8 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
 
       };
 
+      var selMC;
+      var deselMC;
 
       var redrawMarkers = function(data) {
         //init heatmaps
@@ -108,34 +125,46 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
 //          });
           google.maps.event.addListener(dz, 'dragend', function (bnds) {
             console.log('KeyDragZoom Ended: ', bnds);
-            $scope.params.filter[0] = bnds;
+            var ne = bnds.getNorthEast();
+            var sw = bnds.getSouthWest();
+            $scope.$apply(function() {
+              Array.prototype.splice.apply($scope.params.filter[options.latKey], [0, $scope.params.filter[options.latKey].length].concat([[Math.min(sw.lat(), ne.lat()), Math.max(sw.lat(), ne.lat())]]));
+              Array.prototype.splice.apply($scope.params.filter[options.lngKey], [0, $scope.params.filter[options.lngKey].length].concat([[Math.min(sw.lng(), ne.lng()), Math.max(sw.lng(), ne.lng())]]));
+            });
             redrawMarkers($scope.data);
           });
         }
 
+        function filterContains(filter, point) {
+          return filter[options.latKey] &&
+              filter[options.lngKey] &&
+              filter[options.lngKey][0] <= point.lng() &&
+              point.lng() <= filter[options.lngKey][1] &&
+              filter[options.latKey][0] <= point.lat() &&
+              point.lat() <= filter[options.latKey][1];
+        }
+
         if (data) {
           var selectedLocations = _(data).filter(function(d) {
-                if (!(d.lat && d.lng)) {
+                if (!(d[options.latKey] && d[options.lngKey])) {
                   return false;
                 }
-                var l = new google.maps.LatLng(d.lat, d.lng);
-                return $scope.myMap.getBounds() && $scope.myMap.getBounds().contains(l) && $scope.params.filter[0] && $scope.params.filter[0].contains(l);
+                var l = new google.maps.LatLng(d[options.latKey], d[options.lngKey]);
+                return $scope.myMap.getBounds() &&
+                    $scope.myMap.getBounds().contains(l) && filterContains($scope.params.filter, l);
+
               }).map(function(d) {
-                if (d.lat && d.lng) {
-                  return {location: new google.maps.LatLng(d.lat, d.lng), weight: d.weight || 1};
-                }
+                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d.weight || 1};
               }).value();
 
           var deselectedLocations = _(data).filter(function(d) {
-            if (!(d.lat && d.lng)) {
+            if (!(d[options.latKey] && d[options.lngKey])) {
               return false;
             }
-            var l = new google.maps.LatLng(d.lat, d.lng);
-            return $scope.myMap.getBounds() && $scope.myMap.getBounds().contains(l) && (!$scope.params.filter[0] || !$scope.params.filter[0].contains(l));
+            var l = new google.maps.LatLng(d[options.latKey], d[options.lngKey]);
+            return $scope.myMap.getBounds() && ($scope.myMap.getBounds().contains(l) || !options.weightsBasedOnBounds) && !filterContains($scope.params.filter, l);
           }).map(function(d) {
-                if (d.lat && d.lng) {
-                  return {location: new google.maps.LatLng(d.lat, d.lng), weight: d.weight || 1};
-                }
+                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d.weight || 1};
               }).value();
 
 
@@ -148,18 +177,44 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
             dHeatmap.setData(deselPointArray);
 
           } else {
-            $scope.myMarkers = []; //TODO: remove old markers
+            $scope.selectedMarkers = []; //TODO: remove old markers
+            $scope.deselectedMarkers = []; //TODO: remove old markers
             if (options.cluster) {
-              var mc = new MarkerClusterer($scope.myMap);
-              _.each(locations, function(l) {
-                $scope.myMarkers.push(new google.maps.Marker({
-                  //map: $scope.myMap,
+              _.each(selectedLocations, function(l) {
+                $scope.selectedMarkers.push(new google.maps.Marker({
                   position: l.location
                 }));
               });
-              mc.addMarkers($scope.myMarkers);
+
+              _.each(deselectedLocations, function(l) {
+                $scope.deselectedMarkers.push(new google.maps.Marker({
+                  position: l.location
+                }));
+              });
+              if (selMC) {
+                selMC.clearMarkers();
+              }
+              selMC = new MarkerClusterer($scope.myMap, $scope.selectedMarkers);
+              var styles = selMC.getStyles();
+              _.each(styles, function(style) {
+                style.fontWeight = 900;
+                style.textSize = 18;
+//                style.textColor = 'red';
+                style.textDecoration = 'underline';
+              });
+              selMC.setStyles(styles);
+              if (deselMC) {
+                deselMC.clearMarkers();
+              }
+              deselMC = new MarkerClusterer($scope.myMap, $scope.deselectedMarkers);
             } else {
-              _.each(locations, function(l) {
+              _.each(selectedLocations, function(l) {
+                $scope.myMarkers.push(new google.maps.Marker({
+                  map: $scope.myMap,
+                  position: l.location
+                }));
+              });
+              _.each(deselectedLocations, function(l) {
                 $scope.myMarkers.push(new google.maps.Marker({
                   map: $scope.myMap,
                   position: l.location
