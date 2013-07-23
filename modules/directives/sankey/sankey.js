@@ -84,7 +84,38 @@ angular.module('dataviz.directives').directive('sankey', [function() {
               .attr("class", "link")
               .attr("d", path)
               .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-              .sort(function(a, b) { return b.dy - a.dy; });
+              .sort(function(a, b) { return b.dy - a.dy; })
+              .classed('selected', function(d) {
+                var source = d.source;
+                var target = d.target;
+                var sourceIdx = _.indexOf(scope.params.filter[source.filterId], source.fieldValue);
+                var targetIdx = _.indexOf(scope.params.filter[target.filterId], target.fieldValue);
+                return sourceIdx > -1 && targetIdx > -1;
+              })
+              .on("click", function(d) {
+                var elt = d3.select(this);
+                scope.$apply(function() {
+                  var source = d.source;
+                  var target = d.target;
+                  var sourceIdx = _.indexOf(scope.params.filter[source.filterId], source.fieldValue);
+                  var targetIdx = _.indexOf(scope.params.filter[target.filterId], target.fieldValue);
+                  if (elt.classed('selected')) {
+                    //splice out the one later in the array first, to prevent shifts
+                    if (sourceIdx > targetIdx) {
+                      scope.params.filter[source.filterId].splice(sourceIdx, 1);
+                      scope.params.filter[target.filterId].splice(targetIdx, 1);
+                    } else {
+                      scope.params.filter[target.filterId].splice(targetIdx, 1);
+                      scope.params.filter[source.filterId].splice(sourceIdx, 1);
+                    }
+                    elt.classed('selected', false);
+                  } else {
+                    elt.classed('selected', true);
+                    scope.params.filter[source.filterId].push(source.fieldValue);
+                    scope.params.filter[target.filterId].push(target.fieldValue);
+                  }
+                });
+              });
 
           link.append("title")
               .text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
