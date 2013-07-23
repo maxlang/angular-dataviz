@@ -239,12 +239,12 @@ module
 
       var g = new google.maps.Geocoder();
 
-      var mortgageP = $http.get('/doc/data/mortgages.json');
+      var dataP = $http.get('/doc/data/data.json');
       var msaP = $http.get('/doc/data/geocodedMSA.json');
       //var stateAndCounty = dataResource.get({file: 'statCounty.json'});
 
-      $q.all([mortgageP, msaP]).then(function(responses) {
-        var mortgages = responses[0].data;
+      $q.all([dataP, msaP]).then(function(responses) {
+        var data = responses[0].data;
         var msa = responses[1].data;
 
         var msaMap = {};
@@ -255,7 +255,7 @@ module
 
         var locationNoise = d3.random.normal(0,.1);
 
-        _.each(mortgages, function(m) {
+        _.each(data, function(m) {
           if(msaMap[m.metropolitanStatisticalAreaCode]) {
             m.msa = msaMap[m.metropolitanStatisticalAreaCode].name;
             m.lat = msaMap[m.metropolitanStatisticalAreaCode].lat + locationNoise();
@@ -263,11 +263,11 @@ module
           }
         });
 
-        $scope.mapData = mortgages;
+        $scope.mapData = data;
 
         $scope.mapParams = {
           options: {
-            heatmap: true,
+            heatmap: false,
             cluster: true
           },
           filter: []
