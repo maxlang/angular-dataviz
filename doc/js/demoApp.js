@@ -136,7 +136,8 @@ module
       date: date1,
       title: 'First Title',
       subtitle: 'first subtitle',
-      path: '/test/a1.html'
+      path: '/test/a1.html',
+      imageUrl: 'http://www.gravatar.com/avatar/fcb28e2339af77da971f76c764965a76?size=100'
     }, {
       date: date1,
       title: 'Second Title',

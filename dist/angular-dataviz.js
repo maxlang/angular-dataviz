@@ -220,13 +220,15 @@ angular.module('dataviz', ['dataviz.directives']);
                   return translate(s.week * totalCellSize * WEEK_GROUPING, 0);
                 });
 
+          var LINE_X_OFFSET = -5;
+
           annotationSetG
             .append("line")
             .attr("y1", function(s) {
               var o = overlapCount[s.week] || 0;
               return - (o * annotationHeight + 10);
             })
-            .attr("y2", -5)
+            .attr("y2", -LINE_X_OFFSET)
             .attr('class', annotationClass);
 
           annotationSetG
@@ -250,8 +252,26 @@ angular.module('dataviz', ['dataviz.directives']);
                   return translate(0, -annotationHeight * i);
                 });
 
-          // Title.
+          var IMAGE_SIZE = 30;
           annotationG
+            .append('image')
+            .attr('xlink:href', function(d) {
+              return d.imageUrl;
+            })
+            .attr('width', IMAGE_SIZE)
+            .attr('height', IMAGE_SIZE)
+            .attr('transform', function(ann, i) {
+              return translate(LINE_X_OFFSET + 1, -10);
+            });
+
+          var annotationTextG = annotationG
+                .append('g')
+                .attr('transform', function(s) {
+                  return translate(s.imageUrl ? IMAGE_SIZE + 1 : 0, 0);
+                });
+
+          // Title.
+          annotationTextG
             .append("svg:a")
             .attr('xlink:href', function(d) {
               return d.path;
@@ -264,7 +284,7 @@ angular.module('dataviz', ['dataviz.directives']);
             });
 
           // Date.
-          annotationG
+          annotationTextG
             .append('g')
             .attr('class', 'annotation-date')
             .append("svg:text")
