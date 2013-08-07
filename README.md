@@ -12,11 +12,6 @@
 
 ## Installation
 
-```
-npm install
-bower install
-```
-
 ```javascript
 angular.module('myApp', ['dataviz']);
 ```
