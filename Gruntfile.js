@@ -74,7 +74,7 @@ module.exports = function (grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default', ['build', 'test']);
+  grunt.registerTask('default', ['build', 'test', 'concat', 'less:dist']);
 
   grunt.registerTask('build', ['jshint', 'concat', 'less:dist']);
 
