@@ -1,4 +1,4 @@
-# Angular Dataviz - Reliable, componentized data visualization controls for AngularJS
+# Angular Dataviz - componentized data visualization controls for AngularJS
 
 ***
 
@@ -12,7 +12,10 @@
 
 ## Installation
 
-The repository comes with the modules pre-built and compressed into the `build/` directory.
+```
+npm install
+bower install
+```
 
 ```javascript
 angular.module('myApp', ['dataviz']);
