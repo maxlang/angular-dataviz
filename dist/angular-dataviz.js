@@ -220,15 +220,13 @@ angular.module('dataviz', ['dataviz.directives']);
                   return translate(s.week * totalCellSize * WEEK_GROUPING, 0);
                 });
 
-          var LINE_X_OFFSET = -5;
-
           annotationSetG
             .append("line")
             .attr("y1", function(s) {
               var o = overlapCount[s.week] || 0;
               return - (o * annotationHeight + 10);
             })
-            .attr("y2", -LINE_X_OFFSET)
+            .attr("y2", -5)
             .attr('class', annotationClass);
 
           annotationSetG
@@ -261,7 +259,7 @@ angular.module('dataviz', ['dataviz.directives']);
             .attr('width', IMAGE_SIZE)
             .attr('height', IMAGE_SIZE)
             .attr('transform', function(ann, i) {
-              return translate(LINE_X_OFFSET + 1, -10);
+              return translate(-4, -10);
             });
 
           var annotationTextG = annotationG
