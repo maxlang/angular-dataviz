@@ -2,6 +2,10 @@ barchart .brush {
   fill: rgba(0, 0, 0, 0.3);
 }
 
+barchart .brush {
+  fill: rgba(0, 0, 0, 0.3);
+}
+
 block-calendar {
   display: block;
   position: relative;

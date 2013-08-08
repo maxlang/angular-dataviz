@@ -7,10 +7,10 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
     },
     template: '<div id="map_canvas" ui-map="myMap" class="map" ui-options="mapOptions"' +
 //        'ui-event="{}"' +
-      ' ui-event="{\'map-bounds_changed\': \'boundsChanged($event, $params)\', \'map-deactivate\': \'dragEnd($event, $params)\' }"' +
+      ' ui-event="{\'bounds_changed\': \'boundsChanged($event, $params)\', \'map-deactivate\': \'dragEnd($event, $params)\' }"' +
 //    'ui-options="mapOptions">' +
     '></div>',
-    'controller': ['$scope', function ($scope) {
+    'controller': ['$scope', '$timeout', function ($scope, $timeout) {
       $scope.myMarkers = [];
       $scope.myMap = {};
 
@@ -20,13 +20,16 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
         mapOptions: {
           center: new google.maps.LatLng(39.232253,-98.539124),
           zoom: 4,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
         },
         alwaysRedraw: false,
         weightsBasedOnBounds: false,
         latKey: 'lat',
-        lngKey: 'lng'
+        lngKey: 'lng',
+        weightKey: 'weight'
       };
+
+      google.maps.visualRefresh = true;
 
       var options = defaultOptions;
 
@@ -40,11 +43,19 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
       var bounds = null;
 
       $scope.boundsChanged = function() {
+        $scope.$apply(function() {$scope.params.bounds = $scope.myMap.getBounds();});
+
         if ((!bounds && $scope.myMap.getBounds()) || options.alwaysRedraw) {
           bounds = $scope.myMap.getBounds();
           redrawMarkers($scope.data);
         }
       };
+
+      $timeout(function() {
+        google.maps.event.addListener($scope.myMap, 'bounds_changed', function() {
+          $scope.boundsChanged();
+        });
+      });
 
       $scope.$watch('params.filter', function(f) {
         if (f) {
@@ -127,6 +138,7 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
             console.log('KeyDragZoom Ended: ', bnds);
             var ne = bnds.getNorthEast();
             var sw = bnds.getSouthWest();
+            // TODO: broken at the international date line or the poles - FIXME
             $scope.$apply(function() {
               Array.prototype.splice.apply($scope.params.filter[options.latKey], [0, $scope.params.filter[options.latKey].length].concat([[Math.min(sw.lat(), ne.lat()), Math.max(sw.lat(), ne.lat())]]));
               Array.prototype.splice.apply($scope.params.filter[options.lngKey], [0, $scope.params.filter[options.lngKey].length].concat([[Math.min(sw.lng(), ne.lng()), Math.max(sw.lng(), ne.lng())]]));
@@ -135,13 +147,14 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
           });
         }
 
+        // todo: assumes a single selection
         function filterContains(filter, point) {
-          return filter[options.latKey] &&
-              filter[options.lngKey] &&
-              filter[options.lngKey][0] <= point.lng() &&
-              point.lng() <= filter[options.lngKey][1] &&
-              filter[options.latKey][0] <= point.lat() &&
-              point.lat() <= filter[options.latKey][1];
+          return !_.isEmpty(filter[options.latKey]) &&
+              !_.isEmpty(filter[options.lngKey]) &&
+              filter[options.lngKey][0][0] <= point.lng() &&
+              point.lng() <= filter[options.lngKey][0][1] &&
+              filter[options.latKey][0][0] <= point.lat() &&
+              point.lat() <= filter[options.latKey][0][1];
         }
 
         if (data) {
@@ -151,10 +164,11 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
                 }
                 var l = new google.maps.LatLng(d[options.latKey], d[options.lngKey]);
                 return $scope.myMap.getBounds() &&
-                    $scope.myMap.getBounds().contains(l) && filterContains($scope.params.filter, l);
+                    ($scope.myMap.getBounds().contains(l) || !options.weightsBasedOnBounds) &&
+                    filterContains($scope.params.filter, l);
 
               }).map(function(d) {
-                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d.weight || 1};
+                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d[options.weightKey] || 1};
               }).value();
 
           var deselectedLocations = _(data).filter(function(d) {
@@ -164,7 +178,7 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
             var l = new google.maps.LatLng(d[options.latKey], d[options.lngKey]);
             return $scope.myMap.getBounds() && ($scope.myMap.getBounds().contains(l) || !options.weightsBasedOnBounds) && !filterContains($scope.params.filter, l);
           }).map(function(d) {
-                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d.weight || 1};
+                  return {location: new google.maps.LatLng(d[options.latKey], d[options.lngKey]), weight: d[options.weightKey] || 1};
               }).value();
 
 
@@ -182,13 +196,15 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
             if (options.cluster) {
               _.each(selectedLocations, function(l) {
                 $scope.selectedMarkers.push(new google.maps.Marker({
-                  position: l.location
+                  position: l.location,
+                  title: String(l.weight)
                 }));
               });
 
               _.each(deselectedLocations, function(l) {
                 $scope.deselectedMarkers.push(new google.maps.Marker({
-                  position: l.location
+                  position: l.location,
+                  title: String(l.weight)
                 }));
               });
               if (selMC) {
@@ -203,10 +219,13 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
                 style.textDecoration = 'underline';
               });
               selMC.setStyles(styles);
+              selMC.setZoomOnClick(false);
+
               if (deselMC) {
                 deselMC.clearMarkers();
               }
               deselMC = new MarkerClusterer($scope.myMap, $scope.deselectedMarkers);
+              deselMC.setZoomOnClick(false);
             } else {
               _.each(selectedLocations, function(l) {
                 $scope.myMarkers.push(new google.maps.Marker({

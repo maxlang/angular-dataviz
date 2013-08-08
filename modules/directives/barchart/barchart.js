@@ -15,7 +15,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             'widthPx' : 586,
             'heightPx' : 286,
             'padding': 2,
-            'margins': {top:10, left: 10, bottom:20, right: 10},
+            'margins': {top:10, left: 30, bottom:20, right: 10},
             'domain' : 'auto',
             'range' : 'auto',
             'bars' : null,
@@ -135,9 +135,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               scope.brush.x(x);
 
               var xAxis = d3.svg.axis().scale(x).orient("bottom");
+              var yAxis = d3.svg.axis().scale(y).orient("left");
+
 
 
               g.selectAll('rect').data(data).enter().append('rect')
+                  .classed('bar', true)
                   .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
                   .attr('y', function(d, i) { return y(d.value); })
                   .attr('width', barWidth)
@@ -145,10 +148,15 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                   .attr('stroke-width', getOption('padding')+'px');
 
 
-              var axis =   svg.append("g")
+              var xaxis =   svg.append("g")
                   .attr("class", "x axis")
                   .attr("transform", "translate(" + margins.left + ", " + (h + margins.top) + ")")
                   .call(xAxis);
+
+              var yaxis =   svg.append("g")
+                  .attr("class", "y axis")
+                  .attr("transform", "translate(" + margins.left + ", " + (margins.top) + ")")
+                  .call(yAxis);
 
               var brush = g.append("g")
                   .attr("class", "x brush")
@@ -166,12 +174,16 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             }, true);
 
             scope.$watch('params.filter', function(f) {
-              console.log('setting brush');
-              setBrush(f[0]);
+              if (f) {
+                console.log('setting brush');
+                setBrush(f[0]);
+              }
             }, true);
 
             scope.$watch('params.options', function() {
-              drawChart(scope.data);
+              if (scope.data) {
+                drawChart(scope.data);
+              }
             }, true);
 
         }
