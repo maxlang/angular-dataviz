@@ -84,7 +84,8 @@ angular.module('dataviz', ['dataviz.directives']);
           widthPx: 586, //TODO:
           heightPx: 106,
           endTime: Date.now(),
-          numAnnotationsShownPerGroup: 3
+          numAnnotationsShownPerGroup: 3,
+          annotationColumns: 8
         };
 
         //TODO: better way to handle options, esp option merging
@@ -129,9 +130,9 @@ angular.module('dataviz', ['dataviz.directives']);
           var WEEK_GROUPING = 1;
           var ANNOTATION_TEXT_HEIGHT = 13;
           var ANNOTATION_LINES = 2;
-          var MAX_TITLE_LEN = 18;
           var ANNOTATION_Y_SPACING = 9;
-          var ANNOTATION_COLS = 8;
+          var ANNOTATION_COLS = getOption('annotationColumns');
+          var MAX_TITLE_LEN = Math.floor(ANNOTATION_COLS * 1.5);
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
