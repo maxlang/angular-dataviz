@@ -2,8 +2,18 @@ barchart .brush {
   fill: rgba(0, 0, 0, 0.3);
 }
 
-barchart .brush {
-  fill: rgba(0, 0, 0, 0.3);
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.7;
+}
+.grid path {
+  stroke-width: 0;
+}
+rect.bar {
+  fill: #2162a4;
+}
+rect.bar.selected {
+  fill: #13375b;
 }
 
 block-calendar {

@@ -15,11 +15,24 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         'widthPx' : 586,
         'heightPx' : 286,
         'padding': 2,
-        'margins': {top:10, left: 30, bottom:20, right: 10},
+        'margins': {top:10, left: null, bottom:20, right: 15},
 //        'domain' : [],
         'range' : 'auto',
         'bars' : null
       };
+
+      //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
+      function measure(text, classname) {
+        if(!text || text.length === 0) return {height: 0, width: 0};
+
+        var container = d3.select('body').append('svg').attr('class', classname);
+        container.append('text').attr({x: -1000, y: -1000}).text(text);
+
+        var bbox = container.node().getBBox();
+        container.remove();
+
+        return {height: bbox.height, width: bbox.width};
+      }
 
 
 
@@ -89,6 +102,11 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
         var margins = getOption('margins');
 
+        margins.left = margins.left || 20 + _.max(_.map(_.pluck(data, 'key'), function(key) {
+          var size = measure(key, "y axis").width;
+          return size;
+        }));
+
         var w = width - margins.left - margins.right;
         var h = height - margins.top - margins.bottom;
 
@@ -96,13 +114,6 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         var barPadding = getOption('padding');
 
         var barWidth = (h/bars) - barPadding;
-
-        var svg = d3.select(element[0]).select('svg');
-
-        var g = svg.append('g')
-            .attr('width', w)
-            .attr('height', h)
-            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
 
         var y;
         var x;
@@ -128,26 +139,64 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         }
 
 
-
-
 //              scope.brush.x(x);
 
         var xAxis = d3.svg.axis().scale(x).orient("bottom");
         var yAxis = d3.svg.axis().scale(y).orient("left");
 
+        var svg = d3.select(element[0]).select('svg');
+
+
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(" + margins.left + ", " + (margins.top + h) + ")")
+            .call(d3.svg.axis().scale(x).orient("bottom")
+                .tickSize(-height, 0, 0)
+                .tickFormat("")
+            );
+
+        var g = svg.append('g')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
+
+
+        function setSelectedLabels(labels) {
+          var args = [0, scope.params.filter.length].concat(labels);
+          Array.prototype.splice.apply(scope.params.filter, args);
+        }
 
 
         g.selectAll('rect').data(data).enter().append('rect')
             .classed('bar', true)
-//            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
             .attr('y', function(d, i) { return y(d.key);})
             .attr('x', 0)
-//            .attr('x', function(d, i) { return x(d.value); })
-//            .attr('width', barWidth)
             .attr('width', function(d, i) { return  x(d.value);})
             .attr('height', Math.abs(y.rangeBand()))
-//            .attr('height', function (d, i) { return h - y(d.value); })
-            .attr('stroke-width', getOption('padding')+'px');
+            .attr('stroke-width', getOption('padding')+'px')
+            .classed('selected', function(d, i) {
+              return _.contains(scope.params.filter, d.key);
+            })
+            .on('click', function(d, i) {
+              if( _.contains(scope.params.filter, d.key) ) {
+                if(scope.shifted) {
+                  setSelectedLabels(_.without(scope.params.filter, d.key));
+                } else {
+                  g.selectAll('rect.selected').classed('selected', false);
+                  setSelectedLabels([]);
+                }
+                d3.select(this).classed('selected', false);
+              } else {
+                if(scope.shifted) {
+                  scope.params.filter.push(d.key);
+                  setSelectedLabels(scope.params.filter);
+                } else {
+                  g.selectAll('rect.selected').classed('selected', false);
+                  setSelectedLabels([d.key]);
+                }
+                d3.select(this).classed('selected', true);
+              }
+            });
 
 
         var xaxis =   svg.append("g")
@@ -159,6 +208,8 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             .attr("class", "y axis")
             .attr("transform", "translate(" + margins.left + ", " + (margins.top) + ")")
             .call(yAxis);
+
+
 
 //        var brush = g.append("g")
 //            .attr("class", "x brush")

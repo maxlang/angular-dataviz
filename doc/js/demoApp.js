@@ -248,7 +248,7 @@ module
       };
 
       // BAR CHART 1
-      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records, 'state', sti, 'name', null, 0, countCombine));
+      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records, 'state', /*sti*/ null, 'name', null, 0, countCombine));
 
       $scope.bar1params = {};
 
@@ -276,7 +276,7 @@ module
         if (filterKey !== "eaterFilter") {
           $scope.$watch('filters.' + filterKey, function () {
             var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
-            $scope.bar1data = d3.entries(reduce(records, 'state', sti, 'name', null, 0, countCombine));
+            $scope.bar1data = d3.entries(reduce(records, 'state', /*sti*/ null, 'name', null, 0, countCombine));
           }, true);
         }
       }
