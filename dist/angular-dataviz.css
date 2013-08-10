@@ -26,8 +26,8 @@ block-calendar .x.axis text {
   text-anchor: left;
 }
 block-calendar text {
-  opacity: 0.7;
-  font-weight: bold;
+  opacity: 1.0;
+  font-weight: normal;
 }
 block-calendar .container {
   padding: 18px 20px 17px 25px;
@@ -202,27 +202,27 @@ block-calendar .annotation0 circle {
   fill: #ff0000;
 }
 block-calendar .annotation1 text {
-  fill: #00bafb;
+  fill: #0096dc;
 }
 block-calendar .annotation1 line {
-  stroke: #00bafb;
+  stroke: #0096dc;
 }
 block-calendar .annotation1 circle {
-  stroke: #00bafb;
-  fill: #00bafb;
+  stroke: #0096dc;
+  fill: #0096dc;
 }
 block-calendar .annotation2 text {
-  fill: #66b132;
+  fill: #529d1e;
 }
 block-calendar .annotation2 line {
-  stroke: #66b132;
+  stroke: #529d1e;
 }
 block-calendar .annotation2 circle {
-  stroke: #66b132;
-  fill: #66b132;
+  stroke: #529d1e;
+  fill: #529d1e;
 }
 block-calendar .annotation-date text {
-  fill: #bbb;
+  fill: #888;
   font-weight: normal;
 }
 
