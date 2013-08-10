@@ -167,7 +167,9 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
         function setSelectedLabels(labels) {
           var args = [0, scope.params.filter.length].concat(labels);
-          Array.prototype.splice.apply(scope.params.filter, args);
+          scope.$apply(function() {
+            Array.prototype.splice.apply(scope.params.filter, args);
+          });
         }
 
 
