@@ -132,7 +132,7 @@ angular.module('dataviz', ['dataviz.directives']);
           var ANNOTATION_LINES = 2;
           var ANNOTATION_Y_SPACING = 9;
           var ANNOTATION_COLS = getOption('annotationColumns');
-          var MAX_TITLE_LEN = Math.floor(ANNOTATION_COLS * 1.5);
+          var MAX_TITLE_LEN = Math.floor(ANNOTATION_COLS * 1.8);
 
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
