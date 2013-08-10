@@ -211,7 +211,8 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         'widthPx' : 586,
         'heightPx' : 286,
         'padding': 2,
-        'margins': {top:10, left: null, bottom:20, right: 15},
+        'margins': {top:10, left: 20, bottom:20, right: 15},
+        'autoMargin': true,
 //        'domain' : [],
         'range' : 'auto',
         'bars' : null
@@ -298,10 +299,13 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
         var margins = getOption('margins');
 
-        margins.left = margins.left || 20 + _.max(_.map(_.pluck(data, 'key'), function(key) {
-          var size = measure(key, "y axis").width;
-          return size;
-        }));
+        if (getOption('autoMargin')) {
+          margins.left = 20 + _.max(_.map(_.pluck(data, 'key'), function(key) {
+            var size = measure(key, "y axis").width;
+            return size;
+          })) || 20;
+          margins.left = margins.left === -Infinity ? 0 : margins.left;
+        }
 
         var w = width - margins.left - margins.right;
         var h = height - margins.top - margins.bottom;
