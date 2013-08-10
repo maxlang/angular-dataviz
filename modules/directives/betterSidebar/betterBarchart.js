@@ -132,7 +132,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
 
         if(r === 'auto') {
-          var xMax = data[0].value;
+          var xMax = data.length > 0 ? data[0].value : 1;
           x = d3.scale.linear().domain([0, xMax]).range([0, w]);
         } else {
           x = d3.scale.linear().domain(r).range([0, w]);
