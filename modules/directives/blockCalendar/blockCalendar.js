@@ -256,7 +256,7 @@
             .attr('width', IMAGE_SIZE)
             .attr('height', IMAGE_SIZE)
             .attr('transform', function(ann, i) {
-              return translate(-4, -10);
+              return translate(-4.5, -10);
             });
 
           var annotationTextG = annotationG
