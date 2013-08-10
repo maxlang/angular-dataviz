@@ -483,242 +483,243 @@ angular.module('dataviz', ['dataviz.directives']);
 angular.module('dataviz.directives')
   .directive('viz-gridstr', function($timeout) {
     return {
-         restrict: 'E',
-         link: function($scope, $element, $attributes, $controller) {
-           var gridster;
-           var ul = $element.find('ul');
-           var defaultOptions = {
-                 widget_margins: [5, 5],
-                 widget_base_dimensions: [70, 70]
-         };
-       var options = angular.extend(defaultOptions, $scope.$eval($attributes.options));
+      restrict: 'E',
+      link: function($scope, $element, $attributes, $controller) {
+        var gridster;
+        var ul = $element.find('ul');
+        var defaultOptions = {
+          widget_margins: [5, 5],
+          widget_base_dimensions: [70, 70]
+        };
+        var options = angular.extend(defaultOptions, $scope.$eval($attributes.options));
 
-           $timeout(function() {
-               gridster = ul.gridster(options).data('gridster');
+        $timeout(function() {
+          gridster = ul.gridster(options).data('gridster');
 
-                   gridster.options.draggable.stop = function(event, ui) {
-                   //update model
-                       angular.forEach(ul.find('li'), function(item, index) {
-                           var li = angular.element(item);
-                           if (li.attr('class') === 'preview-holder') {
-                               return;
-                             }
-                           var widget = $scope.model[index];
-                           widget.row = li.attr('data-row');
-                           widget.col = li.attr('data-col');
-                         });
-                   $scope.$apply();
-                 };
-             });
+          gridster.options.draggable.stop = function(event, ui) {
+            //update model
+            angular.forEach(ul.find('li'), function(item, index) {
+              var li = angular.element(item);
+              if (li.attr('class') === 'preview-holder') {
+                return;
+              }
+              var widget = $scope.model[index];
+              widget.row = li.attr('data-row');
+              widget.col = li.attr('data-col');
+            });
+            $scope.$apply();
+          };
+        });
 
-           var attachElementToGridster = function(li) {
-           //attaches a new element to gridster
-               var $w = li.addClass('gs_w').appendTo(gridster.$el).hide();
-           gridster.$widgets = gridster.$widgets.add($w);
-           gridster.register_widget($w).add_faux_rows(1).set_dom_grid_height();
-           $w.fadeIn();
-         };
-       $scope.$watch('model.length', function(newValue, oldValue) {
-           if (newValue !== oldValue+1) {
-               return; //not an add
-             }
-           var li = ul.find('li').eq(newValue-1); //latest li element
-           $timeout(function() { attachElementToGridster(li); }); //attach to gridster
-         });
-     }
-     };
-    }).directive('widget', function() {
-     return {
-           restrict: 'E',
-           scope: { widgetModel: '=' },
-       replace: true,
-           template:
-        '<li data-col="{{widgetModel.col}}" data-row="{{widgetModel.row}}" data-sizex="{{widgetModel.sizex}}" data-sizey="{{widgetModel.sizey}}">'+
-            '<div class="dynamic-visualization"><header><h2><input type="text" ng-model="zzzz"></h2> </header><barchart property-id="{{zzzz}}"></barchart></div>'+
-            '</li>',
-          link: function($scope, $element, $attributes, $controller) {
-        }
+        var attachElementToGridster = function(li) {
+          //attaches a new element to gridster
+          var $w = li.addClass('gs_w').appendTo(gridster.$el).hide();
+          gridster.$widgets = gridster.$widgets.add($w);
+          gridster.register_widget($w).add_faux_rows(1).set_dom_grid_height();
+          $w.fadeIn();
+        };
+        $scope.$watch('model.length', function(newValue, oldValue) {
+          if (newValue !== oldValue+1) {
+            return; //not an add
+          }
+          var li = ul.find('li').eq(newValue-1); //latest li element
+          $timeout(function() { attachElementToGridster(li); }); //attach to gridster
+        });
+      }
     };
-    }).controller('MainCtrl', function($scope) {
+  })
+
+  .directive('widget', function() {
+    return {
+      restrict: 'E',
+      scope: { widgetModel: '=' },
+      replace: true,
+      template:
+      '<li data-col="{{widgetModel.col}}" data-row="{{widgetModel.row}}" data-sizex="{{widgetModel.sizex}}" data-sizey="{{widgetModel.sizey}}">'+
+        '<div class="dynamic-visualization"><header><h2><input type="text" ng-model="zzzz"></h2> </header><barchart property-id="{{zzzz}}"></barchart></div>'+
+        '</li>',
+      link: function($scope, $element, $attributes, $controller) {
+      }
+    };
+  }).controller('MainCtrl', function($scope) {
     $scope.widgets = [
       {text:'Widget #1', row:1, col:1, sizex:7, sizey:4},
       {text:'Widget #2', row:5, col:1, sizex:7, sizey:4}
-        ];
+    ];
 
-      $scope.addWidget = function() {
+    $scope.addWidget = function() {
       var randomSizex = 7;
       var randomSizey = 4;
       $scope.widgets.push({text:'Widget #'+($scope.widgets.length+1), row:1+($scope.widgets.length)*4, col:1, sizex:randomSizex, sizey:randomSizey});
     };
-    });
+  });
 
 angular.module('dataviz.directives').directive('nvBarchart', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-          //TODO: change expected values to something more reasonable
-            'data': '=', //expects an array of selected label strings
-            'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
-        },
-        link: function(scope, element, attributes) {
+  return {
+    restrict: 'E',
+    scope: {
+      //TODO: change expected values to something more reasonable
+      'data': '=', //expects an array of selected label strings
+      'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
+    },
+    link: function(scope, element, attributes) {
+      var defaultOptions = {
+        'tooltips' : false,
+        'showValues': true,
+        'staggerLabels': true,
+        'widthPx' : 586,
+        'heightPx' : 286
+      };
 
-          var defaultOptions = {
-            'tooltips' : false,
-            'showValues': true,
-            'staggerLabels': true,
-            'widthPx' : 586,
-            'heightPx' : 286
-          };
-
-          //TODO: better way to handle options, esp option merging
-          function getOption(optionName) {
-            return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
-          }
-
-
-          //INIT:
-          element.append("<svg></svg>");
-
-          function setSelectedLabels(labels) {
-            scope.$apply(function () {
-              var args = [0, scope.params.filter.length].concat(labels);
-              Array.prototype.splice.apply(scope.params.filter, args);
-            });
-          }
-
-          $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
-
-            function drawChart(data) {
-              data = [{
-                key:"Key",
-                values:data
-              }];
+      //TODO: better way to handle options, esp option merging
+      function getOption(optionName) {
+        return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
+      }
 
 
-              element.find("svg").width(getOption('widthPx'));
-              element.find("svg").height(getOption('heightPx'));
+      //INIT:
+      element.append("<svg></svg>");
 
-              nv.addGraph(function() {
-                var chart = nv.models.discreteBarChart()
-                    .x(function(d) { return d.key; })
-                    .y(function(d) { return d.value; })
-                    .staggerLabels(true)
-                    .tooltips(false)
-                    .showValues(true);
+      function setSelectedLabels(labels) {
+        scope.$apply(function () {
+          var args = [0, scope.params.filter.length].concat(labels);
+          Array.prototype.splice.apply(scope.params.filter, args);
+        });
+      }
 
-                d3.select(element[0]).select("svg")
-                    .datum(data)
-                    .transition().duration(500)
-                    .call(chart);
+      $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
-                setTimeout(function() {
-
-                d3.select(element[0]).selectAll('.nv-bar').classed("selected", function(d,i) {
-                  //TODO: HACK ATTACK
-                  var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
-                    var a_trans = a.transform.animVal.getItem(0).matrix.e;
-                    var b_trans = b.transform.animVal.getItem(0).matrix.e;
-                    return a_trans - b_trans;
-                  });
-                  var label = $(labels[i]).text();
-                  if(scope.params.filter) {
-                    var j;
-                    for(j=0;j<scope.params.filter.length;j++) {
-                      if(label === scope.params.filter[j]) {
-                        return true;
-                      }
-                    }
-                  }
-                  return false;
-                });
-                 },10);
-
-                d3.select(element[0]).selectAll('.nv-bar').on("click",function(d, i) {
-                  //TODO HACK to get around nvd3 not adding labels to the bars
-                  var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
-                    var a_trans = a.transform.animVal.getItem(0).matrix.e;
-                    var b_trans = b.transform.animVal.getItem(0).matrix.e;
-                    return a_trans - b_trans;
-                  });
-                  var label = $(labels[i]).text();
-                  if( d3.select(this).classed("selected")) {
-                    if(scope.shifted) {
-                      setSelectedLabels(_.without(scope.params.filter,label));
-                    } else {
-                      setSelectedLabels([]);
-                      d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
-                    }
-                  } else {
-                    if(scope.shifted) {
-                      scope.params.filter.push(label);
-                      setSelectedLabels(scope.params.filter);
-                    } else {
-                      setSelectedLabels([label]);
-                      d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
-                    }
-
-                  }
-                  //HACK: nvd3 seems to be overwriting this
-                  setTimeout(function() {
-                    //dThis.classed("selected", true);
-                    selectBars(scope.params.filter);
-                  }, 1);
-                });
-
-                nv.utils.windowResize(chart.update);
-
-                //TODO: add click handler
+      function drawChart(data) {
+        data = [{
+          key:"Key",
+          values:data
+        }];
 
 
-                return chart;
-              });
-            }
+        element.find("svg").width(getOption('widthPx'));
+        element.find("svg").height(getOption('heightPx'));
 
-          function selectBars(selected){
-            d3.select(element[0]).selectAll('.nv-bar').classed("selected",function(d, i) {
-              //TODO HACK to get around nvd3 not adding labels to the bars
+        nv.addGraph(function() {
+          var chart = nv.models.discreteBarChart()
+                .x(function(d) { return d.key; })
+                .y(function(d) { return d.value; })
+                .staggerLabels(true)
+                .tooltips(false)
+                .showValues(true);
+
+          d3.select(element[0]).select("svg")
+            .datum(data)
+            .transition().duration(500)
+            .call(chart);
+
+          setTimeout(function() {
+
+            d3.select(element[0]).selectAll('.nv-bar').classed("selected", function(d,i) {
+              //TODO: HACK ATTACK
               var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
                 var a_trans = a.transform.animVal.getItem(0).matrix.e;
                 var b_trans = b.transform.animVal.getItem(0).matrix.e;
-               return a_trans - b_trans;
+                return a_trans - b_trans;
               });
               var label = $(labels[i]).text();
-              return _.contains(selected, label);
-            });
-
-
-          }
-
-
-            scope.$watch('data',function(counts) {
-              if(counts!==undefined && counts!==null) {
-                drawChart(counts);
+              if(scope.params.filter) {
+                var j;
+                for(j=0;j<scope.params.filter.length;j++) {
+                  if(label === scope.params.filter[j]) {
+                    return true;
+                  }
+                }
               }
-            }, true);
+              return false;
+            });
+          },10);
 
-            scope.$watch('params.filter', function(f) {
-              selectBars(f);
-            }, true);
+          d3.select(element[0]).selectAll('.nv-bar').on("click",function(d, i) {
+            //TODO HACK to get around nvd3 not adding labels to the bars
+            var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
+              var a_trans = a.transform.animVal.getItem(0).matrix.e;
+              var b_trans = b.transform.animVal.getItem(0).matrix.e;
+              return a_trans - b_trans;
+            });
+            var label = $(labels[i]).text();
+            if( d3.select(this).classed("selected")) {
+              if(scope.shifted) {
+                setSelectedLabels(_.without(scope.params.filter,label));
+              } else {
+                setSelectedLabels([]);
+                d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
+              }
+            } else {
+              if(scope.shifted) {
+                scope.params.filter.push(label);
+                setSelectedLabels(scope.params.filter);
+              } else {
+                setSelectedLabels([label]);
+                d3.select(element[0]).selectAll("g.nv-bar").classed("selected", false);
+              }
 
-            scope.$watch('params.options', function() {
-              drawChart(scope.data);
-            }, true);
+            }
+            //HACK: nvd3 seems to be overwriting this
+            setTimeout(function() {
+              //dThis.classed("selected", true);
+              selectBars(scope.params.filter);
+            }, 1);
+          });
 
+          nv.utils.windowResize(chart.update);
+
+          //TODO: add click handler
+
+
+          return chart;
+        });
+      }
+
+      function selectBars(selected){
+        d3.select(element[0]).selectAll('.nv-bar').classed("selected",function(d, i) {
+          //TODO HACK to get around nvd3 not adding labels to the bars
+          var labels = d3.select(element[0]).selectAll('g.nv-x g.tick')[0].sort(function(a,b) {
+            var a_trans = a.transform.animVal.getItem(0).matrix.e;
+            var b_trans = b.transform.animVal.getItem(0).matrix.e;
+            return a_trans - b_trans;
+          });
+          var label = $(labels[i]).text();
+          return _.contains(selected, label);
+        });
+
+
+      }
+
+
+      scope.$watch('data',function(counts) {
+        if(counts!==undefined && counts!==null) {
+          drawChart(counts);
         }
-    };
+      }, true);
+
+      scope.$watch('params.filter', function(f) {
+        selectBars(f);
+      }, true);
+
+      scope.$watch('params.options', function() {
+        drawChart(scope.data);
+      }, true);
+
+    }
+  };
 }]);
 
 angular.module('dataviz.directives').directive('sidebar', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            'data': '=', //expects an array of selected label strings
-            'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
-        },
-        template: '<div class="sidebar-sizer"><div class="sidebars">' +
-                  '<ul>' +
+  return {
+    restrict: 'E',
+    scope: {
+      'data': '=', //expects an array of selected label strings
+      'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
+    },
+    template: '<div class="sidebar-sizer"><div class="sidebars">' +
+      '<ul>' +
       '<li ng-repeat="item in data|orderBy:value|limitTo:barLimit" ng-class="{selected: item.selected}"> '  +
-            '<div ng-click="select(item)" style="width:100%; position:relative">' +
+      '<div ng-click="select(item)" style="width:100%; position:relative">' +
       '<label>{{item.key}}</label>' +
       '<span class="value" style="width: {{(item.value/maxVal) * 100}}%"><span class="text">{{item.value}}</span></span>' +
       '<span class="cancel x" ng-show="item.selected"></span>' +
@@ -726,84 +727,80 @@ angular.module('dataviz.directives').directive('sidebar', [function() {
       '</li>' +
       '</ul>' +
       '</div></div>',
-        link: function(scope, element, attributes) {
+    link: function(scope, element, attributes) {
 
-          var defaultOptions = {
-            'barLimit' : 5
-          };
+      var defaultOptions = {
+        'barLimit' : 5
+      };
 
-          //TODO: better way to handle options, esp option merging
-          function getOption(optionName) {
-            return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
+      //TODO: better way to handle options, esp option merging
+      function getOption(optionName) {
+        return (scope.params && scope.params.options && scope.params.options[optionName]) || defaultOptions[optionName];
+      }
+
+      //INIT:
+      scope.barLimit =getOption('barLimit');
+
+      $(document).on('keyup keydown', function(e) {
+        scope.shifted = e.shiftKey; return true;
+      });
+
+      function setSelectedLabels(labels) {
+        var args = [0, scope.params.filter.length].concat(labels);
+        Array.prototype.splice.apply(scope.params.filter, args);
+      }
+
+      scope.select = function(item) {
+        if( item.selected) {
+          if(scope.shifted) {
+            setSelectedLabels(_.without(scope.params.filter, item.key));
+          } else {
+            setSelectedLabels([]);
           }
-
-
-          //INIT:
-          scope.barLimit =getOption('barLimit');
-
-          $(document).on('keyup keydown', function(e){
-            scope.shifted = e.shiftKey; return true;}
-          );
-
-          function setSelectedLabels(labels) {
-            var args = [0, scope.params.filter.length].concat(labels);
-            Array.prototype.splice.apply(scope.params.filter, args);
+        } else {
+          if(scope.shifted) {
+            scope.params.filter.push(item.key);
+            setSelectedLabels(scope.params.filter);
+          } else {
+            setSelectedLabels([item.key]);
           }
-
-
-
-             scope.select = function(item) {
-               if( item.selected) {
-                 if(scope.shifted) {
-                   setSelectedLabels(_.without(scope.params.filter, item.key));
-                 } else {
-                   setSelectedLabels([]);
-                 }
-               } else {
-                 if(scope.shifted) {
-                   scope.params.filter.push(item.key);
-                   setSelectedLabels(scope.params.filter);
-                 } else {
-                   setSelectedLabels([item.key]);
-                 }
-
-               }
-               _.each(scope.data, function(datum) {
-                 datum.selected = _.contains(scope.params.filter, datum.key);
-               });
-
-             };
-
-
-
-            scope.$watch('data',function(counts) {
-              console.log("data!");
-              if(counts!==undefined && counts!==null) {
-                //update the max value
-                scope.maxVal = _.max(counts,function(v) {return v.value; }).value;
-                _.each(counts, function(count) {
-                  count.selected = _.contains(scope.params.filter, count.key);
-                });
-              }
-            }, true);
-
-            scope.$watch('params.options', function() {
-              //TODO: UPDATE WIDTH/HEIGHT OF CONTAINER HERE
-              var w = getOption("widthPx");
-              if(w) {
-                element.find(".sidebar-sizer").width(w);
-              }
-              var h = getOption("heightPx");
-              if(h) {
-                element.find(".sidebar-sizer").height(h);
-                if(!scope.params.options.barLimit) {
-                  scope.barLimit = Math.floor(h/25);
-                } else {
-                  scope.barLimit = scope.params.options.barLimit;
-                }
-              }
-            }, true);
 
         }
-    };
+        _.each(scope.data, function(datum) {
+          datum.selected = _.contains(scope.params.filter, datum.key);
+        });
+
+      };
+
+
+
+      scope.$watch('data',function(counts) {
+        console.log("data!");
+        if(counts!==undefined && counts!==null) {
+          //update the max value
+          scope.maxVal = _.max(counts,function(v) {return v.value; }).value;
+          _.each(counts, function(count) {
+            count.selected = _.contains(scope.params.filter, count.key);
+          });
+        }
+      }, true);
+
+      scope.$watch('params.options', function() {
+        //TODO: UPDATE WIDTH/HEIGHT OF CONTAINER HERE
+        var w = getOption("widthPx");
+        if(w) {
+          element.find(".sidebar-sizer").width(w);
+        }
+        var h = getOption("heightPx");
+        if(h) {
+          element.find(".sidebar-sizer").height(h);
+          if(!scope.params.options.barLimit) {
+            scope.barLimit = Math.floor(h/25);
+          } else {
+            scope.barLimit = scope.params.options.barLimit;
+          }
+        }
+      }, true);
+    }
+  };
 }]);
