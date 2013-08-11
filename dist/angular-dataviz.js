@@ -223,7 +223,9 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
     scope: {
       //TODO: change expected values to something more reasonable
       'data': '=', //expects an array of selected label strings
-      'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
+      'data2': '=',
+      'params' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
+      'filter2' : '='
     },
     link: function(scope, element, attributes) {
 
@@ -308,7 +310,9 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 //            setSelected(scope.brush.extent());
 //          }
 
-      function drawChart(data) {
+      var firstFilter = true;
+
+      function drawChart(data, data2) {
 
         element.html('');
         element.append("<svg></svg>");
@@ -383,7 +387,6 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             .attr('height', h)
             .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
 
-
         function setSelectedLabels(labels) {
           var args = [0, scope.params.filter.length].concat(labels);
           scope.$apply(function() {
@@ -391,6 +394,67 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
           });
         }
 
+        function clickFn(d) {
+          var filter = firstFilter ? scope.params.filter : scope.filter2;
+          var selClass = firstFilter ? 'selected' : 'selected2';
+
+          if( _.contains(filter, d.key) ) {
+            if(scope.shifted) {
+              setSelectedLabels(_.without(filter, d.key));
+            } else {
+              g.selectAll('rect.' + selClass).classed(selClass, false);
+              setSelectedLabels([]);
+            }
+            d3.select(this).classed(selClass, false);
+          } else {
+            if(scope.shifted) {
+              filter.push(d.key);
+              setSelectedLabels(filter);
+            } else {
+              g.selectAll('rect.' + selClass).classed(selClass, false);
+              setSelectedLabels([d.key]);
+            }
+            d3.select(this).classed(selClass, true);
+          }
+        }
+
+        if (data2) {
+
+          var mergedData =_.merge(_.cloneDeep(data), data2, function(d1, d2) {
+            var values = [d1.value, d2.value];
+            return {key: d1.key || d2.key, values:values};
+          });
+
+         var rectHolder = g.selectAll('g').data(mergedData).enter().append('g')
+            .classed('bar-holder', true)
+            .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
+            .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
+            .attr('height', Math.abs(y.rangeBand()))
+            .classed('selected', function(d, i) {
+              return _.contains(scope.params.filter, d.key);
+            })
+            .on('click', function(d, i) {
+              clickFn.call(this, d);
+            });
+
+          rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
+              .classed('bar d1', true)
+              .attr('y', function(d, i) {
+                return y(d.key);
+              })
+              .attr('x', 0)
+              .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0);})
+              .attr('height', Math.abs(y.rangeBand()))
+              .attr('stroke-width', getOption('padding')+'px');
+          rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
+              .classed('bar d2', true)
+              .attr('y', function(d, i) { return y(d.key);})
+              .attr('x', function(d) { return (d.values[0] ? x(d.values[0]) : 0);})
+              .attr('width', function(d, i) { return  (d.values[1] ? x(d.values[1]) : 0);})
+              .attr('height', Math.abs(y.rangeBand()))
+              .attr('stroke-width', getOption('padding')+'px');
+
+        } else {
 
         g.selectAll('rect').data(data).enter().append('rect')
             .classed('bar', true)
@@ -403,25 +467,25 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
               return _.contains(scope.params.filter, d.key);
             })
             .on('click', function(d, i) {
-              if( _.contains(scope.params.filter, d.key) ) {
-                if(scope.shifted) {
-                  setSelectedLabels(_.without(scope.params.filter, d.key));
-                } else {
-                  g.selectAll('rect.selected').classed('selected', false);
-                  setSelectedLabels([]);
-                }
-                d3.select(this).classed('selected', false);
-              } else {
-                if(scope.shifted) {
-                  scope.params.filter.push(d.key);
-                  setSelectedLabels(scope.params.filter);
-                } else {
-                  g.selectAll('rect.selected').classed('selected', false);
-                  setSelectedLabels([d.key]);
-                }
-                d3.select(this).classed('selected', true);
-              }
+              clickFn.call(this, d);
             });
+
+        }
+
+        if (scope.filter2) {
+          g.selectAll('rect.compare').data([0,1]).enter().append('rect')
+              .attr('x', function(d) {return w - (12 * d) + 2;})
+              .attr('y', -8)
+              .attr('width', 10)
+              .attr('height', 10)
+              .attr('stroke-width', 2)
+              .classed('compare', true)
+              .classed('d1', function(d) {return d;})
+              .classed('d2', function(d) {return !d;})
+              .on('click', function(d) {
+                firstFilter = d;
+              });
+        }
 
 
         var xaxis =   svg.append("g")
@@ -447,7 +511,13 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
       scope.$watch('data',function(counts) {
         if(counts!==undefined && counts!==null) {
-          drawChart(counts);
+          drawChart(counts, scope.data2);
+        }
+      }, true);
+
+      scope.$watch('data2',function() {
+        if(scope.data!==undefined && scope.data!==null) {
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
@@ -461,6 +531,12 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
       scope.$watch('params.options', function() {
         if (scope.data) {
           drawChart(scope.data);
+        }
+      }, true);
+
+      scope.$watch('filter2', function() {
+        if (scope.data) {
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
@@ -986,7 +1062,9 @@ angular.module('dataviz.directives').directive('sankey', [function() {
     scope: {
       //TODO: DOCUMENT BETTER
       'data': '=',   // expects an array of objects with an array of nodes and an array of links
-      'params' : '='   // a parameters object with the current filters, options, and highlighted data
+      'data2' : '=',
+      'params' : '=',   // a parameters object with the current filters, options, and highlighted data
+      'filter2' : '='
     },
     link: function(scope, element) {
       scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
@@ -1167,6 +1245,7 @@ angular.module('dataviz.directives').directive('sidebar', [function() {
         restrict: 'E',
         scope: {
             'data': '=', //expects an array of selected label strings
+            'data2': '=',
             'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
         },
         template: '<div class="sidebar-sizer"><div class="sidebars">' +

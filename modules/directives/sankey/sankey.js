@@ -9,7 +9,9 @@ angular.module('dataviz.directives').directive('sankey', [function() {
     scope: {
       //TODO: DOCUMENT BETTER
       'data': '=',   // expects an array of objects with an array of nodes and an array of links
-      'params' : '='   // a parameters object with the current filters, options, and highlighted data
+      'data2' : '=',
+      'params' : '=',   // a parameters object with the current filters, options, and highlighted data
+      'filter2' : '='
     },
     link: function(scope, element) {
       scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");

@@ -281,6 +281,8 @@ module
         }
       }
 
+      $scope.f2 = [];
+
       // BAR CHART 2
       $scope.bar2data = d3.entries(reduce($rootScope.dataObject.records, 'eaten', null, 'bites', null, 0, countCombine));
 

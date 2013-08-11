@@ -3,6 +3,7 @@ angular.module('dataviz.directives').directive('sidebar', [function() {
         restrict: 'E',
         scope: {
             'data': '=', //expects an array of selected label strings
+            'data2': '=',
             'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
         },
         template: '<div class="sidebar-sizer"><div class="sidebars">' +
