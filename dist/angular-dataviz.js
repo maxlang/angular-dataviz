@@ -356,7 +356,6 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 //        } else {
 //          x = d3.scale.linear().domain(d).range([0, w]);
 //        }
-        y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
         var mergedData = null;
         if (data2) {
 
@@ -373,8 +372,11 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
               mergedData[d.key] = {key: d.key, values: [null, d.value]};
             }
           });
+          d = _.pluck(mergedData, 'key');
 
         }
+
+        y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
 
         if (r === 'auto') {
           var xMax;
