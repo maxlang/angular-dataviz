@@ -168,10 +168,10 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             .attr('height', h)
             .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
 
-        function setSelectedLabels(labels) {
-          var args = [0, scope.params.filter.length].concat(labels);
+        function setSelectedLabels(filter, labels) {
+          var args = [0, filter.length].concat(labels);
           scope.$apply(function() {
-            Array.prototype.splice.apply(scope.params.filter, args);
+            Array.prototype.splice.apply(filter, args);
           });
         }
 
@@ -181,19 +181,19 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
           if( _.contains(filter, d.key) ) {
             if(scope.shifted) {
-              setSelectedLabels(_.without(filter, d.key));
+              setSelectedLabels(filter, _.without(filter, d.key));
             } else {
               g.selectAll('rect.' + selClass).classed(selClass, false);
-              setSelectedLabels([]);
+              setSelectedLabels(filter, []);
             }
             d3.select(this).classed(selClass, false);
           } else {
             if(scope.shifted) {
               filter.push(d.key);
-              setSelectedLabels(filter);
+              setSelectedLabels(filter, filter);
             } else {
               g.selectAll('rect.' + selClass).classed(selClass, false);
-              setSelectedLabels([d.key]);
+              setSelectedLabels(filter, [d.key]);
             }
             d3.select(this).classed(selClass, true);
           }
