@@ -201,7 +201,21 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
         if (data2) {
 
-          var mergedData =_.merge(_.cloneDeep(data), data2, function(d1, d2) {
+          var mergedData = {};
+
+          _.each(data, function(d) {
+              mergedData[d.key] = {key: d.key, values: [d.value]};
+          });
+
+          _.each(data2, function(d) {
+            if (mergedData[d.key]) {
+              mergedData[d.key].values[1] = d.value;
+            } else {
+              mergedData[d.key] = {key: d.key, values: [null, d.value]};
+            }
+          });
+
+          _.merge(_.cloneDeep(data), data2, function(d1, d2) {
             var values = [d1.value, d2.value];
             return {key: d1.key || d2.key, values:values};
           });
