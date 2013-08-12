@@ -59,10 +59,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
       scope.brush = d3.svg.brush()
           .on("brush", function() {brushed(scope.brush);})
+          .on("brushstart", function() {brushstart(scope.brush);})
           .on("brushend", function() {brushend(scope.brush);});
 
       scope.brush2 = d3.svg.brush()
           .on("brush", function() {brushed(scope.brush2);})
+          .on("brushstart", function() {brushstart(scope.brush2);})
           .on("brushend", function() {brushend(scope.brush2);});
 
 
