@@ -221,7 +221,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                 console.log(h - y(d.values[0]));
                 console.log(h - y(d.values[0]) + h - y(d.values[0]));
                 console.log('f', h - (h - y(d.values[0]) + h - y(d.values[0])));
-                return (h - ((h - (d.values[0] ? y(d.values[0]) : 0)) + (h - (d.values[1] ? y(d.values[1]) : 0))));
+                return (h - ((h - (d.values[0] ? y(d.values[0]) : h)) + (h - (d.values[1] ? y(d.values[1]) : h))));
               })
               .attr('stroke-width', getOption('padding')+'px');
 
