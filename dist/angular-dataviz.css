@@ -196,6 +196,7 @@ block-calendar .annotation0 text {
 }
 block-calendar .annotation0 line {
   stroke: #ff0000;
+  stroke-width: 2px;
 }
 block-calendar .annotation0 circle {
   stroke: #ff0000;
@@ -206,6 +207,7 @@ block-calendar .annotation1 text {
 }
 block-calendar .annotation1 line {
   stroke: #0096dc;
+  stroke-width: 2px;
 }
 block-calendar .annotation1 circle {
   stroke: #0096dc;
@@ -216,6 +218,7 @@ block-calendar .annotation2 text {
 }
 block-calendar .annotation2 line {
   stroke: #529d1e;
+  stroke-width: 2px;
 }
 block-calendar .annotation2 circle {
   stroke: #529d1e;
