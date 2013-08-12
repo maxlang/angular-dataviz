@@ -294,7 +294,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       scope.$watch('params.filter', function(f) {
         if (f) {
           console.log('setting brush');
-          setBrush(f[0]);
+          setBrush(scope.brush, f[0]);
         }
       }, true);
 
@@ -304,9 +304,10 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         }
       }, true);
 
-      scope.$watch('filter2', function() {
-        if (scope.data) {
-          drawChart(scope.data, scope.data2);
+      scope.$watch('filter2', function(f) {
+        if (f) {
+          console.log('setting brush');
+          setBrush(scope.brush2, f[0]);
         }
       }, true);
 
