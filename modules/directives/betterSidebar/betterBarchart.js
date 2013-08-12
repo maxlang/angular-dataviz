@@ -21,7 +21,8 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         'autoMargin': true,
 //        'domain' : [],
         'range' : 'auto',
-        'bars' : null
+        'bars' : null,
+         'filterSelector' : false
       };
 
       //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
@@ -49,49 +50,10 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
       //INIT:
       element.append("<svg></svg>");
 
-      function setSelected(extent) {
-        scope.$apply(function () {
-          scope.params.filter.splice(0, scope.params.filter.length, extent);
-        });
-      }
-
-//          function setBrush(extent) {
-//            if (!extent) {
-//              scope.brush.clear();
-//            } else {
-//              scope.brush.extent(extent);
-//            }
-//            var brush = d3.select(element[0]).select('.x.brush');
-//            scope.brush(brush);
-//          }
-
       $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
-//          scope.brush = d3.svg.brush()
-//              .on("brush", brushed)
-//              .on("brushend", brushend);
 
-//          function brushed() {
-//            var extent = scope.brush.extent();
-//            if (getOption('snap') && extent && extent.length === 2) {
-//              var domain = getOption('domain');
-//              var buckets = getOption('bars');
-//              var range = domain[1] - domain[0];
-//              var step = range/buckets;
-//              extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
-//              scope.brush.extent(extent);
-//              scope.brush(d3.select(this)); //apply change
-//            }
-//
-//            if (getOption('realtime')) {
-//              setSelected(extent);
-//            }
-//          }
-//          function brushend() {
-//            setSelected(scope.brush.extent());
-//          }
-
-      var firstFilter = true;
+      scope.params.filterNum = 0;
 
       function drawChart(data, data2) {
 
@@ -206,8 +168,8 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         }
 
         function clickFn(d) {
-          var filter = firstFilter ? scope.params.filter : scope.filter2;
-          var selClass = firstFilter ? 'selected' : 'selected2';
+          var filter = scope.params.filterNum ? scope.filter2 : scope.params.filter;
+          var selClass = scope.params.filterNum ? 'selected2' : 'selected';
 
           if( _.contains(filter, d.key) ) {
             if(scope.shifted) {
@@ -239,6 +201,9 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             .classed('selected', function(d, i) {
               return _.contains(scope.params.filter, d.key);
             })
+           .classed('selected2', function(d, i) {
+             return _.contains(scope.filter2, d.key);
+           })
             .on('click', function(d, i) {
               clickFn.call(this, d);
             });
@@ -278,7 +243,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
         }
 
-        if (scope.filter2) {
+        if (scope.filter2 && getOption('filterSelector')) {
           g.selectAll('rect.compare').data([0,1]).enter().append('rect')
               .attr('x', function(d) {return w - (12 * d) + 2;})
               .attr('y', -8)
@@ -289,7 +254,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
               .classed('d1', function(d) {return d;})
               .classed('d2', function(d) {return !d;})
               .on('click', function(d) {
-                firstFilter = d;
+                scope.params.filterNum = d;
               });
         }
 
