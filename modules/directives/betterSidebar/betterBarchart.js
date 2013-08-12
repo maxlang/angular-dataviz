@@ -138,9 +138,36 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 //          x = d3.scale.linear().domain(d).range([0, w]);
 //        }
         y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
+        var mergedData = null;
+        if (data2) {
 
-        if(r === 'auto') {
-          var xMax = data.length > 0 ? data[0].value : 1;
+          mergedData = {};
+
+          _.each(data, function(d) {
+            mergedData[d.key] = {key: d.key, values: [d.value]};
+          });
+
+          _.each(data2, function(d) {
+            if (mergedData[d.key]) {
+              mergedData[d.key].values[1] = d.value;
+            } else {
+              mergedData[d.key] = {key: d.key, values: [null, d.value]};
+            }
+          });
+
+        }
+
+        if (r === 'auto') {
+          var xMax;
+          if (mergedData) {
+            xMax = _.max(mergedData, function(d) {
+              return (d.values[0] || 0) + (d.values[1] || 0);
+            });
+          } else {
+            xMax = data.length > 0 ? data[0].value : 1;
+          }
+
+
           x = d3.scale.linear().domain([0, xMax]).range([0, w]);
         } else {
           x = d3.scale.linear().domain(r).range([0, w]);
@@ -200,20 +227,6 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         }
 
         if (data2) {
-
-          var mergedData = {};
-
-          _.each(data, function(d) {
-              mergedData[d.key] = {key: d.key, values: [d.value]};
-          });
-
-          _.each(data2, function(d) {
-            if (mergedData[d.key]) {
-              mergedData[d.key].values[1] = d.value;
-            } else {
-              mergedData[d.key] = {key: d.key, values: [null, d.value]};
-            }
-          });
 
          var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
             .classed('bar-holder', true)
