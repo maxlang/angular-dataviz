@@ -215,7 +215,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             }
           });
 
-         var rectHolder = g.selectAll('g').data(mergedData).enter().append('g')
+         var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
             .classed('bar-holder', true)
             .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
             .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
