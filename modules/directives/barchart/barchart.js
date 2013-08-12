@@ -39,46 +39,61 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       //INIT:
       element.append("<svg></svg>");
 
-      function setSelected(extent) {
+      function setSelected(filter, extent) {
         scope.$apply(function () {
-          scope.params.filter.splice(0, scope.params.filter.length, extent);
+          filter.splice(0, filter.length, extent);
         });
       }
 
-      function setBrush(extent) {
+      function setBrush(brush, extent) {
         if (!extent) {
-          scope.brush.clear();
+          brush.clear();
         } else {
-          scope.brush.extent(extent);
+          brush.extent(extent);
         }
-        var brush = d3.select(element[0]).select('.x.brush');
-        scope.brush(brush);
+        var b = d3.select(element[0]).select('.x.brush');
+        brush(b);
       }
 
       $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
       scope.brush = d3.svg.brush()
-          .on("brush", brushed)
-          .on("brushend", brushend);
+          .on("brush", function() {brushed(scope.brush);})
+          .on("brushend", function() {brushend(scope.brush);});
 
-      function brushed() {
-        var extent = scope.brush.extent();
+      scope.brush2 = d3.svg.brush()
+          .on("brush", function() {brushed(scope.brush2);})
+          .on("brushend", function() {brushend(scope.brush2);});
+
+
+      function brushed(brush) {
+        if ((brush === scope.brush && scope.filterNum) || (brush === scope.brush2 && !scope.filterNum)) {
+          brush.extent(brush.oldExtent);
+          brush(d3.select(this));
+        }
+
+        var extent = brush.extent();
         if (getOption('snap') && extent && extent.length === 2) {
           var domain = getOption('domain');
           var buckets = getOption('bars');
           var range = domain[1] - domain[0];
           var step = range/buckets;
           extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
-          scope.brush.extent(extent);
-          scope.brush(d3.select(this)); //apply change
+          brush.extent(extent);
+          brush(d3.select(this)); //apply change
         }
 
         if (getOption('realtime')) {
-          setSelected(extent);
+          setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, extent);
         }
       }
-      function brushend() {
-        setSelected(scope.brush.extent());
+
+      function brushstart(brush) {
+        brush.oldExtent = brush.extent();
+      }
+
+      function brushend(brush) {
+        setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, brush.extent());
       }
 
       //also in betterBarchart.js - move to a util module
@@ -189,6 +204,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
 
         scope.brush.x(x);
+        scope.brush2.x(x);
+
 
         var xAxis = d3.svg.axis().scale(x).orient("bottom");
         var yAxis = d3.svg.axis().scale(y).orient("left");
@@ -249,6 +266,13 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var brush = g.append("g")
             .attr("class", "x brush")
             .call(scope.brush)
+            .selectAll("rect")
+            .attr("y", -6)
+            .attr("height", h+8);
+
+        var brush2 = g.append("g")
+            .attr("class", "x brush2")
+            .call(scope.brush2)
             .selectAll("rect")
             .attr("y", -6)
             .attr("height", h+8);

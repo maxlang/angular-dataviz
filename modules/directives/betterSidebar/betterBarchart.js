@@ -306,6 +306,12 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         }
       }, true);
 
+      scope.$watch('params.filter', function() {
+        if (scope.data) {
+          drawChart(scope.data, scope.data2);
+        }
+      }, true);
+
       scope.$watch('filter2', function() {
         if (scope.data) {
           drawChart(scope.data, scope.data2);
