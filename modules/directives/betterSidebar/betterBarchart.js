@@ -185,6 +185,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
               setSelectedLabels(filter, filter);
             } else {
               g.selectAll('rect.' + selClass).classed(selClass, false);
+              g.selectAll('g.' + selClass).classed(selClass, false);
               setSelectedLabels(filter, [d.key]);
             }
             d3.select(this).classed(selClass, true);
