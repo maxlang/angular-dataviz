@@ -8,7 +8,9 @@ angular.module('dataviz.directives').directive('barchart', [function() {
     scope: {
       //TODO: change expected values to something more reasonable
       'data': '=', //expects an array of selected label strings
-      'params' : '='  // expects an array of {key:<lable>,value:<count>} pairs
+      'data2': '=',
+      'params' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
+      'filter2' : '='
     },
     link: function(scope, element, attributes) {
 
@@ -25,7 +27,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         'range' : 'auto',
         'bars' : null,
         'realtime' : true,
-        'snap' : false
+        'snap' : false,
+        'filterSelector' : false
       };
 
 
@@ -96,7 +99,9 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         return {height: bbox.height, width: bbox.width};
       }
 
-      function drawChart(data) {
+      scope.params.filterNum = 0;
+
+      function drawChart(data, data2) {
 
         element.html('');
         element.append("<svg></svg>");
@@ -139,17 +144,45 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var d = getOption('domain');
         var r = getOption('range');
 
+        var mergedData = null;
+        if (data2) {
+
+          mergedData = {};
+
+          _.each(data, function(d) {
+            mergedData[d.key] = {key: d.key, values: [d.value]};
+          });
+
+          _.each(data2, function(d) {
+            if (mergedData[d.key]) {
+              mergedData[d.key].values[1] = d.value;
+            } else {
+              mergedData[d.key] = {key: d.key, values: [null, d.value]};
+            }
+          });
+//          d = _.pluck(mergedData, 'key');
+
+        }
+
         if(d === 'auto') {
 
-          var xMax = _.max(_.pluck(data, 'key'));
-          var xMin = _.min(_.pluck(data, 'key'));
+          var xMax = _.max(_.pluck(data, 'key')).key;
+          var xMin = _.min(_.pluck(data, 'key')).key;
           x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
         } else {
           x = d3.scale.linear().domain(d).range([0, w]);
         }
 
         if(r === 'auto') {
-          var yMax = data[0].value;
+          var yMax;
+          if (mergedData) {
+            var yMaxObj = _.max(mergedData, function(d) {
+              return (d.values[0] || 0) + (d.values[1] || 0);
+            });
+            yMax = (yMaxObj.values && (yMaxObj.values[0] || 0) + (yMaxObj.values[1] || 0)) || 1;
+          } else {
+            yMax = data[0].value;
+          }
           //var yMin = data[data.length - 1].value;
           y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
         } else {
@@ -164,9 +197,40 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var xAxis = d3.svg.axis().scale(x).orient("bottom");
         var yAxis = d3.svg.axis().scale(y).orient("left");
 
+        if (data2) {
+
+          var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
+              .classed('bar-holder', true);
+//              .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
+//              .attr('width', barWidth)
+//              .attr('height', function(d,i) { return (d.values[0] ? (h - y(d.values[0])) : 0) + (d.values[1] ? (h - y(d.values[1])) : 0); });
+
+          rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
+              .classed('bar d1', true)
+              .attr('y', function(d, i) { return d.values[0] ? y(d.values[0]) : 0; })
+              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+              .attr('width', barWidth)
+              .attr('height', function(d, i) { return d.values[0] ? (h - y(d.values[0])): 0; })
+              .attr('stroke-width', getOption('padding')+'px');
+          rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
+              .classed('bar d2', true)
+              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+              .attr('height', function(d, i) { return d.values[1] ? (h - y(d.values[1])): 0; })
+              .attr('width', barWidth)
+              .attr('y', function(d, i) {
+                console.log(h - y(d.values[0]));
+                console.log(h - y(d.values[0]) + h - y(d.values[0]));
+                console.log('f', h - (h - y(d.values[0]) + h - y(d.values[0])));
+                return (h - ((h - (d.values[0] ? y(d.values[0]) : 0)) + (h - (d.values[1] ? y(d.values[1]) : 0))));
+              })
+              .attr('stroke-width', getOption('padding')+'px');
 
 
-        g.selectAll('rect').data(data).enter().append('rect')
+
+        } else {
+
+
+          g.selectAll('rect').data(data).enter().append('rect')
             .classed('bar', true)
             .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
             .attr('y', function(d, i) { return y(d.value); })
@@ -174,6 +238,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .attr('height', function(d, i) { return h - y(d.value); })
             .attr('stroke-width', getOption('padding')+'px');
 
+        }
 
         var xaxis =   svg.append("g")
             .attr("class", "x axis")
@@ -196,7 +261,13 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
       scope.$watch('data',function(counts) {
         if(counts!==undefined && counts!==null) {
-          drawChart(counts);
+          drawChart(counts, scope.data2);
+        }
+      }, true);
+
+      scope.$watch('data2',function(counts) {
+        if(scope.data) {
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
@@ -209,7 +280,13 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
       scope.$watch('params.options', function() {
         if (scope.data) {
-          drawChart(scope.data);
+          drawChart(scope.data, scope.data2);
+        }
+      }, true);
+
+      scope.$watch('filter2', function() {
+        if (scope.data) {
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
@@ -343,7 +420,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         if (r === 'auto') {
           var xMax;
           if (mergedData) {
-            xMaxObj = _.max(mergedData, function(d) {
+            var xMaxObj = _.max(mergedData, function(d) {
               return (d.values[0] || 0) + (d.values[1] || 0);
             });
             xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;

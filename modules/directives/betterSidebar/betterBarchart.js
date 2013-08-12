@@ -124,7 +124,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
         if (r === 'auto') {
           var xMax;
           if (mergedData) {
-            xMaxObj = _.max(mergedData, function(d) {
+            var xMaxObj = _.max(mergedData, function(d) {
               return (d.values[0] || 0) + (d.values[1] || 0);
             });
             xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;
