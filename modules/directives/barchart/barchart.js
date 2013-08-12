@@ -51,27 +51,27 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         } else {
           brush.extent(extent);
         }
-        var b = d3.select(element[0]).select('.x.brush');
-        brush(b);
+        brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
       }
 
       $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
       scope.brush = d3.svg.brush()
-          .on("brush", function() {brushed(scope.brush);})
+          .on("brush", function() {brushed(scope.brush, this);})
           .on("brushstart", function() {brushstart(scope.brush);})
           .on("brushend", function() {brushend(scope.brush);});
 
       scope.brush2 = d3.svg.brush()
-          .on("brush", function() {brushed(scope.brush2);})
+          .on("brush", function() {brushed(scope.brush2, this);})
           .on("brushstart", function() {brushstart(scope.brush2);})
           .on("brushend", function() {brushend(scope.brush2);});
 
 
       function brushed(brush) {
-        if ((brush === scope.brush && scope.filterNum) || (brush === scope.brush2 && !scope.filterNum)) {
+        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
           brush.extent(brush.oldExtent);
-          brush(d3.select(this));
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
+          return;
         }
 
         var extent = brush.extent();
@@ -82,7 +82,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var step = range/buckets;
           extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
           brush.extent(extent);
-          brush(d3.select(this)); //apply change
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2')); //apply change
         }
 
         if (getOption('realtime')) {
@@ -95,6 +95,11 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       }
 
       function brushend(brush) {
+        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
+          brush.extent(brush.oldExtent);
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
+          return;
+        }
         setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, brush.extent());
       }
 
@@ -147,6 +152,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var svg = d3.select(element[0]).select('svg');
 
         var g = svg.append('g')
+            .classed('main', true)
             .attr('width', w)
             .attr('height', h)
             .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
@@ -246,12 +252,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
 
           g.selectAll('rect').data(data).enter().append('rect')
-            .classed('bar', true)
-            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
-            .attr('y', function(d, i) { return y(d.value); })
-            .attr('width', barWidth)
-            .attr('height', function(d, i) { return h - y(d.value); })
-            .attr('stroke-width', getOption('padding')+'px');
+              .classed('bar', true)
+              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+              .attr('y', function(d, i) { return y(d.value); })
+              .attr('width', barWidth)
+              .attr('height', function(d, i) { return h - y(d.value); })
+              .attr('stroke-width', getOption('padding')+'px');
 
         }
 
@@ -265,12 +271,6 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .attr("transform", "translate(" + margins.left + ", " + (margins.top) + ")")
             .call(yAxis);
 
-        var brush = g.append("g")
-            .attr("class", "x brush")
-            .call(scope.brush)
-            .selectAll("rect")
-            .attr("y", -6)
-            .attr("height", h+8);
 
         var brush2 = g.append("g")
             .attr("class", "x brush2")
@@ -279,7 +279,22 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .attr("y", -6)
             .attr("height", h+8);
 
+        var brush = g.append("g")
+            .attr("class", "x brush")
+            .call(scope.brush)
+            .selectAll("rect")
+            .attr("y", -6)
+            .attr("height", h+8);
+
       }
+
+      scope.$watch('params.filterNum', function(fn) {
+        if (fn) {
+          $(element[0]).find('g.x.brush2').appendTo($('g.main'));
+        } else {
+          $(element[0]).find('g.x.brush').appendTo($('g.main'));
+        }
+      });
 
       scope.$watch('data',function(counts) {
         if(counts!==undefined && counts!==null) {
