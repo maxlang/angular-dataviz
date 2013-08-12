@@ -127,7 +127,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
             xMaxObj = _.max(mergedData, function(d) {
               return (d.values[0] || 0) + (d.values[1] || 0);
             });
-            xMax = (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0);
+            xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;
           } else {
             xMax = data.length > 0 ? data[0].value : 1;
           }
@@ -302,7 +302,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
       scope.$watch('params.options', function() {
         if (scope.data) {
-          drawChart(scope.data);
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
