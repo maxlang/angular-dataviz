@@ -44,9 +44,15 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       element.append("<svg></svg>");
 
       function setSelected(filter, extent) {
-        scope.$apply(function () {
-          filter.splice(0, filter.length, extent);
-        });
+        if (!extent || _.isEmpty(extent) || extent[0] === extent[1]) {
+          scope.$apply(function () {
+            filter.splice(0, filter.length);
+          });
+        } else {
+          scope.$apply(function () {
+            filter.splice(0, filter.length, extent);
+          });
+        }
       }
 
       function setBrush(brush, extent) {
@@ -479,7 +485,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
 //              scope.brush.x(x);
 
-        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
         var yAxis = d3.svg.axis().scale(y).orient("left");
 
         var svg = d3.select(element[0]).select('svg');
@@ -1462,6 +1468,7 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
     restrict: 'E',
     scope: {
       'data': '=', //expects an array of objects with lat lng and weight
+      'data2': '=',
       'params' : '='
     },
     template: '<div id="map_canvas" ui-map="myMap" class="map" ui-options="mapOptions"' +

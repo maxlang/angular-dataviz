@@ -40,9 +40,15 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       element.append("<svg></svg>");
 
       function setSelected(filter, extent) {
-        scope.$apply(function () {
-          filter.splice(0, filter.length, extent);
-        });
+        if (!extent || _.isEmpty(extent) || extent[0] === extent[1]) {
+          scope.$apply(function () {
+            filter.splice(0, filter.length);
+          });
+        } else {
+          scope.$apply(function () {
+            filter.splice(0, filter.length, extent);
+          });
+        }
       }
 
       function setBrush(brush, extent) {

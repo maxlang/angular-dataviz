@@ -3,6 +3,7 @@ angular.module('dataviz.directives').directive('vizMap', [function() {
     restrict: 'E',
     scope: {
       'data': '=', //expects an array of objects with lat lng and weight
+      'data2': '=',
       'params' : '='
     },
     template: '<div id="map_canvas" ui-map="myMap" class="map" ui-options="mapOptions"' +

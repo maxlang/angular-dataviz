@@ -141,7 +141,7 @@ angular.module('dataviz.directives').directive('betterBarchart', [function() {
 
 //              scope.brush.x(x);
 
-        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
         var yAxis = d3.svg.axis().scale(y).orient("left");
 
         var svg = d3.select(element[0]).select('svg');
