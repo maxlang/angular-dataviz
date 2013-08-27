@@ -8,36 +8,32 @@ block-calendar {
     user-select: none;
   }
 
-
   .week-start {
-
     text {
       font-size: 8px;
       opacity: 0.3;
       text-anchor: middle;
     }
-
   }
 
   .week-start, .x.axis {
     text {
-
       &:hover {
         cursor: pointer;
         opacity: .9;
         fill: red;
       }
     }
-
   }
 
-  .x.axis text { text-anchor:left; }
+  .x.axis text {
+    text-anchor: left;
+  }
 
   text {
-    opacity: 0.7;
-    font-weight: bold;
+    opacity: 1.0;
+    font-weight: normal;
   }
-
 
   display:block;
 //  .flexbox();
@@ -204,34 +200,43 @@ block-calendar {
       &:last-child, &:nth-child(2) { margin-left: 10px; }
     }
   }
-  .annotations {
-    @blue: rgb(0,186,251);
-    @green: rgb(102,177,50);
-    @spanOffset: 2px;
-    margin: 15px 12px 0 34px;
-//    .flexbox();
-    li {
-//      .flex(1);
-      font-size: 0.75em;
-      line-height: 1.2em;
-      font-weight: bold;
-      position: relative;
 
-      span {
-        font-size: 0.8em;
-        color: rgb(192,192,192);
-        display: block;
-        margin-top: -1*@spanOffset;
-      }
-      &.introduced {
-        color: @blue;
-        span.pointer { display: none; }
-      }
-      &.last-comm {
-        color: @blue;
-        text-align: right;
-        span.pointer { display: none; }
-      }
+  @blue: rgb(0,150,220);
+  @green: rgb(82,157,30);
+  @red: red;
+
+  .annotation (@annotationColor) {
+    text {
+      fill: @annotationColor;
+    }
+
+    line {
+      stroke: @annotationColor;
+      stroke-width: 2px;
+    }
+
+    circle {
+      stroke: @annotationColor;
+      fill: @annotationColor;
+    }
+  }
+
+  .annotation0 {
+    .annotation(@red);
+  }
+
+  .annotation1 {
+    .annotation(@blue);
+  }
+
+  .annotation2 {
+    .annotation(@green);
+  }
+
+  .annotation-date {
+    text {
+      fill: #888;
+      font-weight: normal;
     }
   }
 }

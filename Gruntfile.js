@@ -53,7 +53,8 @@ module.exports = function (grunt) {
     },
     jshint: {
       options: {
-        jshintrc: '.jshintrc'
+        jshintrc: '.jshintrc',
+        force: true
       },
       src: {
         src: ['modules/**/*.js', '!modules/**/test/*.js']
@@ -63,7 +64,8 @@ module.exports = function (grunt) {
       }
     },
     watch: {
-      files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less'],
+      files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less',
+              'doc/**/*.js', 'doc/**/*.css', 'doc/*.html'],
       tasks: ['build', 'test'],
       options: {
         livereload: 35730
@@ -72,7 +74,7 @@ module.exports = function (grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default', ['build', 'test']);
+  grunt.registerTask('default', ['build', 'test', 'concat', 'less:dist']);
 
   grunt.registerTask('build', ['jshint', 'concat', 'less:dist']);
 

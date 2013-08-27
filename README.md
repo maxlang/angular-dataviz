@@ -1,4 +1,4 @@
-# Angular Dataviz - Reliable, componentized data visualization controls for AngularJS
+# Angular Dataviz - componentized data visualization controls for AngularJS
 
 ***
 
@@ -11,8 +11,6 @@
 * **AngularJS v1.1.3+** is currently required.
 
 ## Installation
-
-The repository comes with the modules pre-built and compressed into the `build/` directory.
 
 ```javascript
 angular.module('myApp', ['dataviz']);

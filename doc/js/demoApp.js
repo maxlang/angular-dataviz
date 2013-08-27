@@ -15,7 +15,7 @@ function reduce(records, key, keyTransform, value, valueTransform, valueDefault,
     var k = (keyTransform && keyTransform(records[i][key])) || records[i][key];
     var v = (valueTransform && valueTransform(records[i][value])) || records[i][value];
     if (k in reducedRecords) {
-      reducedRecords[k] = combineFn(reducedRecords[k], v);
+      reducedRecords[k] = combineFn(reducedRecords[k],v);
     } else {
       reducedRecords[k] = combineFn(valueDefault, v);
     }
@@ -119,527 +119,281 @@ function mapTokvArray(map, keyName, valueName) {
   return array;
 }
 
-var module = angular.module('demoApp', ['dataviz'], function ($locationProvider) {
+var module = angular.module('demoApp', ['dataviz'], function($locationProvider) {
   $locationProvider.hashPrefix('');
   // Make code pretty
   window.prettyPrint && prettyPrint();
 });
 
 module
-    .directive('scrollto', [function () {
-      return function (scope, elm, attrs) {
-        elm.bind('click', function (e) {
-          e.preventDefault();
-          if (attrs.href) {
-            attrs.scrollto = attrs.href;
-          }
-          var top = $(attrs.scrollto).offset().top;
-          $('body,html').animate({ scrollTop: top }, 800);
-        });
-      };
-    }])
-
-    .filter('timestampToDay', [function () {
-      return function (input) {
-        console.log('filter');
-        console.log(input);
-        if (input === null || input === undefined) {
-          return [];
+  .directive('scrollto', [function() {
+    return function(scope, elm, attrs) {
+      elm.bind('click', function(e) {
+        e.preventDefault();
+        if (attrs.href) {
+          attrs.scrollto = attrs.href;
         }
-        var output = input.map(function (e) {
-          var d = new Date();
-          d.setTime(e.time);
-          return {
-            date: d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(),
-            count: e.bites
-          };
-        });
-        console.log(output);
-        return output;
-      };
-    }])
+        var top = $(attrs.scrollto).offset().top;
+        $('body,html').animate({ scrollTop: top }, 800);
+      });
+    };
+  }])
 
-    .filter('inView', [function () {
-      return function (records, filters, excludeFilter) {
-        var i;
-        var output = [];
-        for (i = 0; i < records.length; i++) {
-          var record = records[i];
-          var push = true;
-          var filterKey;
-          for (filterKey in filters) {
-            if (filterKey !== excludeFilter) {
-              push &= filters[filterKey].applyFilter(record);
-            }
-          }
-          if (push) {
-            output.push(record);
-          }
-        }
-        return output;
+  .filter('timestampToDay', [function() {
+    return function(input) {
+      console.log('filter');
+      console.log(input);
+      if (input===null || input===undefined) {
+        return [];
       }
-    }])
+      var output =  input.map(function(e) {
+        var d = new Date();
+        d.setTime(e.time);
+        return {
+          date: d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(),
+          count: e.bites
+        };
+      });
+      console.log(output);
+      return output;
+    };
+  }])
+
+  .filter('inView', [function() {
+    return function(records, filters, excludeFilter) {
+      var i;
+      var output = [];
+      for(i=0;i<records.length;i++) {
+        var record = records[i];
+        var push = true;
+        var filterKey;
+        for(filterKey in filters) {
+          if (filterKey !== excludeFilter) {
+            push &= filters[filterKey].applyFilter(record);
+          }
+        }
+        if (push) {
+          output.push(record);
+        }
+      }
+      return output;
+    }
+  }])
 
 //TODO: stop using rootscope
 
-    .controller('dashboardCtrl', ['$scope', '$rootScope', '$filter', function ($scope, $rootScope, $filter) {
-      $scope.params = {};
+  .controller('dashboardCtrl', ['$scope','$rootScope', '$filter', function($scope, $rootScope, $filter) {
+    $scope.params = {};
 
-      ///CALENDAR 1
-      $scope.cal1data = d3.entries(reduce($rootScope.dataObject.records, 'time', timestampToDate, 'bites', null, 0, sumCombine));
+    ///CALENDAR 1
+    $scope.cal1data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,sumCombine));
 
-      $scope.cal1params = {};
+    $scope.cal1params = {};
 
-      $scope.cal1params.options = {};
-      $scope.cal1params.options.widthPx = 586;
+    $scope.cal1params.options = {};
+    $scope.cal1params.options.widthPx = 586;
+    $scope.cal1params.options.endTime = moment().add(1, 'months').valueOf();
 
-      $scope.params.dateFilter = [];
+    $scope.params.dateFilter = [];
 
-      $scope.cal1params.filter = $scope.params.dateFilter;
+    $scope.cal1params.filter = $scope.params.dateFilter;
 
-      //CALENDAR 2
-      $scope.cal2data = d3.entries(reduce($rootScope.dataObject.records, 'time', timestampToDate, 'bites', null, 0, countCombine));
+    var DAY_MS = 24 * 60 * 60 * 1000;
+    var WEEK_MS = 7 * DAY_MS;
 
-      $scope.cal2params = {};
+    var date1 = Date.now() - (60 * DAY_MS);
+    $scope.cal1params.annotations = [{
+      date: date1,
+      title: 'First Title',
+      subtitle: 'first subtitle',
+      path: '/test/a1.html',
+      imageUrl: 'http://www.gravatar.com/avatar/fcb28e2339af77da971f76c764965a76?size=100'
+    }, {
+      date: date1,
+      title: 'Second Title',
+      subtitle: 'second subtitle',
+      path: '/test/a2.html'
+    }, {
+      date: date1 - WEEK_MS,
+      title: 'Third Title',
+      subtitle: 'third subtitle',
+      path: '/test/a3.html'
+    }, {
+      date: date1 - (2 * WEEK_MS),
+      title: 'Third Title',
+      subtitle: 'third subtitle',
+      path: '/test/a3.html'
+    }, {
+      date: Date.now() - (120 * DAY_MS),
+      title: 'testo title 2',
+      subtitle: 'testo subtitle 2',
+      path: '/test/a4.html'
+    }, {
+      date: Date.now() - (180 * DAY_MS),
+      title: 'testo title 2 really long really long really long really long',
+      subtitle: 'testo subtitle 2',
+      path: '/test/a4.html'
+    }];
 
-      $scope.cal2params.filter = $scope.params.dateFilter;
+    //CALENDAR 2
+    $scope.cal2data = d3.entries(reduce($rootScope.dataObject.records,'time',timestampToDate,'bites',null,0,countCombine));
 
-      //NOTE: we avoid watches on the calendar filter by modifying the filter array instead of replacing it
+    $scope.cal2params = {};
 
-      // CALENDAR WATCHES
-      $scope.$watch('params.dateFilter', function (f) {
-        console.log("date filter change");
-        if (f.length > 0) {
-          $rootScope.filters.dateFilter.from = f[0][0];
-          $rootScope.filters.dateFilter.to = f[0][1];
-        } else {
-          $rootScope.filters.dateFilter.from = null;
-          $rootScope.filters.dateFilter.to = null;
-        }
-      }, true);
+    $scope.cal2params.filter = $scope.params.dateFilter;
 
-      $rootScope.$watch('filters.dateFilter', function (df) {
-        console.log("root date filter change");
-        if ($scope.params.dateFilter[0]) {
-          $scope.params.dateFilter[0][0] = df.from;
-          $scope.params.dateFilter[0][1] = df.to;
-        } else {
-          $scope.params.dateFilter[0] = [df.from, df.to];
-        }
-      }, true);
+    //NOTE: we avoid watches on the calendar filter by modifying the filter array instead of replacing it
 
-      // add a watch to all other filters
-      var filterKey;
-      for (filterKey in $rootScope.filters) {
-        if (filterKey !== "dateFilter") {
-          $scope.$watch('filters.' + filterKey, function () {
-            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
-            console.log(records);
-            $scope.cal1data = d3.entries(reduce(records, 'time', timestampToDate, 'bites', null, 0, sumCombine));
-            $scope.cal2data = d3.entries(reduce(records, 'time', timestampToDate, 'bites', null, 0, countCombine));
-          }, true);
+    // CALENDAR WATCHES
+    $scope.$watch('params.dateFilter', function(f) {
+      console.log("date filter change");
+      if (f.length > 0) {
+        $rootScope.filters.dateFilter.from = f[0][0];
+        $rootScope.filters.dateFilter.to = f[0][1];
+      } else {
+        $rootScope.filters.dateFilter.from = null;
+        $rootScope.filters.dateFilter.to = null;
+      }
+    }, true);
+
+    $rootScope.$watch('filters.dateFilter', function(df) {
+      console.log("root date filter change");
+      if ($scope.params.dateFilter[0]) {
+        $scope.params.dateFilter[0][0] = df.from;
+        $scope.params.dateFilter[0][1] = df.to;
+      } else {
+        $scope.params.dateFilter[0]=[df.from,df.to];
+      }
+    }, true);
+
+    // add a watch to all other filters
+    var filterKey;
+    for(filterKey in $rootScope.filters) {
+      if (filterKey !== "dateFilter") {
+        $scope.$watch('filters.'+filterKey, function() {
+          var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "dateFilter");
+          console.log(records);
+          $scope.cal1data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,sumCombine));
+          $scope.cal2data = d3.entries(reduce(records,'time',timestampToDate,'bites',null,0,countCombine));
+        }, true);
+      }
+    }
+
+
+    // BAR CHART 1
+    $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records,'eater',null,'bites',null,0,countCombine));
+
+    $scope.bar1params = {};
+
+    $scope.bar1params.filter = [];
+
+    $scope.$watch('bar1params.filter', function(val) {
+      if (val!==null && val!==undefined && val.length > 0) {
+        $rootScope.filters.eaterFilter.selected = val;
+      } else {
+        $rootScope.filters.eaterFilter.selected = null;
+      }
+    }, true);
+
+    //TODO: add watch on filters.eaterFilter
+
+    // add a watch to all other filters
+    var filterKey;
+    for(filterKey in $rootScope.filters) {
+      if (filterKey !== "eaterFilter") {
+        $scope.$watch('filters.'+filterKey, function() {
+          var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
+          $scope.bar1data = d3.entries(reduce(records,'eater',null,'bites',null,0,countCombine));
+        }, true);
+      }
+    }
+
+    // BAR CHART 2
+    $scope.bar2data = d3.entries(reduce($rootScope.dataObject.records,'eaten',null,'bites',null,0,countCombine));
+
+    $scope.bar2params = {};
+
+    $scope.bar2params.filter = [];
+
+    $scope.$watch('bar2params.filter', function(val) {
+      if (val!==null && val!==undefined && val.length > 0) {
+        $rootScope.filters.eatenFilter.selected = val;
+      } else {
+        $rootScope.filters.eatenFilter.selected = null;
+      }
+    }, true);
+
+    //TODO: add watch on filters.eatenFilter
+
+    // add a watch to all other filters
+    var filterKey;
+    for(filterKey in $rootScope.filters) {
+      if (filterKey !== "eatenFilter") {
+        $scope.$watch('filters.'+filterKey, function() {
+          var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eatenFilter");
+          $scope.bar2data = d3.entries(reduce(records,'eaten',null,'bites',null,0,countCombine));
+        }, true);
+      }
+    }
+  }])
+
+  .controller('GlobalDataCtrl',['$scope', '$rootScope', function($scope, $rootScope) {
+    $rootScope.dataObject = [];
+    $rootScope.filters = {
+      dateFilter:
+      {
+        to: null,
+        from: null,
+        applyFilter: function(r) { return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from); }
+      },
+      eaterFilter:
+      {
+        selected: null,
+        applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.eater)); }
+      },
+      eatenFilter:
+      {
+        selected: null,
+        applyFilter: function(r) { return (!this.selected || _.contains(this.selected, r.eaten)); }
+      }
+    };
+
+      var carnivores = ["Rex", "Allen", "Velossy"];
+      var herbivores = ["Stegosaurus", "Trice", "Bronta"];
+
+    var populate = function(dataObj) {
+      var today = new Date();
+      var dayInMilliseconds = 24*60*60*1000;
+      var end = today.getTime();
+      var start = end - 200 * dayInMilliseconds;
+      dataObj.records = [];
+      //TODO: irrelevant, but how do you make a good random time series?
+      for( ;start<=end;start+=dayInMilliseconds) {
+        var count = Math.floor(Math.pow(Math.random(), 3) * 10);
+        var i;
+        for (i=0;i<count;i++) {
+          var car = Math.floor(Math.random() * 3);
+          var veg = Math.floor(Math.random() * 3);
+          var bites = 1 + Math.floor(Math.random() * 3);
+          var time = start + Math.floor(Math.random() * dayInMilliseconds);
+          dataObj.records.push({
+            eater: carnivores[car],
+            eaten: herbivores[veg],
+            bites: bites,
+            time: time
+          })
+
         }
       }
+    }
 
-      var stateToInt = {};
-      var numStates = 1; //0 breaks reduce fn
-      var sti = function (v) {
-        return (v in stateToInt) ? stateToInt[v] : (stateToInt[v] = numStates++);
-      };
+    populate($scope.dataObject);
+  }])
 
-      // BAR CHART 1
-      $scope.bar1data = d3.entries(reduce($rootScope.dataObject.records, 'state', sti, 'name', null, 0, countCombine));
-
-      _.each($scope.bar1data, function(d) {
-        d.key = parseInt(d.key);
-      });
-
-      $scope.bar1params = {};
-
-      $scope.bar1params.filter = [];
-
-      $scope.bar1params.options = {
-        domain: [0, 7],
-        range: [0, 100*2],
-        bars: 7
-      };
-
-      $scope.$watch('bar1params.filter', function (val) {
-        if (val !== null && val !== undefined && val.length > 0) {
-          $rootScope.filters.eaterFilter.selected = val;
-        } else {
-          $rootScope.filters.eaterFilter.selected = null;
-        }
-      }, true);
-
-      //TODO: add watch on filters.eaterFilter
-
-      // add a watch to all other filters
-      var filterKey;
-      for (filterKey in $rootScope.filters) {
-        if (filterKey !== "eaterFilter") {
-          $scope.$watch('filters.' + filterKey, function () {
-            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eaterFilter");
-            $scope.bar1data = d3.entries(reduce(records, 'state', sti, 'name', null, 0, countCombine));
-            _.each($scope.bar1data, function(d) {
-              d.key = parseInt(d.key);
-            });
-          }, true);
-        }
-      }
-
-      $scope.f2 = [];
-
-      // BAR CHART 2
-      $scope.bar2data = d3.entries(reduce($rootScope.dataObject.records, 'eaten', null, 'bites', null, 0, countCombine));
-
-      $scope.bar2params = {};
-
-      $scope.bar2params.filter = [];
-
-      $scope.$watch('bar2params.filter', function (val) {
-        if (val !== null && val !== undefined && val.length > 0) {
-          $rootScope.filters.eatenFilter.selected = val;
-        } else {
-          $rootScope.filters.eatenFilter.selected = null;
-        }
-      }, true);
-
-      //TODO: add watch on filters.eatenFilter
-
-      // add a watch to all other filters
-      var filterKey;
-      for (filterKey in $rootScope.filters) {
-        if (filterKey !== "eatenFilter") {
-          $scope.$watch('filters.' + filterKey, function () {
-            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "eatenFilter");
-            $scope.bar2data = d3.entries(reduce(records, 'eaten', null, 'bites', null, 0, countCombine));
-          }, true);
-        }
-      }
-      //SANKEY
-
-      $scope.sankeyData = toNodesAndLinks($rootScope.dataObject.records, $rootScope.dataObject.records, 'state', null, "No contact", 0, countCombine);
-
-      var filterKey;
-      for (filterKey in $rootScope.filters) {
-        if (filterKey !== "sankeyFilter") {
-          $scope.$watch('filters.' + filterKey, function () {
-            var records = $filter('inView')($rootScope.dataObject.records, $rootScope.filters, "sankeyFilter");
-            $scope.sankeyData = toNodesAndLinks($rootScope.dataObject.records, records, 'state', null, "No contact", 0, countCombine);
-          }, true);
-        }
-      }
-
-
-    }])
-
-
-    .controller('GlobalDataCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-      $rootScope.dataObject = [];
-      $rootScope.filters = {
-        dateFilter: {
-          to: null,
-          from: null,
-          applyFilter: function (r) {
-            return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from);
-          }
-        },
-        eaterFilter: {
-          selected: null,
-          applyFilter: function (r) {
-            return (!this.selected || _.contains(this.selected, r.state));
-          }
-        },
-        eatenFilter: {
-          selected: null,
-          applyFilter: function (r) {
-            return (!this.selected || _.contains(this.selected, r.eaten));
-          }
-        }
-      }
-    }])
-
-    .controller('GlobalDataCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-      $rootScope.dataObject = [];
-      $rootScope.filters = {
-        dateFilter: {
-          to: null,
-          from: null,
-          applyFilter: function (r) {
-            return (!this.to || r.time < this.to) && (!this.from || r.time >= this.from);
-          }
-        },
-        eaterFilter: {
-          selected: null,
-          applyFilter: function (r) {
-            return (!this.selected || _.contains(this.selected, r.eater));
-          }
-        },
-        eatenFilter: {
-          selected: null,
-          applyFilter: function (r) {
-            return (!this.selected || _.contains(this.selected, r.eaten));
-          }
-        }
-      };
-
-      var dinosaurs = //["Rex", "Allen", "Velossy", "Stegosaurus", "Trice", "Bronta", "Tom", "Susan", "Ed", "Joe", "Bill", "Stacy", "Wilma", "Karl", "Pete", "Stan", "Lucy", "Jen", "Janet"];
-          [
-            "Les",
-            "Alyssa",
-            "Stephine",
-            "Hyo",
-            "Diann",
-            "Jamar",
-            "Rosina",
-            "Belen",
-            "Apryl",
-            "Nenita",
-            "Carmon",
-            "Laraine",
-            "Kelvin",
-            "Joaquina",
-            "Eddie",
-            "Raymond",
-            "Charles",
-            "Leontine",
-            "Jacinta",
-            "Tracie",
-            "Ivy",
-            "Corey",
-            "Julissa",
-            "Marisela",
-            "Donella",
-            "Lane",
-            "Shantay",
-            "Effie",
-            "Anisa",
-            "Yuette",
-            "Brenna",
-            "Golda",
-            "Fairy",
-            "Darrin",
-            "Evangeline",
-            "Marlin",
-            "Rodrigo",
-            "Suzanne",
-            "Elma",
-            "Launa",
-            "Tova",
-            "Tamie",
-            "Danyel",
-            "Georgann",
-            "Elna",
-            "Caterina",
-            "Faviola",
-            "Corrie",
-            "Morris",
-            "Nick",
-            "Catrina",
-            "Daphine",
-            "Tarsha",
-            "Carmelo",
-            "Shemeka",
-            "Jamel",
-            "Candice",
-            "Chelsea",
-            "Tommy",
-            "Sunny",
-            "Vance",
-            "Bee",
-            "Christin",
-            "Forrest",
-            "Meridith",
-            "Maybell",
-            "Veola",
-            "Randi",
-            "Francisco",
-            "Latoyia",
-            "Anna",
-            "Spencer",
-            "Louisa",
-            "Tova",
-            "Teresita",
-            "Cheryll",
-            "Walker",
-            "Brain",
-            "Newton",
-            "Lynna",
-            "Easter",
-            "Glynis",
-            "Afton",
-            "Grady",
-            "Dede",
-            "Bell",
-            "Coletta",
-            "Shana",
-            "Klara",
-            "Noemi",
-            "Mireille",
-            "Man",
-            "Frederic",
-            "Tifany",
-            "Steven",
-            "Tarra",
-            "Mirna",
-            "Ezra",
-            "Glenda",
-            "Lloyd"
-          ];
-
-
-      var states = ["No contact", "Resume", "Phone screen", "Phone screen 2", "Onsite interview", "Onsite interview 2", "Hired", "Rejected"];
-
-      var transitions = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [2, 4],
-        [3, 4],
-        [4, 5],
-        [4, 6],
-        [5, 6],
-        [1, 7],
-        [2, 7],
-        [3, 7],
-        [4, 7],
-        [5, 7]
-      ];
-
-      var phone = [1, 2];
-      var onsite = [3, 4, 5];
-      var reject = [8, 9, 10, 11, 12];
-      var hire = [6, 7];
-
-
-      var getGaussian = function (min, max) {
-        min = _.isNumber(min) && min || 0;
-        max = _.isNumber(max) && max || 1;
-        return min + ((Math.random() + Math.random() + Math.random()) * (max - min) / 3);
-      };
-
-      var populate = function (dataObj) {
-        var today = new Date();
-        var dayInMilliseconds = 24 * 60 * 60 * 1000;
-        var end = today.getTime();
-        var start = end - 200 * dayInMilliseconds;
-        var i, j;
-        var currentStates = {};
-
-        dataObj.records = [];
-        //TODO: irrelevant, but how do you make a good random time series?
-
-        var lastInterviewDay = start;
-        var onsiteCapped = false;
-        var phoneCapped = false;
-
-        for (; start <= end; start += dayInMilliseconds) {
-          var phoneInterviewDay = getGaussian(0, phoneCapped ? 5 : 10) < 2;
-          var onsiteInterviewDay = getGaussian(0, onsiteCapped ? 5 : 10) < 2;
-
-          if (phoneInterviewDay || onsiteInterviewDay) {
-            lastInterviewDay = start;
-          }
-
-          if (phoneInterviewDay) {
-            console.log('phone');
-            var phoneCount = 0;
-            for (i = 0; i < dinosaurs.length && phoneCount < 10; i++) {
-              if (currentStates[dinosaurs[i]] === states[1] || currentStates[dinosaurs[i]] === states[2] && getGaussian(0, 10) < 8) {
-                for (j = 0; j < phone.length; j++) {
-                  if (currentStates[dinosaurs[i]] === states[transitions[phone[j]][0]]) {
-                    dataObj.records.push({
-                      name: dinosaurs[i],
-                      time: start,
-                      state: states[transitions[phone[j]][1]]
-                    });
-                    currentStates[dinosaurs[i]] = states[transitions[phone[j]][1]];
-                    phoneCount++;
-                    break;
-                  }
-                }
-              }
-            }
-            if (phoneCount === 10) {
-              phoneCapped = true;
-            } else {
-              phoneCapped = false;
-            }
-          }
-
-          if (onsiteInterviewDay) {
-            console.log('onsite');
-            var onsiteCount = 0;
-            for (i = 0; i < dinosaurs.length && onsiteCount < 2; i++) {
-              if (currentStates[dinosaurs[i]] === states[1] || currentStates[dinosaurs[i]] === states[2] && getGaussian(0, 10) < 8) {
-                for (j = 0; j < onsite.length; j++) {
-                  if (currentStates[dinosaurs[i]] === states[transitions[onsite[j]][0]]) {
-                    dataObj.records.push({
-                      name: dinosaurs[i],
-                      time: start,
-                      state: states[transitions[onsite[j]][1]]
-                    });
-                    currentStates[dinosaurs[i]] = states[transitions[onsite[j]][1]];
-                    onsiteCount++;
-                    break;
-                  }
-                }
-              }
-            }
-            if (onsiteCount === 2) {
-              onsiteCapped = true;
-            } else {
-              onsiteCapped = false;
-            }
-          }
-
-
-          for (i = 0; i < dinosaurs.length; i++) {
-            if ((currentStates[dinosaurs[i]] === states[0] || currentStates[dinosaurs[i]] === undefined) && getGaussian(0, 10) < 2) {
-              dataObj.records.push({
-                name: dinosaurs[i],
-                time: start,
-                state: states[1]
-              });
-              currentStates[dinosaurs[i]] = states[1];
-            } else if (getGaussian(0, ((start - lastInterviewDay) / dayInMilliseconds)) > 2 && ((start - lastInterviewDay) / dayInMilliseconds) < 6) {
-              for (j = 0; j < reject.length; j++) {
-                if (currentStates[dinosaurs[i]] === states[transitions[reject[j]][0]] && getGaussian(0, 10) < 5) {
-                  console.log('reject');
-                  dataObj.records.push({
-                    name: dinosaurs[i],
-                    time: start,
-                    state: states[transitions[reject[j]][1]]
-                  });
-                  currentStates[dinosaurs[i]] = states[transitions[reject[j]][1]];
-                  break;
-                }
-              }
-            }
-            for (j = 0; j < hire.length; j++) {
-              if (currentStates[dinosaurs[i]] === states[transitions[hire[j]][0]] && getGaussian(0, 10) < 3) {
-                console.log('hire');
-                dataObj.records.push({
-                  name: dinosaurs[i],
-                  time: start,
-                  state: states[transitions[hire[j]][1]]
-                });
-                currentStates[dinosaurs[i]] = states[transitions[hire[j]][1]];
-                break;
-              }
-            }
-          }
-        }
-      };
-
-      populate($scope.dataObject);
-    }])
-
-    .filter('timestampToTime', function () {
-      return function (t) {
-        var d = new Date();
-        d.setTime(t);
-        return d.toDateString();
-      }
-    });
+  .filter('timestampToTime',function() {
+    return function(t) {
+      var d = new Date();
+      d.setTime(t);
+      return d.toDateString();
+    }
+  });

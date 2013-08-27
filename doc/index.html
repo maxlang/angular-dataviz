@@ -36,6 +36,7 @@
 
     <script src="../components/angular-ui-map/src/map.js"></script>
 
+
     <script src="../dist/angular-dataviz.js"></script>
     <script src="../components/google-code-prettify/src/prettify.js"></script>
     <script src="js/demoApp.js"></script>
@@ -196,23 +197,26 @@
           <!--{{dataObject.records[0]}} -->
           <div class="table-container" >
             <table class="table">
-                <thead>
-                <th>Name</th>
-                <th>State</th>
+              <thead>
+                <th>Eater Name</th>
+                <th>Number of Bites</th>
+                <th>Eaten Name</th>
                 <th>Time</th>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="record in dataObject.records|inView:filters">
-                    <td>
-                        {{record.name}}
-                    </td>
-                    <td>
-                        {{record.state}}
-                    </td>
-                    <td>
-                        {{record.time|timestampToTime}}
-                    </td>
-
+              </thead>
+              <tbody>
+                <tr ng-repeat="record in dataObject.records|inView:filters">
+                  <td>
+                    {{record.eater}}
+                  </td>
+                  <td>
+                    {{record.bites}}
+                  </td>
+                  <td>
+                    {{record.eaten}}
+                  </td>
+                  <td>
+                    {{record.time|timestampToTime}}
+                  </td>
                 </tr>
 
               </tbody>
@@ -224,14 +228,21 @@
               <!--<h1>Block Calendar</h1> -->
 
               <div ng-controller="dashboardCtrl">
-                  <input ng-model="cal1params.options.widthPx"></input>
-                  <!--<block-calendar data="cal1data" params="cal1params"></block-calendar>-->
-                  <block-calendar data="cal2data" params="cal2params"></block-calendar>
-                  <barchart data="bar1data" data2="bar1data" params="bar1params" filter2="f2"></better-barchart>
+                  <!--<input ng-model="cal1params.options.widthPx"></input>-->
+                  <!--&lt;!&ndash;<block-calendar data="cal1data" params="cal1params"></block-calendar>&ndash;&gt;-->
+                  <!--<block-calendar data="cal2data" params="cal2params"></block-calendar>-->
+                  <!--<barchart data="bar1data" data2="bar1data" params="bar1params" filter2="f2"></better-barchart>-->
                 <!--<sankey data="sankeyData"></sankey>-->
                  <!-- <nv-barchart data="bar2data" params="bar2params"></nv-barchart>
                   <nv-barchart data="bar2data" params="bar2params"></nv-barchart> -->
                   <!--<better-barcharr data="bar2data" params="bar2params"></sidebar>-->
+                <input ng-model="cal1params.options.widthPx"></input>
+                <block-calendar data="cal1data" params="cal1params"></block-calendar>
+                <block-calendar data="cal2data" params="cal2params"></block-calendar>
+                <nv-barchart data="bar1data" params="bar1params"></nv-barchart>
+                <!-- <nv-barchart data="bar2data" params="bar2params"></nv-barchart>
+                     <nv-barchart data="bar2data" params="bar2params"></nv-barchart> -->
+                <sidebar data="bar2data" params="bar2params"></sidebar>
               </div>
 
             </div>

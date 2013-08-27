@@ -4,11 +4,66 @@
   //TODO: add prefixes to directives
   //TODO: fix references to flexbox in css
 
-  angular.module('dataviz.directives').directive('blockCalendar', [function() {
-    function isNullOrUndefined(x) {
-      return _.isNull(x) || _.isUndefined(x);
+  function truncate(str, n) {
+    return str.length < n ? str : (str.substr(0, n) + '...');
+  }
+
+  function isNullOrUndefined(x) {
+    return _.isNull(x) || _.isUndefined(x);
+  }
+
+  function translate(x, y) {
+    return 'translate(' + x + ', ' + y + ')';
+  }
+
+  function overlapCounts(start, end, weekCounts, cols) {
+    var h = {};
+    var k = {};
+
+    function wc(x) {
+      return weekCounts[x] || 0;
     }
 
+    for (var i = end; i > start; --i) {
+      h[i] = (k[i] || 0) + wc(i);
+      //console.log('i', i, 'k[i]', k[i], 'wc(i)', wc(i), 'h[i]', h[i]);
+
+      if (wc(i) > 0) {
+        for (var j = i - 1; j > i - cols; --j) {
+          k[j] = h[i];
+        }
+      }
+    }
+
+    return h;
+  }
+
+//   function overlapCountsFwd(start, end, weekCounts) {
+//     var N = 3;
+//     var h = {};
+//     var k = {};
+
+//     function wc(x) {
+//       return weekCounts[x] || 0;
+//     }
+
+//     k[start] = 0;
+//     _.range(start, end).forEach(function(i) {
+//       h[i] = (k[i] || 0) + wc(i);
+//       console.log('i', i, 'k[i]', k[i], 'wc(i)', wc(i), 'h[i]', h[i]);
+
+//       if (wc(i) > 0) {
+//       _.range(i + 1, i + N).forEach(function(j) {
+//         //k[j] = (k[j] || 0) + wc(i);
+//         k[j] = h[i]; //+ wc(i);
+//       });
+//       }
+//     });
+
+//     return h;
+//   }
+
+  angular.module('dataviz.directives').directive('blockCalendar', [function() {
     return {
       restrict: 'E',
       scope: {
@@ -23,7 +78,10 @@
           cellSizePx: 13,
           cellBorderPx: 2,
           widthPx: 586, //TODO:
-          heightPx: 106
+          heightPx: 106,
+          endTime: Date.now(),
+          numAnnotationsShownPerGroup: 3,
+          annotationColumns: 8
         };
 
         //TODO: better way to handle options, esp option merging
@@ -32,11 +90,13 @@
             defaultOptions[optionName];
         }
 
+        var filter = (scope.params && scope.params.filter) ? scope.params.filter : [];
+
         //TODO: standardize how filters are changed (don't create a new object) - use extend?
         function setSelectedRanges(ranges) {
           scope.$apply(function () {
-            var args = [0, scope.params.filter.length].concat(ranges);
-            Array.prototype.splice.apply(scope.params.filter, args);
+            var args = [0, filter.length].concat(ranges);
+            Array.prototype.splice.apply(filter, args);
           });
         }
 
@@ -62,6 +122,14 @@
           var yAxisPx = 23;
           var xAxisPx = 25;
 
+          // Annotation settings.
+          var WEEK_GROUPING = 1;
+          var ANNOTATION_TEXT_HEIGHT = 13;
+          var ANNOTATION_LINES = 2;
+          var ANNOTATION_Y_SPACING = 9;
+          var ANNOTATION_COLS = getOption('annotationColumns');
+          var MAX_TITLE_LEN = Math.floor(ANNOTATION_COLS * 1.8);
+
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
 
@@ -71,14 +139,49 @@
 
           var columns = Math.floor(chartWidth/(totalCellSize));
 
+          var numAnnotationsShownPerGroup = getOption('numAnnotationsShownPerGroup');
+          var endTime = getOption('endTime');
+
+          var annotations = (scope.params && scope.params.annotations) ? scope.params.annotations : [];
+
           // current week counts as an extra column
-          var start = moment().subtract('weeks',columns - 1).startOf('week');
+          var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
-          var end = moment().startOf('day');
+          var end = moment(endTime).startOf('day');
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
           var maxCount = _.max(data, function(d) {return d.value;}).value;
+
+          function weeksFromStart(date) {
+            return moment(date).diff(start, 'weeks') + 2;
+          }
+
+          var annotationsByWeek = _(annotations)
+                .filter(function(a) {
+                  var ws = weeksFromStart(a.date);
+                  var we = moment(a.date).diff(end, 'weeks');
+                  // NOTE/TODO (em) first 2 weeks after 'start' are not rendered (?)
+                  return ws >= 2 && we <= 0;
+                })
+                .groupBy(function(a) {
+                  return Math.floor(weeksFromStart(a.date) / WEEK_GROUPING);
+                })
+                .map(function(anns, week) {
+                  return {
+                    week: parseInt(week, 10), // TODO why does this turn into string?
+                    annotations: _(anns).sortBy('date').take(numAnnotationsShownPerGroup).value()
+                  };
+                })
+                .value();
+
+          var weekCounts = {};
+          annotationsByWeek.forEach(function(s) {
+            weekCounts[s.week] = (weekCounts[s.week] || 0) + s.annotations.length;
+          });
+
+          var overlapCount = overlapCounts(0, weeksFromStart(end), weekCounts, ANNOTATION_COLS);
+          var maxOverlapHeight = _.max(_.values(overlapCount));
 
           //TODO: feels like there should be a better way
           var dataMapping = {};
@@ -95,13 +198,111 @@
           scope.svg = d3.select(element[0]).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
 
+          var annotationHeight = ANNOTATION_LINES * ANNOTATION_TEXT_HEIGHT + ANNOTATION_Y_SPACING;
+          var maxAnnotationLineLength = annotationHeight * maxOverlapHeight + 20;
+
+          function annotationClass(ann, i) {
+            return 'annotation' + (i % 3);
+          }
+
+          var annotationSetG = scope.svg
+                .append("g")
+                .attr('transform', translate(0, maxAnnotationLineLength))
+                .selectAll("text")
+                .data(annotationsByWeek)
+                .enter()
+                .append('g')
+                .attr('class', annotationClass)
+                .attr('transform', function(s) {
+                  return translate(s.week * totalCellSize * WEEK_GROUPING, 0);
+                });
+
+          annotationSetG
+            .append("line")
+            .attr("y1", function(s) {
+              var o = overlapCount[s.week] || 0;
+              return - (o * annotationHeight + 10);
+            })
+            .attr("y2", -5)
+            .attr('class', annotationClass);
+
+          annotationSetG
+            .append('circle')
+            .attr('r', 1)
+            .attr('class', annotationClass);
+
+          var annotationG = annotationSetG
+                .append('g')
+                .attr('transform', function(s) {
+                  var o = overlapCount[s.week] || 0;
+                  return translate(5, - (o - s.annotations.length + 1) * annotationHeight);
+                })
+                .selectAll("text")
+                .data(function(d) {
+                  return d.annotations.reverse();
+                })
+                .enter()
+                .append('g')
+                .attr('transform', function(ann, i) {
+                  return translate(0, -annotationHeight * i);
+                });
+
+          var IMAGE_SIZE = 30;
+          annotationG
+            .append('image')
+            .attr('xlink:href', function(d) {
+              return d.imageUrl;
+            })
+            .attr('width', IMAGE_SIZE)
+            .attr('height', IMAGE_SIZE)
+            .attr('transform', function(ann, i) {
+              return translate(-4, -10);
+            });
+
+          var annotationTextG = annotationG
+                .append('g')
+                .attr('transform', function(s) {
+                  return translate(s.imageUrl ? IMAGE_SIZE + 1 : 0, 0);
+                });
+
+          // Title.
+          annotationTextG
+            .append("svg:a")
+            .attr('xlink:href', function(d) {
+              return d.path;
+            })
+            .append('text')
+            .attr('font-size', 13)
+            .text(function(d) {
+              // TODO (em) truncate via styling instead of code.
+              return truncate(d.title, MAX_TITLE_LEN);
+            });
+
+          // Date.
+          annotationTextG
+            .append('g')
+            .attr('class', 'annotation-date')
+            .append("svg:text")
+            .text(function(d) {
+              return moment(d.date).format('MMMM D, YYYY');
+            })
+            .attr('font-size', 10)
+            .attr('y', ANNOTATION_TEXT_HEIGHT);
+
           //TODO: add mouse events
 
           // month axis
           //TODO: check this math (might need special case for small widths?)
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
-          scope.svg.append("g").attr("width", "100%").attr("class", "x axis")
+          var calendarG = scope.svg.append("g")
+                .attr('transform', translate(0, maxAnnotationLineLength - 5))
+                .append('g');
+
+          calendarG
+            .append("g")
+            .attr("width", "100%")
+            .attr("class", "x axis")
             .selectAll("text").data(_.range(months)).enter().append("svg:text")
             .text(function(d) {
               return end.clone().subtract("months", d).format("MMM");
@@ -110,14 +311,13 @@
               return width - 8 - 2*totalCellSize +
                 (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
             })
-            .attr("y", 0)
             .attr("fill", "black")
             .attr("dy",".9em");
-          //weeks
 
-          var weeks = end.diff(start.clone().startOf("week"),'weeks', false) + 1;
+          var weeks = end.diff(start.clone().startOf("week"), 'weeks', false) + 1;
 
-          scope.svg.append("g").attr("width", "100%").attr("class", "week-start")
+          calendarG
+            .append("g").attr("width", "100%").attr("class", "week-start")
             .selectAll("text").data(_.range(weeks)).enter().append("svg:text")
             .text(function(d) {
               return start.clone().add("weeks", d).format("D");
@@ -130,19 +330,18 @@
 
 
           // Weekday axis
-          scope.svg.append("g").attr("height", "100%").attr("class", "y axis")
+          calendarG.append("g").attr("height", "100%").attr("class", "y axis")
             .selectAll("text").data(_.range(7)).enter().append("text")
             .text(function(d) {
-              return moment().days(d).format("ddd");
+              return moment(endTime).days(d).format("ddd");
             })
             .attr("dy",".9em")
-            .attr("x", 0)
             .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
 
 
           // actual chart
-          scope.chart = scope.svg.append("g")
-            .attr("transform", "translate(" + yAxisPx + "," + xAxisPx + ")");
+          scope.chart = calendarG.append("g")
+            .attr("transform", translate(yAxisPx, xAxisPx));
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
@@ -254,7 +453,7 @@
         scope.$watch('data',function(counts) {
           if (!isNullOrUndefined(counts) && counts.length > 0) {
             drawChart(counts);
-            selectRanges(scope.params.filter);
+            selectRanges(filter);
           }
         }, true);
 
@@ -269,7 +468,7 @@
           //the display options have changed, redraw the chart
           if (!isNullOrUndefined(scope.data) && scope.data.length > 0) {
             drawChart(scope.data);
-            selectRanges(scope.params.filter);
+            selectRanges(filter);
           }
         }, true);
       }
