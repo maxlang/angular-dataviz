@@ -191,8 +191,10 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
         if(d === 'auto') {
 
-          var xMax = _.max(_.pluck(data, 'key')).key;
-          var xMin = _.min(_.pluck(data, 'key')).key;
+          var xMax = _.max(_.pluck(data, 'key'));
+          var xMin = _.min(_.pluck(data, 'key'));
+          //TODO: use d3 to do this automatically
+          xMax += (xMax - xMin)/bars;
           x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
         } else {
           x = d3.scale.linear().domain(d).range([0, w]);
