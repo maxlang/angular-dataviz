@@ -1,1 +1,2 @@
 dist/* -diff
+doc/data/* -diff

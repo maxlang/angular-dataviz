@@ -22,5 +22,8 @@
     "angular-ui-map": "~0.0.2",
     "jquery": "~2.0.3",
     "google-maps-utility-library-v3": "latest"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.0.8"
   }
 }

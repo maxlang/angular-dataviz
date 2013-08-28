@@ -17,15 +17,26 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         'widthPx' : 586,
         'heightPx' : 286,
         'padding': 2,
-        'margins': {top:10, left: 30, bottom:20, right: 10},
-        'autoMargin' : true,
-        'domain' : 'auto',
+        'margins': {top:10, left: 20, bottom:20, right: 15},
+        'autoMargin': true,
+//        'domain' : [],
         'range' : 'auto',
         'bars' : null,
-        'realtime' : true,
-        'snap' : false,
-        'filterSelector' : false
+         'filterSelector' : false
       };
+
+      //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
+      function measure(text, classname) {
+        if(!text || text.length === 0) return {height: 0, width: 0};
+
+        var container = d3.select('body').append('svg').attr('class', classname);
+        container.append('text').attr({x: -1000, y: -1000}).text(text);
+
+        var bbox = container.node().getBBox();
+        container.remove();
+
+        return {height: bbox.height, width: bbox.width};
+      }
 
 
 
@@ -39,89 +50,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
       //INIT:
       element.append("<svg></svg>");
 
-      function setSelected(filter, extent) {
-        if (!extent || _.isEmpty(extent) || extent[0] === extent[1]) {
-          scope.$apply(function () {
-            filter.splice(0, filter.length);
-          });
-        } else {
-          scope.$apply(function () {
-            filter.splice(0, filter.length, extent);
-          });
-        }
-      }
-
-      function setBrush(brush, extent) {
-        if (!extent) {
-          brush.clear();
-        } else {
-          brush.extent(extent);
-        }
-        brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
-      }
-
       $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
-      scope.brush = d3.svg.brush()
-          .on("brush", function() {brushed(scope.brush, this);})
-          .on("brushstart", function() {brushstart(scope.brush);})
-          .on("brushend", function() {brushend(scope.brush);});
-
-      scope.brush2 = d3.svg.brush()
-          .on("brush", function() {brushed(scope.brush2, this);})
-          .on("brushstart", function() {brushstart(scope.brush2);})
-          .on("brushend", function() {brushend(scope.brush2);});
-
-
-      function brushed(brush) {
-        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
-          brush.extent(brush.oldExtent);
-          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
-          return;
-        }
-
-        var extent = brush.extent();
-        if (getOption('snap') && extent && extent.length === 2) {
-          var domain = getOption('domain');
-          var buckets = getOption('bars');
-          var range = domain[1] - domain[0];
-          var step = range/buckets;
-          extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
-          brush.extent(extent);
-          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2')); //apply change
-        }
-
-        if (getOption('realtime')) {
-          setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, extent);
-        }
-      }
-
-      function brushstart(brush) {
-        brush.oldExtent = brush.extent();
-      }
-
-      function brushend(brush) {
-        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
-          brush.extent(brush.oldExtent);
-          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
-          return;
-        }
-        setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, brush.extent());
-      }
-
-      //also in betterBarchart.js - move to a util module
-      //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
-      function measure(text, classname) {
-        if(!text || text.length === 0) return {height: 0, width: 0};
-
-        var container = d3.select('body').append('svg').attr('class', classname);
-        container.append('text').attr({x: -1000, y: -1000}).text(text);
-
-        var bbox = container.node().getBBox();
-        container.remove();
-
-        return {height: bbox.height, width: bbox.width};
-      }
 
       scope.params.filterNum = 0;
 
@@ -153,22 +83,22 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var bars = getOption('bars') || data.length;
         var barPadding = getOption('padding');
 
-        var barWidth = (w/bars) - barPadding;
+        var barWidth = (h/bars) - barPadding;
 
-        var svg = d3.select(element[0]).select('svg');
-
-        var g = svg.append('g')
-            .classed('main', true)
-            .attr('width', w)
-            .attr('height', h)
-            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
-
-        var x;
         var y;
+        var x;
 
-        var d = getOption('domain');
+        var d = _.pluck(data, 'key');
         var r = getOption('range');
 
+//        if(d === 'auto') {
+//
+//          var xMax = _.max(_.pluck(data, 'key'));
+//          var xMin = _.min(_.pluck(data, 'key'));
+//          x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
+//        } else {
+//          x = d3.scale.linear().domain(d).range([0, w]);
+//        }
         var mergedData = null;
         if (data2) {
 
@@ -185,89 +115,150 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               mergedData[d.key] = {key: d.key, values: [null, d.value]};
             }
           });
-//          d = _.pluck(mergedData, 'key');
+          d = _.pluck(mergedData, 'key');
 
         }
 
-        if(d === 'auto') {
+        y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
 
-          var xMax = _.max(_.pluck(data, 'key'));
-          var xMin = _.min(_.pluck(data, 'key'));
-          //TODO: use d3 to do this automatically
-          xMax += (xMax - xMin)/bars;
-          x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
-        } else {
-          x = d3.scale.linear().domain(d).range([0, w]);
-        }
-
-        if(r === 'auto') {
-          var yMax;
+        if (r === 'auto') {
+          var xMax;
           if (mergedData) {
-            var yMaxObj = _.max(mergedData, function(d) {
+            var xMaxObj = _.max(mergedData, function(d) {
               return (d.values[0] || 0) + (d.values[1] || 0);
             });
-            yMax = (yMaxObj.values && (yMaxObj.values[0] || 0) + (yMaxObj.values[1] || 0)) || 1;
+            xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;
           } else {
-            yMax = data[0].value;
+            xMax = data.length > 0 ? data[0].value : 1;
           }
-          //var yMin = data[data.length - 1].value;
-          y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
+
+
+          x = d3.scale.linear().domain([0, xMax]).range([0, w]);
         } else {
-          y = d3.scale.linear().domain(r).range([h, 0]);
+          x = d3.scale.linear().domain(r).range([0, w]);
         }
 
 
+//              scope.brush.x(x);
 
-
-        scope.brush.x(x);
-        scope.brush2.x(x);
-
-
-        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
         var yAxis = d3.svg.axis().scale(y).orient("left");
+
+        var svg = d3.select(element[0]).select('svg');
+
+
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(" + margins.left + ", " + (margins.top + h) + ")")
+            .call(d3.svg.axis().scale(x).orient("bottom")
+                .tickSize(-height, 0, 0)
+                .tickFormat("")
+            );
+
+        var g = svg.append('g')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
+
+        function setSelectedLabels(filter, labels) {
+          var args = [0, filter.length].concat(labels);
+          scope.$apply(function() {
+            Array.prototype.splice.apply(filter, args);
+          });
+        }
+
+        function clickFn(d) {
+          var filter = scope.params.filterNum ? scope.filter2 : scope.params.filter;
+          var selClass = scope.params.filterNum ? 'selected2' : 'selected';
+
+          if( _.contains(filter, d.key) ) {
+            if(scope.shifted) {
+              setSelectedLabels(filter, _.without(filter, d.key));
+            } else {
+              g.selectAll('rect.' + selClass).classed(selClass, false);
+              setSelectedLabels(filter, []);
+            }
+            d3.select(this).classed(selClass, false);
+          } else {
+            if(scope.shifted) {
+              filter.push(d.key);
+              setSelectedLabels(filter, filter);
+            } else {
+              g.selectAll('rect.' + selClass).classed(selClass, false);
+              g.selectAll('g.' + selClass).classed(selClass, false);
+              setSelectedLabels(filter, [d.key]);
+            }
+            d3.select(this).classed(selClass, true);
+          }
+        }
 
         if (data2) {
 
-          var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
-              .classed('bar-holder', true);
-//              .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
-//              .attr('width', barWidth)
-//              .attr('height', function(d,i) { return (d.values[0] ? (h - y(d.values[0])) : 0) + (d.values[1] ? (h - y(d.values[1])) : 0); });
+         var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
+            .classed('bar-holder', true)
+            .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
+            .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
+            .attr('height', Math.abs(y.rangeBand()))
+            .classed('selected', function(d, i) {
+              return _.contains(scope.params.filter, d.key);
+            })
+           .classed('selected2', function(d, i) {
+             return _.contains(scope.filter2, d.key);
+           })
+            .on('click', function(d, i) {
+              clickFn.call(this, d);
+            });
 
           rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
               .classed('bar d1', true)
-              .attr('y', function(d, i) { return d.values[0] ? y(d.values[0]) : 0; })
-              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
-              .attr('width', barWidth)
-              .attr('height', function(d, i) { return d.values[0] ? (h - y(d.values[0])): 0; })
+              .attr('y', function(d, i) {
+                return y(d.key);
+              })
+              .attr('x', 0)
+              .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0);})
+              .attr('height', Math.abs(y.rangeBand()))
               .attr('stroke-width', getOption('padding')+'px');
           rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
               .classed('bar d2', true)
-              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
-              .attr('height', function(d, i) { return d.values[1] ? (h - y(d.values[1])): 0; })
-              .attr('width', barWidth)
-              .attr('y', function(d, i) {
-                console.log(h - y(d.values[0]));
-                console.log(h - y(d.values[0]) + h - y(d.values[0]));
-                console.log('f', h - (h - y(d.values[0]) + h - y(d.values[0])));
-                return (h - ((h - (d.values[0] ? y(d.values[0]) : h)) + (h - (d.values[1] ? y(d.values[1]) : h))));
-              })
+              .attr('y', function(d, i) { return y(d.key);})
+              .attr('x', function(d) { return (d.values[0] ? x(d.values[0]) : 0);})
+              .attr('width', function(d, i) { return  (d.values[1] ? x(d.values[1]) : 0);})
+              .attr('height', Math.abs(y.rangeBand()))
               .attr('stroke-width', getOption('padding')+'px');
-
-
 
         } else {
 
-
-          g.selectAll('rect').data(data).enter().append('rect')
-              .classed('bar', true)
-              .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
-              .attr('y', function(d, i) { return y(d.value); })
-              .attr('width', barWidth)
-              .attr('height', function(d, i) { return h - y(d.value); })
-              .attr('stroke-width', getOption('padding')+'px');
+        g.selectAll('rect').data(data).enter().append('rect')
+            .classed('bar', true)
+            .attr('y', function(d, i) { return y(d.key);})
+            .attr('x', 0)
+            .attr('width', function(d, i) { return  x(d.value);})
+            .attr('height', Math.abs(y.rangeBand()))
+            .attr('stroke-width', getOption('padding')+'px')
+            .classed('selected', function(d, i) {
+              return _.contains(scope.params.filter, d.key);
+            })
+            .on('click', function(d, i) {
+              clickFn.call(this, d);
+            });
 
         }
+
+        if (scope.filter2 && getOption('filterSelector')) {
+          g.selectAll('rect.compare').data([0,1]).enter().append('rect')
+              .attr('x', function(d) {return w - (12 * d) + 2;})
+              .attr('y', -8)
+              .attr('width', 10)
+              .attr('height', 10)
+              .attr('stroke-width', 2)
+              .classed('compare', true)
+              .classed('d1', function(d) {return d;})
+              .classed('d2', function(d) {return !d;})
+              .on('click', function(d) {
+                scope.params.filterNum = d;
+              });
+        }
+
 
         var xaxis =   svg.append("g")
             .attr("class", "x axis")
@@ -280,29 +271,15 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .call(yAxis);
 
 
-        var brush2 = g.append("g")
-            .attr("class", "x brush2")
-            .call(scope.brush2)
-            .selectAll("rect")
-            .attr("y", -6)
-            .attr("height", h+8);
 
-        var brush = g.append("g")
-            .attr("class", "x brush")
-            .call(scope.brush)
-            .selectAll("rect")
-            .attr("y", -6)
-            .attr("height", h+8);
+//        var brush = g.append("g")
+//            .attr("class", "x brush")
+//            .call(scope.brush)
+//            .selectAll("rect")
+//            .attr("y", -6)
+//            .attr("height", h+8);
 
       }
-
-      scope.$watch('params.filterNum', function(fn) {
-        if (fn) {
-          $(element[0]).find('g.x.brush2').appendTo($('g.main'));
-        } else {
-          $(element[0]).find('g.x.brush').appendTo($('g.main'));
-        }
-      });
 
       scope.$watch('data',function(counts) {
         if(counts!==undefined && counts!==null) {
@@ -310,18 +287,18 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         }
       }, true);
 
-      scope.$watch('data2',function(counts) {
-        if(scope.data) {
+      scope.$watch('data2',function() {
+        if(scope.data!==undefined && scope.data!==null) {
           drawChart(scope.data, scope.data2);
         }
       }, true);
 
-      scope.$watch('params.filter', function(f) {
-        if (f) {
-          console.log('setting brush');
-          setBrush(scope.brush, f[0]);
-        }
-      }, true);
+//            scope.$watch('params.filter', function(f) {
+//              if (f) {
+//                console.log('setting brush');
+//                setBrush(f[0]);
+//              }
+//            }, true);
 
       scope.$watch('params.options', function() {
         if (scope.data) {
@@ -329,10 +306,15 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         }
       }, true);
 
-      scope.$watch('filter2', function(f) {
-        if (f) {
-          console.log('setting brush');
-          setBrush(scope.brush2, f[0]);
+      scope.$watch('params.filter', function() {
+        if (scope.data) {
+          drawChart(scope.data, scope.data2);
+        }
+      }, true);
+
+      scope.$watch('filter2', function() {
+        if (scope.data) {
+          drawChart(scope.data, scope.data2);
         }
       }, true);
 
