@@ -2,20 +2,6 @@
 <html lang="en" ng-app="demoApp" id="top">
   <head>
     <title>Angular Dataviz for AngularJS</title>
-    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
-    <!--<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>-->
-    <!--<script src="../components/angular-unstable/angular.js"></script>-->
-    <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
-
-    <!--<script src="../components/nvd3/nv.d3.js"></script>-->
-    <!--<script src="https://raw.github.com/d3/d3-plugins/master/sankey/sankey.js"></script>-->
-    <!--<script src="../test/lib/sankey/sankey.js"></script>-->
-    <!--<script src="../components/moment/moment.js"></script>-->
-    <!--<script src="../components/lodash/lodash.js"></script>-->
-    <!--<script src="../components/gridster/dist/jquery.gridster.js"></script>-->
-    <!--<script src="../dist/angular-dataviz.js"></script>-->
-    <!--<script src="../components/google-code-prettify/src/prettify.js"></script>-->
-    <!--<script src="js/demoApp.js"></script>-->
 
     <meta charset="utf-8"> <!-- for d3 -->
 
@@ -225,23 +211,12 @@
 
           <section id="blockCalendar" class="blockCalendar">
             <div class="page-header">
-              <!--<h1>Block Calendar</h1> -->
 
               <div ng-controller="dashboardCtrl">
-                  <!--<input ng-model="cal1params.options.widthPx"></input>-->
-                  <!--&lt;!&ndash;<block-calendar data="cal1data" params="cal1params"></block-calendar>&ndash;&gt;-->
-                  <!--<block-calendar data="cal2data" params="cal2params"></block-calendar>-->
-                  <!--<barchart data="bar1data" data2="bar1data" params="bar1params" filter2="f2"></better-barchart>-->
-                <!--<sankey data="sankeyData"></sankey>-->
-                 <!-- <nv-barchart data="bar2data" params="bar2params"></nv-barchart>
-                  <nv-barchart data="bar2data" params="bar2params"></nv-barchart> -->
-                  <!--<better-barcharr data="bar2data" params="bar2params"></sidebar>-->
                 <input ng-model="cal1params.options.widthPx"></input>
                 <block-calendar data="cal1data" params="cal1params"></block-calendar>
                 <block-calendar data="cal2data" params="cal2params"></block-calendar>
                 <nv-barchart data="bar1data" params="bar1params"></nv-barchart>
-                <!-- <nv-barchart data="bar2data" params="bar2params"></nv-barchart>
-                     <nv-barchart data="bar2data" params="bar2params"></nv-barchart> -->
                 <sidebar data="bar2data" params="bar2params"></sidebar>
               </div>
 
