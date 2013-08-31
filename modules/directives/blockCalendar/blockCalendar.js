@@ -471,6 +471,13 @@
             selectRanges(filter);
           }
         }, true);
+
+        scope.$watch('params.annotations', function(o) {
+          if (!isNullOrUndefined(scope.data) && scope.data.length > 0) {
+            drawChart(scope.data);
+            selectRanges(filter);
+          }
+        }, true);
       }
     };
   }]);
