@@ -662,6 +662,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           // Weekday axis
           calendarG
             .append("g")
+            .attr('transform', translate(18, 0))
             .attr("height", "100%")
             .attr('class', 'weekday')
             .selectAll("text")

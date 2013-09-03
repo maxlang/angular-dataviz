@@ -245,6 +245,7 @@ block-calendar .annotation-date text {
 block-calendar .weekday text {
   fill: #a6a6a6;
   font-size: 9px;
+  text-anchor: end;
 }
 
 barchart .brush {
