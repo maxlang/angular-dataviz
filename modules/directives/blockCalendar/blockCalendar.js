@@ -75,7 +75,8 @@
         scope.id = element.attr('id') || _.uniqueId(element.prop("tagName") + "-");
 
         var defaultOptions = {
-          cellSizePx: 13,
+          cellHeightPx: 13,
+          cellWidthPx: 13,
           cellBorderPx: 2,
           widthPx: 586, //TODO:
           heightPx: 106,
@@ -133,11 +134,13 @@
           var chartWidth = width - yAxisPx;
           var chartHeight = height - xAxisPx;
 
-          var size = getOption('cellSizePx');
+          var cellHeight = getOption('cellHeightPx');
+          var cellWidth = getOption('cellWidthPx');
           var border = getOption('cellBorderPx');
-          var totalCellSize = size + border;
+          var totalCellWidth = cellWidth + border;
+          var totalCellHeight = cellHeight + border;
 
-          var columns = Math.floor(chartWidth/(totalCellSize));
+          var columns = Math.floor(chartWidth/(totalCellWidth));
 
           var numAnnotationsShownPerGroup = getOption('numAnnotationsShownPerGroup');
           var endTime = getOption('endTime');
@@ -214,7 +217,7 @@
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(s) {
-                  return translate(s.week * totalCellSize * WEEK_GROUPING, 0);
+                  return translate(s.week * totalCellWidth * WEEK_GROUPING, 0);
                 });
 
           annotationSetG
@@ -308,8 +311,8 @@
               return end.clone().subtract("months", d).format("MMM");
             })
             .attr("x", function(d) {
-              return width - 8 - 2*totalCellSize +
-                (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellSize;
+              return width - 8 - 2*totalCellWidth +
+                (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellWidth;
             })
             .attr("fill", "black")
             .attr("dy",".9em");
@@ -323,7 +326,7 @@
               return start.clone().add("weeks", d).format("D");
             })
             .attr("x", function(d) {
-              return 5 + yAxisPx + d * totalCellSize;
+              return 5 + yAxisPx + d * totalCellWidth;
             })
             .attr("y", 15)
             .attr("dy",".9em");     //TODO: why is this necessary
@@ -336,7 +339,7 @@
               return moment(endTime).days(d).format("ddd");
             })
             .attr("dy",".9em")
-            .attr("y", function(d) {return d * totalCellSize + xAxisPx;});
+            .attr("y", function(d) {return d * totalCellHeight + xAxisPx;});
 
 
           // actual chart
@@ -345,11 +348,11 @@
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
-            .attr("width", size)
-            .attr("height", size)
+            .attr("width", cellWidth)
+            .attr("height", cellHeight)
             .attr("stroke-width",border)
-            .attr("x", function(d) { return Math.floor(d / 7) * totalCellSize;})
-            .attr("y", function(d) { return Math.floor(d % 7) * totalCellSize;})
+            .attr("x", function(d) { return Math.floor(d / 7) * totalCellWidth; })
+            .attr("y", function(d) { return Math.floor(d % 7) * totalCellHeight; })
 
           //TODO: change the data over so we don't have to keep doing date math from the startdate
 
