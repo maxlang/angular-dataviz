@@ -306,7 +306,10 @@
             .append("g")
             .attr("width", "100%")
             .attr("class", "x axis")
-            .selectAll("text").data(_.range(months)).enter().append("svg:text")
+            .selectAll("text")
+            .data(_.range(months))
+            .enter()
+            .append("svg:text")
             .text(function(d) {
               return end.clone().subtract("months", d).format("MMM");
             })
