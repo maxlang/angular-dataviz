@@ -448,8 +448,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var height = getOption('heightPx');
 
           //TODO: options
-          var yAxisPx = 23;
-          var xAxisPx = 25;
+          var yAxisWidth = 23;
+          var xAxisHeight = 6;
 
           // Annotation settings.
           var WEEK_GROUPING = 1;
@@ -459,8 +459,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var ANNOTATION_COLS = getOption('annotationColumns');
           var MAX_TITLE_LEN = Math.floor(ANNOTATION_COLS * 1.8);
 
-          var chartWidth = width - yAxisPx;
-          var chartHeight = height - xAxisPx;
+          var chartWidth = width - yAxisWidth;
+          var chartHeight = height - xAxisHeight;
 
           var cellHeight = getOption('cellHeightPx');
           var cellWidth = getOption('cellWidthPx');
@@ -545,7 +545,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(s) {
-                  return translate(s.week * totalCellWidth * WEEK_GROUPING, 0);
+                  return translate(s.week * totalCellWidth * WEEK_GROUPING, 0); // TODO move to middle of column (+/- totalCellWidth / 2)
                 });
 
           annotationSetG
@@ -627,7 +627,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var months = Math.round(end.diff(start.clone().startOf("month"),'months', true));
 
           var calendarG = scope.svg.append("g")
-                .attr('transform', translate(0, maxAnnotationLineLength - 5))
+                .attr('transform', translate(0, maxAnnotationLineLength))
                 .append('g');
 
           calendarG
@@ -645,27 +645,14 @@ angular.module('dataviz.directives').directive('barchart', [function() {
               return width - 8 - 2*totalCellWidth +
                 (end.clone().subtract("months", d).diff(end, "weeks")) * totalCellWidth;
             })
-            .attr("fill", "black")
-            .attr("dy",".9em");
+            .attr("fill", "black");
 
           var weeks = end.diff(start.clone().startOf("week"), 'weeks', false) + 1;
-
-          calendarG
-            .append("g").attr("width", "100%").attr("class", "week-start")
-            .selectAll("text").data(_.range(weeks)).enter().append("svg:text")
-            .text(function(d) {
-              return start.clone().add("weeks", d).format("D");
-            })
-            .attr("x", function(d) {
-              return 5 + yAxisPx + d * totalCellWidth;
-            })
-            .attr("y", 15)
-            .attr("dy",".9em");     //TODO: why is this necessary
 
           // Weekday axis
           calendarG
             .append("g")
-            .attr('transform', translate(18, 0))
+            .attr('transform', translate(18, xAxisHeight + 2))
             .attr("height", "100%")
             .attr('class', 'weekday')
             .selectAll("text")
@@ -675,14 +662,13 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .text(function(d) {
               return moment(endTime).days(d).format("ddd");
             })
-            .attr("dy",".9em")
             .attr("y", function(d) {
-              return d * totalCellHeight + xAxisPx;
+              return d * totalCellHeight + xAxisHeight;
             });
 
           // actual chart
           scope.chart = calendarG.append("g")
-            .attr("transform", translate(yAxisPx, xAxisPx));
+            .attr("transform", translate(yAxisWidth, xAxisHeight));
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
