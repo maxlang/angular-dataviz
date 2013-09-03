@@ -40,6 +40,7 @@ block-calendar .x.axis text {
   font-size: 11px;
   font-weight: bold;
   color: #232323;
+  font-family: 'helvetica neue', 'helvetica', 'arial', sans-serif;
 }
 block-calendar .x.axis text {
   text-anchor: left;
@@ -251,6 +252,7 @@ block-calendar .weekday text {
   fill: #a6a6a6;
   font-size: 9px;
   text-anchor: end;
+  font-family: 'helvetica neue', 'helvetica', 'arial', sans-serif;
 }
 
 barchart .brush {
