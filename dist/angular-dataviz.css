@@ -53,8 +53,6 @@ block-calendar.chart {
 block-calendar.chart svg {
   width: 100%;
   height: 100%;
-  margin-left: 19px;
-  margin-top: 5px;
 }
 block-calendar.chart .qundefined-9 {
   fill: #eeeeee;
