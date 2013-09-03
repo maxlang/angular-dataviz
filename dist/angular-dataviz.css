@@ -47,8 +47,6 @@ block-calendar .container {
 }
 block-calendar.chart {
   font: 10px sans-serif;
-  margin-bottom: 10px;
-  margin-left: 10px;
 }
 block-calendar.chart svg {
   width: 100%;
