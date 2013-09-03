@@ -226,12 +226,7 @@
               var o = overlapCount[s.week] || 0;
               return - (o * annotationHeight + 10);
             })
-            .attr("y2", -5)
-            .attr('class', annotationClass);
-
-          annotationSetG
-            .append('circle')
-            .attr('r', 1)
+            .attr("y2", -9)
             .attr('class', annotationClass);
 
           var annotationG = annotationSetG
