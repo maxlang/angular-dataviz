@@ -331,16 +331,22 @@
             .attr("y", 15)
             .attr("dy",".9em");     //TODO: why is this necessary
 
-
           // Weekday axis
-          calendarG.append("g").attr("height", "100%").attr("class", "y axis")
-            .selectAll("text").data(_.range(7)).enter().append("text")
+          calendarG
+            .append("g")
+            .attr("height", "100%")
+            .attr("class", "y axis")
+            .selectAll("text")
+            .data(_.range(7))
+            .enter()
+            .append("text")
             .text(function(d) {
               return moment(endTime).days(d).format("ddd");
             })
             .attr("dy",".9em")
-            .attr("y", function(d) {return d * totalCellHeight + xAxisPx;});
-
+            .attr("y", function(d) {
+              return d * totalCellHeight + xAxisPx;
+            });
 
           // actual chart
           scope.chart = calendarG.append("g")
