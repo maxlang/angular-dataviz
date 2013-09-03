@@ -663,11 +663,11 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           calendarG
             .append("g")
             .attr("height", "100%")
-            .attr("class", "y axis")
+            .attr('class', 'weekday')
             .selectAll("text")
             .data(_.range(7))
             .enter()
-            .append("text")
+            .append("svg:text")
             .text(function(d) {
               return moment(endTime).days(d).format("ddd");
             })
