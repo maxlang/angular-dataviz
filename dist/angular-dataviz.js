@@ -451,6 +451,8 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var yAxisWidth = 23;
           var xAxisHeight = 6;
 
+          var debugMode = false;
+
           // Annotation settings.
           var WEEK_GROUPING = 1;
           var ANNOTATION_TEXT_HEIGHT = 13;
@@ -545,7 +547,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                 .append('g')
                 .attr('class', annotationClass)
                 .attr('transform', function(s) {
-                  return translate(s.week * totalCellWidth * WEEK_GROUPING, 0); // TODO move to middle of column (+/- totalCellWidth / 2)
+                  return translate(s.week * totalCellWidth * WEEK_GROUPING - totalCellWidth / 2 - 1, 0);
                 });
 
           annotationSetG
@@ -745,6 +747,19 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                 return dateString;
               }
             });
+
+          if (debugMode) {
+            scope.chart.selectAll("text")
+              .data(_.range(days))
+              .enter()
+              .append('svg:text')
+              .text(function(d) {
+                return start.clone().add("days", d).format("DD");
+              })
+              .attr("x", function(d) { return Math.floor(d / 7) * totalCellWidth; })
+              .attr("y", function(d) { return Math.floor(d % 7) * totalCellHeight; })
+            ;
+          }
 
           // in case we lift up the mouse somewhere else on the page
           d3.select("html").on("mouseup", function() {
