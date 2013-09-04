@@ -143,12 +143,14 @@ angular.module('dataviz.directives').directive('histogram', [function() {
 
         var max = _.isArray(r) && r[1] || _.max(_.map(_.pluck(data, 'value')));
 
+        var leftMargin = margins.left;
+
         if (getOption('autoMargin')) {
-          margins.left = (margins.left + measure(max, "y axis").width) || margins.left;
-          margins.left = margins.left === -Infinity ? 0 : margins.left;
+          leftMargin = (margins.left + measure(max, "y axis").width) || margins.left;
+          leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
         }
 
-        var w = width - margins.left - margins.right;
+        var w = width - leftMargin - margins.right;
         var h = height - margins.top - margins.bottom;
 
         var bars = getOption('bars') || data.length;
@@ -162,7 +164,7 @@ angular.module('dataviz.directives').directive('histogram', [function() {
             .classed('main', true)
             .attr('width', w)
             .attr('height', h)
-            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
+            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
         var x;
         var y;
@@ -271,12 +273,12 @@ angular.module('dataviz.directives').directive('histogram', [function() {
 
         var xaxis =   svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(" + margins.left + ", " + (h + margins.top) + ")")
+            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
             .call(xAxis);
 
         var yaxis =   svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate(" + margins.left + ", " + (margins.top) + ")")
+            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
             .call(yAxis);
 
 
