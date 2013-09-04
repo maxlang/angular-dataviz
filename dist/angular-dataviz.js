@@ -74,10 +74,10 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var margins = getOption('margins');
 
         if (getOption('autoMargin')) {
-          margins.left = 20 + _.max(_.map(_.pluck(data, 'key'), function(key) {
+          margins.left = margins.left + _.max(_.map(_.pluck(data, 'key'), function(key) {
             var size = measure(key, "y axis").width;
             return size;
-          })) || 20;
+          })) || margins.left;
           margins.left = margins.left === -Infinity ? 0 : margins.left;
         }
 
@@ -1036,10 +1036,10 @@ angular.module('dataviz.directives').directive('histogram', [function() {
         var margins = getOption('margins');
 
         if (getOption('autoMargin')) {
-          margins.left = 20 + _.max(_.map(_.pluck(data, 'key'), function(key) {
+          margins.left = margins.left + _.max(_.map(_.pluck(data, 'count'), function(key) {
             var size = measure(key, "y axis").width;
             return size;
-          })) || 20;
+          })) || margins.left;
           margins.left = margins.left === -Infinity ? 0 : margins.left;
         }
 
