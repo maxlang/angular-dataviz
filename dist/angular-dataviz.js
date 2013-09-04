@@ -668,7 +668,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .attr("transform", translate(yAxisWidth, xAxisHeight));
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
-            .classed("day", true)
+            .classed("day", function(d) {
+              return true;
+            })
+            .classed("future-day", function(d) {
+              return true;
+            })
             .attr("width", cellWidth)
             .attr("height", cellHeight)
             .attr("stroke-width",border)
