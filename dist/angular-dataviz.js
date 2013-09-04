@@ -667,12 +667,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           scope.chart = calendarG.append("g")
             .attr("transform", translate(yAxisWidth, xAxisHeight));
 
+          var pastDays = moment().diff(start, 'days', false);
+
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
-            .classed("day", function(d) {
-              return true;
-            })
+            .classed("day", true)
             .classed("future-day", function(d) {
-              return true;
+              return d > pastDays;
             })
             .attr("width", cellWidth)
             .attr("height", cellHeight)

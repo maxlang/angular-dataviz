@@ -107,6 +107,9 @@ block-calendar.chart .day:hover {
 block-calendar.chart .day.selected {
   opacity: .5;
 }
+block-calendar.chart .future-day {
+  fill: #f6f6f6;
+}
 block-calendar.chart .month {
   fill: none;
   stroke-width: 1px;
