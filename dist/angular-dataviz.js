@@ -1035,11 +1035,12 @@ angular.module('dataviz.directives').directive('histogram', [function() {
 
         var margins = getOption('margins');
 
+        var r = getOption('range');
+
+        var max = _.isArray(r) && r[1] || _.max(_.map(_.pluck(data, 'value')));
+
         if (getOption('autoMargin')) {
-          margins.left = margins.left + _.max(_.map(_.pluck(data, 'count'), function(key) {
-            var size = measure(key, "y axis").width;
-            return size;
-          })) || margins.left;
+          margins.left = (margins.left + measure(max, "y axis").width) || margins.left;
           margins.left = margins.left === -Infinity ? 0 : margins.left;
         }
 
@@ -1063,7 +1064,6 @@ angular.module('dataviz.directives').directive('histogram', [function() {
         var y;
 
         var d = getOption('domain');
-        var r = getOption('range');
 
         var mergedData = null;
         if (data2) {
