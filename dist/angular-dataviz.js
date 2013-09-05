@@ -671,6 +671,13 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
           var pastDays = moment().diff(start, 'days', false);
 
+          function setSelectedRangesForDay(d) {
+            var rangeStartDate = start.clone().add("days", d);
+            var rangeEndDate = start.clone().add("days", d + 1);
+            var ranges = [[rangeStartDate, rangeEndDate]];
+            setSelectedRanges(ranges);
+          }
+
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
             .classed("day", true)
             .classed("future-day", function(d) {
@@ -701,17 +708,14 @@ angular.module('dataviz.directives').directive('barchart', [function() {
                 } else {
                   scope.chart.selectAll("rect.day").classed("selected", false);
                   rect.classed("selected", true);
-                  setSelectedRanges([[start.clone().add("days", d), start.clone().add("days", d + 1)]]);
+                  setSelectedRangesForDay(d);
                 }
               } else {
                 // if lots of cells are selected, always select (TODO: does this behavior make sense?)
                 //TODO: add a good way to deselect esp for ranges
                 scope.chart.selectAll("rect.day").classed("selected", false);
                 rect.classed("selected", true);
-                var rangeStartDate = start.clone().add("days", d);
-                var rangeEndDate = start.clone().add("days", d + 1);
-                var ranges = [[rangeStartDate, rangeEndDate]];
-                setSelectedRanges(ranges);
+                setSelectedRangesForDay(d);
               }
             })
           //TODO: doublecheck re: mouseover bubbling concerns
