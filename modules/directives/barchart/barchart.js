@@ -69,15 +69,17 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
         var margins = getOption('margins');
 
+        var leftMargin = margins.left;
+
         if (getOption('autoMargin')) {
-          margins.left = margins.left + _.max(_.map(_.pluck(data, 'key'), function(key) {
+          leftMargin = leftMargin + _.max(_.map(_.pluck(data, 'key'), function(key) {
             var size = measure(key, "y axis").width;
             return size;
-          })) || margins.left;
-          margins.left = margins.left === -Infinity ? 0 : margins.left;
+          })) || leftMargin;
+          leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
         }
 
-        var w = width - margins.left - margins.right;
+        var w = width - leftMargin - margins.right;
         var h = height - margins.top - margins.bottom;
 
         var bars = getOption('bars') || data.length;
@@ -149,7 +151,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
         svg.append("g")
             .attr("class", "grid")
-            .attr("transform", "translate(" + margins.left + ", " + (margins.top + h) + ")")
+            .attr("transform", "translate(" + leftMargin + ", " + (margins.top + h) + ")")
             .call(d3.svg.axis().scale(x).orient("bottom")
                 .tickSize(-height, 0, 0)
                 .tickFormat("")
@@ -158,7 +160,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
         var g = svg.append('g')
             .attr('width', w)
             .attr('height', h)
-            .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
+            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
         function setSelectedLabels(filter, labels) {
           var args = [0, filter.length].concat(labels);
@@ -262,12 +264,12 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
         var xaxis =   svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(" + margins.left + ", " + (h + margins.top) + ")")
+            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
             .call(xAxis);
 
         var yaxis =   svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate(" + margins.left + ", " + (margins.top) + ")")
+            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
             .call(yAxis);
 
 
