@@ -673,9 +673,10 @@ angular.module('dataviz.directives').directive('barchart', [function() {
 
           function setSelectedRangesForDay(d) {
             var rangeStartDate = start.clone().add("days", d);
-            var rangeEndDate = start.clone().add("days", d + 1);
-            var ranges = [[rangeStartDate, rangeEndDate]];
-            setSelectedRanges(ranges);
+            setSelectedRanges([[
+              rangeStartDate,
+              rangeStartDate.clone().add("days", 1)
+            ]]);
           }
 
           scope.chart.selectAll("rect").data(_.range(days)).enter().append("svg:rect")
