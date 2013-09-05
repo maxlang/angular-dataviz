@@ -1133,8 +1133,8 @@ angular.module('dataviz.directives').directive('histogram', [function() {
         scope.brush2.x(x);
 
 
-        var xAxis = d3.svg.axis().scale(x).orient("bottom");
-        var yAxis = d3.svg.axis().scale(y).orient("left");
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(w/100);
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(h/60);
 
         if (data2) {
 
