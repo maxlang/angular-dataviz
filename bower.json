@@ -24,6 +24,11 @@
     "google-maps-utility-library-v3": "latest"
   },
   "devDependencies": {
-    "angular-mocks": "~1.0.8"
+    "angular-mocks": "~1.0.8",
+    "Editr.js": "https://github.com/maxlang/Editr.js.git",
+    "ace-builds": "~1.1.1",
+    "emmet-core": "https://github.com/nightwing/emmet-core.git",
+    "select2": "~3.4.3",
+    "github": "~0.7.0"
   }
 }

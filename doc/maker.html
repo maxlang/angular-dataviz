@@ -21,12 +21,26 @@
   <script src="../components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js"></script>
 
   <script src="../components/angular-ui-map/src/map.js"></script>
+  <script src="../components/angular-ui/build/angular-ui.js"></script>
+
+  <script src="../components/select2/select2.js"></script>
+  <script src="../components/github/github.js"></script>
+  <script src="../components/github/lib/base64.js"></script>
+
 
 
   <script src="../dist/angular-dataviz.js"></script>
   <script src="../components/google-code-prettify/src/prettify.js"></script>
+  <script src="../components/ace-builds/src/ace.js"></script>
+  <script src="../components/ace-builds/src/ext-emmet.js"></script>
+  <script src="../components/emmet-core/emmet.js"></script>
+  <script src="../components/Editr.js/editr/editr.js"></script>
+  <script src="../components/Editr.js/editr/parsers/coffeescript.js"></script>
+  <script src="../components/Editr.js/editr/parsers/less.js"></script>
   <script src="js/makerApp.js"></script>
 
+  <link rel="stylesheet" href="../components/select2/select2.css">
+  <link rel="stylesheet" href="../components/Editr.js/editr/editr.css">
   <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../dist/angular-dataviz.css">
   <link rel="stylesheet" href="../components/google-code-prettify/src/prettify.css">
@@ -165,10 +179,15 @@
     Data: <textarea ng-model="viz.data"></textarea>
     Config: <textarea ng-model="viz.config"></textarea>
     Filter: <span ng-bind="viz.parsedConfig.filter|json"></span>
-
+    Github User: <input ng-model="github.user">
+    Github Password: <input type="password" ng-model="github.password">
+    <!--<button ng-click="auth()">Login</button>-->
+    <span ng-if="github.user && github.password">GistId: <input ng-model="github.gist" ui-select2="select2Options"></input></span>
+    {{ github.gistid }}
 
     <block-calendar ng-if="viz.type==='calendar'" data="viz.parsedData" params="viz.parsedConfig"></block-calendar>
     <histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></histogram>
+    <div ng-if="github.gist" class="editr" data-item="maker" ></div>
 
 
 
