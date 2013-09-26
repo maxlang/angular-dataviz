@@ -6,6 +6,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
       params: '='
     },
     link: function(scope, element) {
+
       var o = VizUtils.genOptionGetter(scope,{
         widthPx: 175,
         heightPx: 175,
@@ -50,7 +51,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
       function calcLegendDims(data) {
         var slices = _.cloneDeep(_.first(data, o('maxSlices')));
-        if (data.length >= slices.length) {
+        if (data.length >= o('maxSlices')) {
           _.last(slices).key = "Other";
         }
 
@@ -102,11 +103,11 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
         if (hasLegend) {
           // legend on left/right
-          if (width - padding - diam < legendDims.width && height - padding - diam > legendDims.height) {
+          if (width - padding - diam < legendDims.width && height - padding - diam >= legendDims.height) {
             legendDims.top = padding + diam;
             legendDims.left = padding;
 //            fullHeight += legendDims.height;
-          } else if (width - padding - diam > legendDims.width) {
+          } else if (width - padding - diam >= legendDims.width) {
             legendDims.left = padding + diam;
             legendDims.top = padding;
 //            fullWidth += legendDims.width;
@@ -182,12 +183,13 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
 
         var data0 = path.data();
-        var pieData = _.clone(scope.data);
+        var pieData = _.cloneDeep(scope.data);
         if (pieData.length >= o('maxSlices')) {
           pieData[o('maxSlices') - 1].key = "Other";
           pieData[o('maxSlices') - 1].value = _(pieData).rest(o('maxSlices') -1).reduce(function(acc, val) {
             return acc + val.value;
           }, 0);
+          pieData = _.first(pieData, o('maxSlices'));
         }
 
         var data1 = pie(pieData);
@@ -225,9 +227,26 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         k.append("rect")
             .attr("width", o('legendSquareSizePx'))
             .attr("height", o('legendSquareSizePx'))
-            .style("fill", function(d) {
-              return color(d.data.key); })
+//            .attr("fill", function(d) {
+//              return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); });
+
+        //TODO: figure out text ellipsis issue
+//        var textWidth = legendDims.width - o('legendSquareSizePx') + 2* o('legendPadding') + o('legendSpacing');
+//
+//        var text = k.append("foreignObject")
+//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
+//            .attr("y", 0)
+//            .attr('width', textWidth)
+//            .attr('height', '1.2em')
+//            .append("xhtml:div")
+//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+//
+//        var k2 = keys.transition().duration(300).selectAll('foreignObject');
+//
+//        k2.attr('width', textWidth);
+//            //.html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+
 
         k.append("text")
             .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
