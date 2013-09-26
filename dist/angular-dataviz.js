@@ -729,7 +729,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
       var color, pie, arc, svg, path, legendDims, hasLegend, legend, g, keys, opacity;
 
       function calcLegendDims(data) {
-        var slices = _.first(data, o('maxSlices'));
+        var slices = _.cloneDeep(_.first(data, o('maxSlices')));
         if (data.length >= slices.length) {
           _.last(slices).key = "Other";
         }
@@ -862,7 +862,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
 
         var data0 = path.data();
-        var pieData = scope.data;
+        var pieData = _.clone(scope.data);
         if (pieData.length >= o('maxSlices')) {
           pieData[o('maxSlices') - 1].key = "Other";
           pieData[o('maxSlices') - 1].value = _(pieData).rest(o('maxSlices') -1).reduce(function(acc, val) {
@@ -919,29 +919,6 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         keys.exit().remove();
 
         keys.transition().duration(300);
-//        keys.attr("fill", function(d) { return color(d.data.key); })
-//              .append("title")
-//              .text(function(d) { return d.data.key; });
-//
-//          path.exit()
-//              .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
-//              .transition()
-//              .duration(750)
-//              .attrTween("d", arcTween)
-//              .remove();
-//
-//          path.transition()
-//              .duration(750)
-//              .attrTween("d", arcTween);
-//
-//
-//        .attr("transform", "tr")
-//              .data(data)
-//              .enter().append("g")
-//
-//          legend
-//
-//          legend
       }
 //      });
 
