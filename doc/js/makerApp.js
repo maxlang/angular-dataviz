@@ -1,4 +1,4 @@
-var module = angular.module('makerApp', ['dataviz', 'ui'], function ($locationProvider) {
+var module = angular.module('makerApp', ['dataviz', 'ui', 'colorpicker.module'], function ($locationProvider) {
   $locationProvider.hashPrefix('');
   // Make code pretty
   window.prettyPrint && prettyPrint();
@@ -210,3 +210,20 @@ module    .controller('makerCtrl', ['$scope', '$rootScope', '$filter', '$locatio
         return d.toDateString();
       }
     });
+
+
+module.directive('makerResize', function() {
+  return {
+    restrict: 'E',
+    link:function(scope, elt)
+    {
+      $(elt[0]).resizable({
+        resize: function( event, ui ) {
+          scope.viz.parsedConfig.options.heightPx = ui.size.height;
+          scope.viz.parsedConfig.options.widthPx = ui.size.width;
+          scope.$digest();
+        }
+      });
+    }
+  };
+});

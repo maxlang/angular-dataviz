@@ -1,4 +1,4 @@
-angular.module('dataviz.directives').directive('histogram', [function() {
+angular.module('dataviz.directives').directive('aHistogram', [function() {
   return {
     restrict: 'E',
     scope: {

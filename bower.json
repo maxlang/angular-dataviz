@@ -29,6 +29,8 @@
     "ace-builds": "~1.1.1",
     "emmet-core": "https://github.com/nightwing/emmet-core.git",
     "select2": "~3.4.3",
-    "github": "~0.7.0"
+    "github": "~0.7.0",
+    "jquery-ui": "~1.10.3",
+    "angular-bootstrap-colorpicker": "~2.0.1"
   }
 }
