@@ -227,8 +227,8 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         k.append("rect")
             .attr("width", o('legendSquareSizePx'))
             .attr("height", o('legendSquareSizePx'))
-//            .attr("fill", function(d) {
-//              return color(d.data.key); })
+            .attr("fill", function(d) {
+              return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); });
 
         //TODO: figure out text ellipsis issue
