@@ -133,7 +133,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
           'rgba(255,255,255)'
           ]);
         opacity = d3.scale.ordinal().range([
-          1,0.8,0.6,0.4
+          0.8,0.6,0.4,0.2
         ]);
 
 

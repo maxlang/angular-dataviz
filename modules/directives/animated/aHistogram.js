@@ -8,22 +8,20 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
     link: function(scope, element) {
 
       var o = VizUtils.genOptionGetter(scope,{
-        widthPx: 175,
-        heightPx: 175,
-        minPadding: 10,
-        legend: true,
-        legendWidth: 'auto',
-        legendSquareSizePx: 19,
-        legendPadding: 10,
-        legendSpacing: 5,
-        maxLegendWidth: 200,
-        minLegendWidth: 100,
-        maxSlices: 4,    // maximum number of slices including 'other' slice
-        otherSlice: true,
-        donutWidth: 40,
-        bgColor: '#3976BF',
-        textColor: 'white',
-        fillOpacity: '0.8'
+        'tooltips' : false,
+        'showValues': true,
+        'staggerLabels': true,
+        'widthPx' : 586,
+        'heightPx' : 286,
+        'padding': 2,
+        'margins': {top:10, left: 30, bottom:20, right: 10},
+        'autoMargin' : true,
+        'domain' : 'auto',
+        'range' : 'auto',
+        'bars' : null,
+        'realtime' : true,
+        'snap' : false,
+        'filterSelector' : false
       });
       var initialized = false;
 
@@ -47,78 +45,63 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         change();
       }, true);
 
-      var color, pie, arc, svg, path, legendDims, hasLegend, legend, g, keys, opacity;
-
-      function calcLegendDims(data) {
-        var slices = _.cloneDeep(_.first(data, o('maxSlices')));
-        if (data.length >= o('maxSlices')) {
-          _.last(slices).key = "Other";
-        }
-
-        return {
-          width: Math.max(Math.min((2 * o('legendPadding')) +
-              o('legendSquareSizePx') +
-              o('legendSpacing') + _.max(_(data).map(function(v) {return VizUtils.measure(v.key, element[0], 'legend-text').width;})),
-              o('maxLegendWidth')), o('maxLegendWidth')),
-          height: (slices.length * o('legendSquareSizePx')) +
-              (2 * o('legendPadding')) +
-              ((slices.length - 1) * o('legendSpacing'))
-        };
-      }
-
-      var width,height,padding,radius;
+      var width, height, margins, range, max, leftMargin, w, h, bars, barPadding, barWidth, svg, g, x, y, d, xAxis, yAxis, xAxisG, yAxisG, rects, brush, brushRect;
 
       var calcInfo = function(data) {
         width = o('widthPx');
         height = o('heightPx');
-        padding = o('minPadding');
-        radius = Math.min(width - padding*2, height - padding*2) / 2; //TODO: possibly change this size based on the legend
-        legendDims = calcLegendDims(data);
+        margins = o('margins');
+        range = o('range');
 
-
-        /***
-         * Options
-         *
-         * 1) Width > Height, pie < legend : legend on the right
-         * 2) Height > Width, pie < legend : legend below
-         * 3) Pie >legend, width - pie < legend, height - pie < legend: legend inside donut
-         *
+        /**
+         *  Max
+         *  1) defined explicitly
+         *  2) highest elt in range
+         *  3) highest elt in data
          */
-        hasLegend = o('legend');
-        var diam = 2*radius;
+        max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(data, 'value'));
 
-        if (width - padding - diam < legendDims.width && height - padding - diam < legendDims.height) {
-          legendDims.width = Math.max(o('minLegendWidth'), width - padding - diam);
-          legendDims.width = Math.max(legendDims.width, Math.sqrt(Math.pow(2 * radius, 2)/Math.pow(legendDims.height, 2)));
+        leftMargin = margins.left;
+
+        if (o('autoMargin')) {
+          leftMargin = (margins.left + VizUtils.measure(max, element[0], "y axis").width) || margins.left;
+          leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
         }
 
-        // does the legend fit at all?
-        if (width - padding - diam < o('minLegendWidth') &&
-            height - padding - diam < legendDims.height &&
-            Math.pow(legendDims.height, 2) + Math.pow(legendDims.width, 2) > Math.pow(2 * radius, 2)) {
-          hasLegend = false;
-        }
-//        var fullWidth = diam + padding * 2;
-//        var fullHeight = diam + padding * 2;
+        w = width - leftMargin - margins.right;
+        h = height - margins.top - margins.bottom;
 
-        if (hasLegend) {
-          // legend on left/right
-          if (width - padding - diam < legendDims.width && height - padding - diam >= legendDims.height) {
-            legendDims.top = padding + diam;
-            legendDims.left = padding;
-//            fullHeight += legendDims.height;
-          } else if (width - padding - diam >= legendDims.width) {
-            legendDims.left = padding + diam;
-            legendDims.top = padding;
-//            fullWidth += legendDims.width;
-          } else {
-            legendDims.top = padding + radius - legendDims.height/2;
-            legendDims.left = padding + radius - legendDims.width/2;
-          }
+        bars = o('bars') || data.length;
+        barPadding = o('padding');
+
+        barWidth = (w/bars) - barPadding;
+
+        d = o('domain');
+
+        if(d === 'auto') {
+
+          var xMax = _.max(_.pluck(data, 'key'));
+          var xMin = _.min(_.pluck(data, 'key'));
+          //TODO: use d3 to do this automatically
+          xMax += (xMax - xMin)/bars;
+          x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
+        } else {
+          x = d3.scale.linear().domain(d).range([0, w]);
         }
-        arc = d3.svg.arc()
-            .innerRadius(Math.max(0,radius - o('donutWidth')))
-            .outerRadius(radius);
+
+        if(range === 'auto') {
+          var yMax;
+            yMax = data[0].value;
+          //var yMin = data[data.length - 1].value;
+          y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
+        } else {
+          y = d3.scale.linear().domain(range).range([h, 0]);
+        }
+
+
+        xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(w/100);
+        yAxis = d3.svg.axis().scale(y).orient("left").ticks(h/60);
+
       };
 
       function init(data) {
@@ -126,184 +109,269 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
         calcInfo(data);
 
-        color = d3.scale.ordinal().range([
-          'rgba(255,255,255)',
-          'rgba(255,255,255)',
-          'rgba(255,255,255)',
-          'rgba(255,255,255)'
-        ]);
-        opacity = d3.scale.ordinal().range([
-          1,0.8,0.6,0.4
-        ]);
-
-
-        pie = d3.layout.pie()
-            .value(function(d) {
-              return d.value; })
-            .sort(null);
-
         svg = d3.select(element[0]).select("svg")
             .attr("width", width)
             .attr("height", height)
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
-        g = svg.append("g")
-            .attr("transform", "translate(" + (radius + padding) + "," + (radius + padding) + ")");
+        g = svg.append('g')
+            .classed('main', true)
+            .attr('width', w)
+            .attr('height', h)
+            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
-        path = g.selectAll("path");
+        scope.brush.x(x);
 
-        if (hasLegend) {
-          legend = svg.append('g')
-              .attr("class", "legend")
-              .attr("width", legendDims.width)
-              .attr("height", legendDims.height)
-              .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
+        rects = g.selectAll('rect');
 
-          keys = legend.selectAll("g");
-        }
+        xAxisG =   svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
+            .attr('fill', o('axisColor'))
+            .attr('fill-opacity', o('axisOpacity'))
+            .call(xAxis);
+
+        yAxisG =   svg.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
+            .attr('fill', o('axisColor'))
+            .attr('fill-opacity', o('axisOpacity'))
+            .call(yAxis);
+
+        brush = g.append("g")
+            .attr("class", "x brush")
+            .call(scope.brush);
+
+        brushRect = brush.selectAll("rect")
+            .attr("y", -6)
+            .attr("height", h+8);
 
         initialized = true;
       }
 
       function change() {
         calcInfo(scope.data);
-
-        svg.transition()
-            .duration(300)
-            .attr("width", o('widthPx'))
-            .attr("height", o('heightPx'))
+//
+        svg.transition().duration(300)
+            .attr("width", width)
+            .attr("height", height)
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
+        g.transition().duration()
+            .attr('width', w)
+            .attr('height', h)
+            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
-        g.transition()
-            .duration(300)
-            .attr("transform", "translate(" + (radius + padding) + "," + (radius + padding) + ")");
+        rects = rects.data(scope.data, key);
+
+        rects.enter().append('rect')
+            .classed('a-bar', true)
+            .attr('stroke-width', o('padding')+'px')
+            .attr('fill', o('barColor'))
+            .attr('fill-opacity', o('barOpacity'))
+            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+            .attr('width', barWidth)
+            .attr('y', h)
+            .attr('height', 0);
+//            .transition().delay(2000).duration(3000)
+//            .attr('y', function(d, i) { return y(d.value); })
+//            .attr('height', function(d, i) { return h - y(d.value); });
 
 
-        var data0 = path.data();
-        var pieData = _.cloneDeep(scope.data);
-        if (pieData.length >= o('maxSlices')) {
-          pieData[o('maxSlices') - 1].key = "Other";
-          pieData[o('maxSlices') - 1].value = _(pieData).rest(o('maxSlices') -1).reduce(function(acc, val) {
-            return acc + val.value;
-          }, 0);
-          pieData = _.first(pieData, o('maxSlices'));
-        }
+        rects.exit().transition().duration(300).attr('height', 0).attr('y', h).remove();
 
-        var data1 = pie(pieData);
+        rects.transition().duration(300)
 
-        path = path.data(data1, key);
+            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+            .attr('y', function(d, i) { return y(d.value); })
+            .attr('width', barWidth)
+            .attr('height', function(d, i) { return h - y(d.value); })
+            .attr('stroke-width', o('padding')+'px')
+            .attr('fill', o('barColor'))
+            .attr('fill-opacity', o('barOpacity'));
 
-        path.enter().append("path")
-            .each(function(d, i) { this._current = findNeighborArc(i, data0, data1, key) || d; })
-            .attr("fill", function(d) { return color(d.data.key); })
-            .attr("fill-opacity", function(d) { return opacity(d.data.key); })
-            .append("title")
-            .text(function(d) { return d.data.key; });
+        xAxisG.transition().duration(300)
+            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
+            .attr('fill', o('axisColor'))
+            .attr('fill-opacity', o('axisOpacity'))
+            .call(xAxis);
 
-        path.exit()
-            .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
-            .transition()
-            .duration(750)
-            .attrTween("d", arcTween)
-            .remove();
+        yAxisG.transition().duration(300)
+            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
+            .attr('fill', o('axisColor'))
+            .attr('fill-opacity', o('axisOpacity'))
+            .call(yAxis);
 
-        path.transition()
-            .duration(750)
-            .attrTween("d", arcTween);
+        scope.brush.x(x);
 
-        legend.transition().duration(300)
-            .attr("width", legendDims.width)
-            .attr("height", legendDims.height)
-            .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
+        brush.transition().duration(300)
+            .call(scope.brush.extent(scope.brush.extent()))
+            .selectAll('rect')
+            .attr("height", h+8);
 
-        keys = keys.data(data1, key);
 
-        var k = keys.enter().append("g")
-            .attr("transform", function(d, i) { return "translate(" + o('legendPadding') + "," + (i * (o('legendSpacing') + o('legendSquareSizePx'))) + ")"; });
-
-        k.append("rect")
-            .attr("width", o('legendSquareSizePx'))
-            .attr("height", o('legendSquareSizePx'))
-//            .attr("fill", function(d) {
-//              return color(d.data.key); })
-            .attr("fill-opacity", function(d) { return opacity(d.data.key); });
-
-        //TODO: figure out text ellipsis issue
-//        var textWidth = legendDims.width - o('legendSquareSizePx') + 2* o('legendPadding') + o('legendSpacing');
+//        g.transition()
+//            .duration(300)
+//            .attr("transform", "translate(" + (radius + padding) + "," + (radius + padding) + ")");
 //
-//        var text = k.append("foreignObject")
+//
+//        var data0 = path.data();
+//        var pieData = _.cloneDeep(scope.data);
+//        if (pieData.length >= o('maxSlices')) {
+//          pieData[o('maxSlices') - 1].key = "Other";
+//          pieData[o('maxSlices') - 1].value = _(pieData).rest(o('maxSlices') -1).reduce(function(acc, val) {
+//            return acc + val.value;
+//          }, 0);
+//          pieData = _.first(pieData, o('maxSlices'));
+//        }
+//
+//        var data1 = pie(pieData);
+//
+//        path = path.data(data1, key);
+//
+//        path.enter().append("path")
+//            .each(function(d, i) { this._current = findNeighborArc(i, data0, data1, key) || d; })
+//            .attr("fill", function(d) { return color(d.data.key); })
+//            .attr("fill-opacity", function(d) { return opacity(d.data.key); })
+//            .append("title")
+//            .text(function(d) { return d.data.key; });
+//
+//        path.exit()
+//            .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
+//            .transition()
+//            .duration(750)
+//            .attrTween("d", arcTween)
+//            .remove();
+//
+//        path.transition()
+//            .duration(750)
+//            .attrTween("d", arcTween);
+//
+//        legend.transition().duration(300)
+//            .attr("width", legendDims.width)
+//            .attr("height", legendDims.height)
+//            .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
+//
+//        keys = keys.data(data1, key);
+//
+//        var k = keys.enter().append("g")
+//            .attr("transform", function(d, i) { return "translate(" + o('legendPadding') + "," + (i * (o('legendSpacing') + o('legendSquareSizePx'))) + ")"; });
+//
+//        k.append("rect")
+//            .attr("width", o('legendSquareSizePx'))
+//            .attr("height", o('legendSquareSizePx'))
+////            .attr("fill", function(d) {
+////              return color(d.data.key); })
+//            .attr("fill-opacity", function(d) { return opacity(d.data.key); });
+//
+//        //TODO: figure out text ellipsis issue
+////        var textWidth = legendDims.width - o('legendSquareSizePx') + 2* o('legendPadding') + o('legendSpacing');
+////
+////        var text = k.append("foreignObject")
+////            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
+////            .attr("y", 0)
+////            .attr('width', textWidth)
+////            .attr('height', '1.2em')
+////            .append("xhtml:div")
+////            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+////
+////        var k2 = keys.transition().duration(300).selectAll('foreignObject');
+////
+////        k2.attr('width', textWidth);
+////            //.html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+//
+//
+//        k.append("text")
 //            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-//            .attr("y", 0)
-//            .attr('width', textWidth)
-//            .attr('height', '1.2em')
-//            .append("xhtml:div")
-//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+//            .attr("y", 9)
+//            .attr("dy", ".35em")
+//            .text(function(d) {
+//              return d.data.key; }).classed('pie-legend', true);
 //
-//        var k2 = keys.transition().duration(300).selectAll('foreignObject');
+//        keys.exit().remove();
 //
-//        k2.attr('width', textWidth);
-//            //.html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
-
-
-        k.append("text")
-            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .text(function(d) {
-              return d.data.key; }).classed('pie-legend', true);
-
-        keys.exit().remove();
-
-        keys.transition().duration(300);
+//        keys.transition().duration(300);
       }
 //      });
 
       function key(d) {
-        return d.data.key;
+        return d.key;
       }
 
-      function type(d) {
-        d.value = +d.value;
-        return d;
-      }
-
-      function findNeighborArc(i, data0, data1, key) {
-        var d;
-        return (d = findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
-            : (d = findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
-            : null;
-      }
-
-// Find the element in data0 that joins the highest preceding element in data1.
-      function findPreceding(i, data0, data1, key) {
-        var m = data0.length;
-        while (--i >= 0) {
-          var k = key(data1[i]);
-          for (var j = 0; j < m; ++j) {
-            if (key(data0[j]) === k) return data0[j];
-          }
+      function setSelected(filter, extent) {
+        if (!extent || _.isEmpty(extent) || extent[0] === extent[1]) {
+          scope.$apply(function () {
+            filter.splice(0, filter.length);
+          });
+        } else {
+          scope.$apply(function () {
+            filter.splice(0, filter.length, extent);
+          });
         }
       }
 
-// Find the element in data0 that joins the lowest following element in data1.
-      function findFollowing(i, data0, data1, key) {
-        var n = data1.length, m = data0.length;
-        while (++i < n) {
-          var k = key(data1[i]);
-          for (var j = 0; j < m; ++j) {
-            if (key(data0[j]) === k) return data0[j];
-          }
+      scope.$watch('params.filter', function(f) {
+        if (f) {
+          console.log('setting brush');
+          setBrush(scope.brush, f[0]);
+        }
+      }, true);
+
+      function setBrush(brush, extent) {
+        if (!extent) {
+          brush.clear();
+        } else {
+          brush.extent(extent);
+        }
+        brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
+      }
+
+      $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
+
+      scope.brush = d3.svg.brush()
+          .on("brush", function() {brushed(scope.brush, this);})
+          .on("brushstart", function() {brushstart(scope.brush);})
+          .on("brushend", function() {brushend(scope.brush);});
+
+
+      function brushed(brush) {
+        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
+          brush.extent(brush.oldExtent);
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
+          return;
+        }
+
+        var extent = brush.extent();
+        if (o('snap') && extent && extent.length === 2) {
+          var domain = o('domain');
+          var buckets = o('bars');
+          var range = domain[1] - domain[0];
+          var step = range/buckets;
+          extent = [Math.round(extent[0]/step) * step, Math.round(extent[1]/step) * step];
+          brush.extent(extent);
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2')); //apply change
+        }
+
+        if (o('realtime')) {
+          setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, extent);
         }
       }
 
-      function arcTween(d) {
-        var i = d3.interpolate(this._current, d);
-        this._current = i(0);
-        return function(t) { return arc(i(t)); };
+      function brushstart(brush) {
+        brush.oldExtent = brush.extent();
       }
+
+      function brushend(brush) {
+        if ((brush === scope.brush && scope.params.filterNum) || (brush === scope.brush2 && !scope.params.filterNum)) {
+          brush.extent(brush.oldExtent);
+          brush(brush === scope.brush ?  d3.select(element[0]).select('.x.brush') : d3.select(element[0]).select('.x.brush2'));
+          return;
+        }
+        setSelected(scope.params.filterNum ? scope.filter2 : scope.params.filter, brush.extent());
+      }
+
     }
   };
 }]);

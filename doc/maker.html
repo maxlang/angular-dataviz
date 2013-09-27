@@ -182,20 +182,20 @@
     Data: <textarea ng-model="viz.data"></textarea>
     Config: <textarea ng-model="viz.config"></textarea>
     Filter: <span ng-bind="viz.parsedConfig.filter|json"></span>
-    Github User: <input ng-model="github.user">
-    Github Password: <input type="password" ng-model="github.password">
+    <!--Github User: <input ng-model="github.user">-->
+    <!--Github Password: <input type="password" ng-model="github.password">-->
     <!--<button ng-click="auth()">Login</button>-->
-    <span ng-if="github.user && github.password">GistId: <input ng-model="github.gist" ui-select2="select2Options"></input></span>
-    {{ github.gistid }}
+    <!--<span ng-if="github.user && github.password">GistId: <input ng-model="github.gist" ui-select2="select2Options"></input></span>-->
+    <!--{{ github.gistid }}-->
 
     <maker-resize style = "display:block; border:1px solid #000;">
       <block-calendar ng-if="viz.type==='calendar'" data="viz.parsedData" params="viz.parsedConfig"></block-calendar>
-      <histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></histogram>
+      <a-histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></a-histogram>
       <barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></barchart>
       <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></pie>
 
     </maker-resize>
-    <div ng-if="github.gist" class="editr" data-item="maker" ></div>
+    <!--<div ng-if="github.gist" class="editr" data-item="maker" ></div>-->
     <div style="width:100px;height:1000px;"></div>
 
 
