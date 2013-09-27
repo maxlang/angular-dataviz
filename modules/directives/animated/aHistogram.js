@@ -53,25 +53,46 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         margins = o('margins');
         range = o('range');
 
+        h = height - margins.top - margins.bottom;
+
+        var yTicks = h/60;
+
         /**
-         *  Max
+         *  Max value just used to judge width of y axis
          *  1) defined explicitly
          *  2) highest elt in range
          *  3) highest elt in data
          */
-        max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(data, 'value'));
+        if (range !== 'auto') {
+          max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(data, 'value'));
+        } else {
+          max = _.max(_.pluck(data, 'value'));
+        }
 
         leftMargin = margins.left;
 
         if (o('autoMargin')) {
+          //account for possible decimals
+          var decimals = Math.ceil(-((Math.log(max/yTicks)/Math.log(10))));
+          if (decimals > 0) {
+            max = Math.floor(max);
+            max += "." + Math.pow(10, decimals);
+          }
+
           leftMargin = (margins.left + VizUtils.measure(max, element[0], "y axis").width) || margins.left;
           leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
         }
 
         w = width - leftMargin - margins.right;
-        h = height - margins.top - margins.bottom;
-
-        bars = o('bars') || data.length;
+        if (range !== 'auto') {
+          bars = o('bars') || data.length;
+        } else {
+          var interval = o('interval') || 1; //TODO: handle case where interval is undefined - perhaps extrapolate from data somehow?
+          var keys = _.pluck(data, 'key');
+          var maxKey = _.max(keys);
+          var minKey = _.min(keys);
+          bars = Math.ceil((maxKey - minKey)/interval) + 1;
+        }
         barPadding = o('padding');
 
         barWidth = (w/bars) - barPadding;
@@ -91,7 +112,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
         if(range === 'auto') {
           var yMax;
-            yMax = data[0].value;
+            yMax = max;
           //var yMin = data[data.length - 1].value;
           y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
         } else {
@@ -100,7 +121,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
 
         xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(w/100);
-        yAxis = d3.svg.axis().scale(y).orient("left").ticks(h/60);
+        yAxis = d3.svg.axis().scale(y).orient("left").ticks(yTicks);
 
       };
 
