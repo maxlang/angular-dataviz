@@ -16,7 +16,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         legendSquareSizePx: 19,
         legendPadding: 10,
         legendSpacing: 5,
-        maxLegendWidth: 200,
+        maxLegendWidth: 400,
         minLegendWidth: 100,
         maxSlices: 4,    // maximum number of slices including 'other' slice
         otherSlice: true,
@@ -106,10 +106,12 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
           if (width - padding - diam < legendDims.width && height - padding - diam >= legendDims.height) {
             legendDims.top = padding + diam;
             legendDims.left = padding;
+            legendDims.width = Math.max(o('minLegendWidth'), width);
 //            fullHeight += legendDims.height;
           } else if (width - padding - diam >= legendDims.width) {
             legendDims.left = padding + diam;
             legendDims.top = padding;
+            legendDims.width = Math.max(o('minLegendWidth'), width - diam);
 //            fullWidth += legendDims.width;
           } else {
             legendDims.top = padding + radius - legendDims.height/2;
@@ -222,7 +224,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         keys = keys.data(data1, key);
 
         var k = keys.enter().append("g")
-            .attr("transform", function(d, i) { return "translate(" + o('legendPadding') + "," + (i * (o('legendSpacing') + o('legendSquareSizePx'))) + ")"; });
+            .attr("transform", function(d, i) { return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; });
 
         k.append("rect")
             .attr("width", o('legendSquareSizePx'))
@@ -231,33 +233,36 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); });
 
-        //TODO: figure out text ellipsis issue
-//        var textWidth = legendDims.width - o('legendSquareSizePx') + 2* o('legendPadding') + o('legendSpacing');
-//
-//        var text = k.append("foreignObject")
-//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-//            .attr("y", 0)
-//            .attr('width', textWidth)
-//            .attr('height', '1.2em')
-//            .append("xhtml:div")
-//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
-//
-//        var k2 = keys.transition().duration(300).selectAll('foreignObject');
-//
-//        k2.attr('width', textWidth);
-//            //.html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;'>" + d.data.key + "</div>";});
+        var nonTextWidth = o('legendSquareSizePx') + (2 * o('legendPadding')) + o('legendSpacing') + padding;
+        var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
 
+        var tc = d3.rgb(o('textColor'));
+        var rgba = [tc.r, tc.g, tc.b,o('fillOpacity')];
 
-        k.append("text")
+        var text = k.append("foreignObject")
             .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .text(function(d) {
-              return d.data.key; }).classed('pie-legend', true);
+            .attr("y", 0)
+            .attr('width', textWidth)
+            .attr('height', '1.2em')
+            .append("xhtml:div")
+            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.data.key + "</div>";});
+//
+        keys.transition().duration(300).call(function() {
+          //TODO: incorporate into transition better
+          $(this[0]).width(textWidth).find('foreignObject').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+        });
+
+
+//        k.append("text")
+//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
+//            .attr("y", 9)
+//            .attr("dy", ".35em")
+//            .text(function(d) {
+//              return d.data.key; }).classed('pie-legend', true);
 
         keys.exit().remove();
 
-        keys.transition().duration(300);
+//        keys.transition().duration(300);
       }
 //      });
 
