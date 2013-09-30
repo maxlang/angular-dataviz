@@ -95,7 +95,9 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         var oldWidth = legendDims.width;
         if (width - padding - diam < legendDims.width && height - padding - diam < legendDims.height) {
           legendDims.width = Math.max(o('minLegendWidth'), width - padding - diam);
-          legendDims.width = Math.max(legendDims.width, Math.sqrt(Math.pow(2 * (radius - o('donutWidth')), 2) - Math.pow(legendDims.height, 2)));
+          if (Math.pow(legendDims.height, 2) < Math.pow(2 * (radius - o('donutWidth')), 2)) {
+            legendDims.width = Math.max(legendDims.width, Math.sqrt(Math.pow(2 * (radius - o('donutWidth')), 2) - Math.pow(legendDims.height, 2)));
+          }
         }
 
         // does the legend fit at all?
