@@ -977,7 +977,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         legendSquareSizePx: 19,
         legendPadding: 10,
         legendSpacing: 5,
-        maxLegendWidth: 400,
+        maxLegendWidth: 400,  //TODO: enforce
         minLegendWidth: 100,
         maxSlices: 4,    // maximum number of slices including 'other' slice
         otherSlice: true,
@@ -1047,10 +1047,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
          */
         hasLegend = o('legend');
         var diam = 2*radius;
-
+        var oldWidth = legendDims.width;
         if (width - padding - diam < legendDims.width && height - padding - diam < legendDims.height) {
           legendDims.width = Math.max(o('minLegendWidth'), width - padding - diam);
-          legendDims.width = Math.max(legendDims.width, Math.sqrt(Math.pow(2 * radius, 2)/Math.pow(legendDims.height, 2)));
+          legendDims.width = Math.max(legendDims.width, Math.sqrt(Math.pow(2 * (radius - o('donutWidth')), 2) - Math.pow(legendDims.height, 2)));
         }
 
         // does the legend fit at all?
@@ -1075,8 +1075,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             legendDims.width = Math.max(o('minLegendWidth'), width - diam);
 //            fullWidth += legendDims.width;
           } else {
+            legendDims.width = Math.max(o('minLegendWidth'), Math.min(oldWidth, Math.sqrt(Math.pow(2 * (radius - o('donutWidth')), 2) - Math.pow(legendDims.height, 2))));
             legendDims.top = padding + radius - legendDims.height/2;
             legendDims.left = padding + radius - legendDims.width/2;
+
           }
         }
         arc = d3.svg.arc()
