@@ -167,7 +167,6 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
             .attr("height", height)
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
-            .style('font-size',o('font-size') || 250)
             .style('font-weight', 'bold')
             .style("background-color", o('bgColor'));
         g.transition().duration(300)
@@ -182,6 +181,7 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
             .attr('fill', o('textColor'))
             .attr('fill-opacity', o('fillOpacity'))
             .attr('x', o('bottomRight') ? w : w/2)
+            .style('font-size',o('font-size') || 250)
             .attr('text-anchor', o('bottomRight') ? 'end' : 'middle')
             .each(function(d){
               this.__lastData = d;
