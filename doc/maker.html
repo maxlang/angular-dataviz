@@ -192,7 +192,9 @@
       <block-calendar ng-if="viz.type==='calendar'" data="viz.parsedData" params="viz.parsedConfig"></block-calendar>
       <a-histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></a-histogram>
       <barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></barchart>
-      <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></pie>
+      <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></a-pie>
+      <a-number ng-if="viz.type==='number'" data="viz.parsedData" params="viz.parsedConfig"></a-number>
+
 
     </maker-resize>
     <!--<div ng-if="github.gist" class="editr" data-item="maker" ></div>-->
