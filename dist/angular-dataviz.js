@@ -984,7 +984,13 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         donutWidth: 40,
         bgColor: '#3976BF',
         textColor: 'white',
-        fillOpacity: '0.8'
+        fillOpacity: '0.8',
+        pieStroke: 'black',
+        pieStrokeWidth: '2',
+        pieStrokeOpacity: '0.4',
+        selectedStroke: 'white',
+        selectedStrokeOpacity:'1'
+
       });
       var initialized = false;
 
@@ -1165,8 +1171,36 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .each(function(d, i) { this._current = findNeighborArc(i, data0, data1, key) || d; })
             .attr("fill", function(d) { return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); })
-            .append("title")
-            .text(function(d) { return d.data.key; });
+            .attr("stroke", function(d) {
+              return _.contains(scope.params.filter, d.data.key) ? o('selectedStroke') : o('pieStroke');
+            })
+            .attr("stroke-width", o('pieStrokeWidth'))
+            .attr("stroke-opacity", function(d) {
+              return _.contains(scope.params.filter, d.data.key) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
+            })
+            .on('click', function(d, i) {
+              if (_.contains(scope.params.filter, d.data.key)) {
+                if (scope.shifted) {
+                  scope.$apply(function() {
+                    scope.params.filter.splice(scope.params.filter.indexOf(d.data.key), 1);
+                  });
+                } else {
+                  scope.$apply(function() {
+                    scope.params.filter.splice(0, scope.params.filter.length);
+                  });
+                }
+              } else {
+                if (!scope.shifted) {
+                  scope.$apply(function() {
+                    scope.params.filter.splice(0, scope.params.filter.length);
+                  });
+                }
+                scope.$apply(function() {
+                  scope.params.filter.push(d.data.key);
+                });
+              }
+            });
+
 
         path.exit()
             .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
@@ -1177,6 +1211,12 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
         path.transition()
             .duration(750)
+            .attr("stroke", function(d) {
+              return _.contains(scope.params.filter, d.data.key) ? o('selectedStroke') : o('pieStroke');
+            })
+            .attr("stroke-opacity", function(d) {
+              return _.contains(scope.params.filter, d.data.key) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
+            })
             .attrTween("d", arcTween);
 
         legend.transition().duration(300)
@@ -1229,7 +1269,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
       }
 //      });
 
-      function key(d) {
+        $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
+
+
+        function key(d) {
         return d.data.key;
       }
 

@@ -28,6 +28,11 @@ module    .controller('makerCtrl', ['$scope', '$rootScope', '$filter', '$locatio
         }
       });
 
+      $scope.$watch('viz.parsedConfig.filter', function(f) {
+        console.log(f);
+        $scope.viz.config = JSON.stringify($scope.viz.parsedConfig);
+      }, true);
+
       $scope.$watch('viz.type', function(t) {
         $location.search('type',t);
       });
@@ -221,6 +226,7 @@ module.directive('makerResize', function() {
         resize: function( event, ui ) {
           scope.viz.parsedConfig.options.heightPx = ui.size.height;
           scope.viz.parsedConfig.options.widthPx = ui.size.width;
+          scope.viz.config = JSON.stringify(scope.viz.parsedConfig);
           scope.$digest();
         }
       });
