@@ -197,10 +197,13 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         var data0 = path.data();
         var pieData = _.cloneDeep(scope.data);
         if (pieData.length >= o('maxSlices')) {
-          pieData[o('maxSlices') - 1].key = "Other";
+          pieData[o('maxSlices') - 1].other = true;
+          pieData[o('maxSlices') - 1].otherKeys = [];
           pieData[o('maxSlices') - 1].value = _(pieData).rest(o('maxSlices') -1).reduce(function(acc, val) {
+            pieData[o('maxSlices') - 1].otherKeys.push(val.key);
             return acc + val.value;
           }, 0);
+          pieData[o('maxSlices') - 1].key = "Other";
           pieData = _.first(pieData, o('maxSlices'));
         }
 
@@ -213,14 +216,55 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .attr("fill", function(d) { return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); })
             .attr("stroke", function(d) {
-              return _.contains(scope.params.filter, d.data.key) ? o('selectedStroke') : o('pieStroke');
+              return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStroke') : o('pieStroke');
             })
             .attr("stroke-width", o('pieStrokeWidth'))
             .attr("stroke-opacity", function(d) {
-              return _.contains(scope.params.filter, d.data.key) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
+              return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
             .on('click', function(d, i) {
-              if (_.contains(scope.params.filter, d.data.key)) {
+              if (d.data.other) {
+                if (_.difference(d.data.otherKeys, scope.params.filter).length === 0) { //all keys are in filter
+                  if (scope.shifted) {
+                    scope.$apply(function() {
+                      _.remove(scope.params.filter, function(v) {
+                        return _.contains(d.data.otherKeys, v);
+                      });
+                    });
+                  } else {
+                    scope.$apply(function() {
+                      Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length]);
+                    });
+                  }
+                } else if (_.intersection(d.data.otherKeys, scope.params.filter).length > 0) { //some keys are in filter
+                  var diff = _.difference(scope.params.filter, d.data.otherKeys);
+                  if (scope.shifted) {
+                    scope.$apply(function() {
+                      _.each(diff, function(v) {
+                        scope.params.filter.push(v);
+                      });
+                    });
+                  } else {
+                    scope.$apply(function() {
+                      _.remove(scope.params.filter, function(v) {
+                        return _.contains(d.data.otherKeys, v);
+                      });
+                    });
+                  }
+                } else { // no keys are in filter
+                  if (scope.shifted) {
+                    scope.$apply(function() {
+                      _.each(d.data.otherKeys, function(v) {
+                        scope.params.filter.push(v);
+                      });
+                    });
+                  } else {
+                    scope.$apply(function() {
+                      Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length].concat(d.data.otherKeys));
+                    });
+                  }
+                }
+              } else if (_.contains(scope.params.filter, d.data.key)) {
                 if (scope.shifted) {
                   scope.$apply(function() {
                     scope.params.filter.splice(scope.params.filter.indexOf(d.data.key), 1);
@@ -253,10 +297,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         path.transition()
             .duration(750)
             .attr("stroke", function(d) {
-              return _.contains(scope.params.filter, d.data.key) ? o('selectedStroke') : o('pieStroke');
+              return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStroke') : o('pieStroke');
             })
             .attr("stroke-opacity", function(d) {
-              return _.contains(scope.params.filter, d.data.key) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
+              return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
             .attrTween("d", arcTween);
 
