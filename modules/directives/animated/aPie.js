@@ -53,7 +53,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         change();
       }, true);
 
-      var color, pie, arc, svg, path, legendDims, hasLegend, legend, g, keys, opacity;
+      var color, pie, arc, svg, path, legendDims, hasLegend, legend, g, keys, opacity, getArcFunc;
 
       function calcLegendDims(data) {
         var slices = _.cloneDeep(_.first(data, o('maxSlices')));
@@ -131,6 +131,12 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         arc = d3.svg.arc()
             .innerRadius(Math.max(0,radius - o('donutWidth')))
             .outerRadius(radius);
+
+        getArcFunc = function(pop) {
+          return d3.svg.arc()
+              .innerRadius(Math.max(pop,radius - o('donutWidth') + pop))
+              .outerRadius(radius + pop);
+        };
       };
 
       function init(data) {
@@ -206,6 +212,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
           pieData[o('maxSlices') - 1].key = "Other";
           pieData = _.first(pieData, o('maxSlices'));
         }
+
+        _.each(pieData, function(v, k) {
+          v.selected = _.contains(scope.params.filter, v.key) || (v.other && _.intersection(scope.params.filter, v.otherKeys).length > 0);
+        });
 
         var data1 = pie(pieData);
 
@@ -302,7 +312,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .attr("stroke-opacity", function(d) {
               return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
-            .attrTween("d", arcTween);
+            .attrTween("d", arcTween)
+            .each('end', function(d) {
+              this._current.data.selected = _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0); //overwrite NaN
+            });
 
         legend.transition().duration(300)
             .attr("width", legendDims.width)
@@ -357,7 +370,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
 
 
-        function key(d) {
+      function key(d) {
         return d.data.key;
       }
 
@@ -397,9 +410,16 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
       function arcTween(d) {
         var i = d3.interpolate(this._current, d);
+        var pop = d3.interpolate(this._current.data.selected ? 10 : 0, d.data.selected ? 10 : 0 );
+
         this._current = i(0);
-        return function(t) { return arc(i(t)); };
-      }
+//        if ((d.data.other && _.intersection(d.data.otherKeys, scope.params.filter).length > 0) || _.contains(scope.params.filter, d.data.key)) {
+          return function(t) {
+
+            return getArcFunc(pop(t))(i(t)); };
+        }
+//        return function(t) { return arc(i(t)); };
+//      }
     }
   };
 }]);
