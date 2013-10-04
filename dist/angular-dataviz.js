@@ -1261,7 +1261,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         path.exit()
             .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
             .transition()
-            .duration(750)
+            .duration(300)
             .attrTween("d", arcTween)
             .remove();
 
