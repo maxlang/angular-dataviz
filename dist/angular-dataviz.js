@@ -1112,7 +1112,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
           'rgba(255,255,255)'
           ]);
         opacity = d3.scale.ordinal().range([
-          0.8,0.6,0.4,0.2
+          0.95,0.8,0.65,0.5,0.35,0.1
         ]);
 
 
@@ -1286,7 +1286,8 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         keys = keys.data(data1, key);
 
         var k = keys.enter().append("g")
-            .attr("transform", function(d, i) { return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; });
+            .attr("transform", function(d, i) { console.log(d,i); return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; });
+
 
         k.append("rect")
             .attr("width", o('legendSquareSizePx'))
@@ -1309,7 +1310,9 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .append("xhtml:div")
             .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.data.key + "</div>";});
 //
-        keys.transition().duration(300).call(function() {
+        keys.transition().duration(300)
+            .attr("transform", function(d, i) { console.log(d,i); return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; })
+        .call(function() {
           //TODO: incorporate into transition better
           $(this[0]).width(textWidth).find('foreignObject').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
         });
