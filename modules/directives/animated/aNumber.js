@@ -203,7 +203,7 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
             .attr('x', o('bottomRight') ? w : w/2)
             .tween("text", function(d) {
               var last = this.__lastData;
-              var tI = d3.interpolateNumber(parseFloat(last), parseFloat(d));
+              var tI = d3.interpolateNumber(parseFloat(last) || 0, parseFloat(d) || 0);
               return function(t){
                 this.textContent = format(tI(t));
               };
