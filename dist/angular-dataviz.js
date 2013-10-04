@@ -1371,7 +1371,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
 
       function arcTween(d) {
         var i = d3.interpolate(this._current, d);
-        var pop = d3.interpolate(this._current.data.selected ? 10 : 0, d.data.selected ? 10 : 0 );
+        var pop = d3.interpolate(this._current.data && this._current.data.selected ? 10 : 0, d.data && d.data.selected ? 10 : 0 );
 
         this._current = i(0);
 //        if ((d.data.other && _.intersection(d.data.otherKeys, scope.params.filter).length > 0) || _.contains(scope.params.filter, d.data.key)) {
