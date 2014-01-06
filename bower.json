@@ -19,7 +19,7 @@
     "d3": "~3.2.3",
     "d3-plugins": "latest",
     "angular-ui": "~0.4.0",
-    "angular-ui-map": "~0.0.2",
+    "angular-ui-map": "0.0.2",
     "jquery": "~2.0.3",
     "google-maps-utility-library-v3": "latest"
   },
