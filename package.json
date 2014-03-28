@@ -2,7 +2,7 @@
   "author": "https://github.com/maxlang/angular-dataviz/graphs/contributors",
   "name": "angular-dataviz",
   "description": "Angular Dataviz - Reliable, componentized data visualization controls for AngularJS",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "homepage": "https://github.com/maxlang/angular-dataviz",
   "repository": {
     "type": "git",
