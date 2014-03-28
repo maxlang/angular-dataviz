@@ -409,6 +409,9 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
             max += "." + Math.pow(10, decimals);
           }
 
+          //add commas
+          max += (Array((max+"").length/3).join(","));
+
           leftMargin = (margins.left + VizUtils.measure(max, element[0], "y axis").width) || margins.left;
           leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
         }
