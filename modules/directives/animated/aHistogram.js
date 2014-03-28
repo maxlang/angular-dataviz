@@ -78,12 +78,15 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
             max = Math.floor(max);
             max += "." + Math.pow(10, decimals);
           }
-
+          var maxString = max;
           //add commas
-          max += (Array((max+"").length/3).join(","));
+          if (_.isNumber(max) && ((max + 1)!==max)) {
+            maxString += (Array(Math.floor((max+"").length/3)).join(","));
+          }
 
-          leftMargin = (margins.left + VizUtils.measure(max, element[0], "y axis").width) || margins.left;
+          leftMargin = (margins.left + VizUtils.measure(maxString, element[0], "y axis").width) || margins.left;
           leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
+          leftMargin += 9;
         }
 
         w = width - leftMargin - margins.right;
