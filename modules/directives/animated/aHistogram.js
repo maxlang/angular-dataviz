@@ -21,7 +21,8 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         'bars' : null,
         'realtime' : true,
         'snap' : false,
-        'filterSelector' : false
+        'filterSelector' : false,
+        'date' : false
       });
       var initialized = false;
 
@@ -34,6 +35,19 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
 
       scope.$watch('data', function(data, oldData) {
+        if (o('date')) {
+          var ensureDates = _.map(data, function(d) {
+            if (!d) {
+              return;
+            }
+            return {
+              key:moment(d.key),
+              value: d.value
+            };
+          });
+          Array.prototype.splice.apply(scope.data,[0,scope.data.length].concat(ensureDates));
+        }
+
         if(!initialized) {
           init(data);
         }
@@ -127,6 +141,12 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
 
         xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(w/100);
+        if (o('date')) {
+          xAxis.tickFormat(function(d) {
+            return moment(d).format('YYYY-MM-DD');
+          });
+        }
+
         yAxis = d3.svg.axis().scale(y).orient("left").ticks(yTicks);
 
       };
@@ -193,12 +213,20 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
         rects = rects.data(scope.data, key);
 
+        var rectX = function(d, i) {
+          if (o('date')) {
+            return x(d.key);
+          } else {
+            return _.isNumber(d.key) ? x(d.key) : x(i);
+          }
+        };
+
         rects.enter().append('rect')
             .classed('a-bar', true)
             .attr('stroke-width', o('padding')+'px')
             .attr('fill', o('barColor'))
             .attr('fill-opacity', o('barOpacity'))
-            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+            .attr('x', rectX)
             .attr('width', barWidth)
             .attr('y', h)
             .attr('height', 0);
@@ -211,7 +239,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
 
         rects.transition().duration(300)
 
-            .attr('x', function(d, i) { return _.isNumber(d.key) ? x(d.key) : x(i);})
+            .attr('x', rectX)
             .attr('y', function(d, i) { return y(d.value); })
             .attr('width', barWidth)
             .attr('height', function(d, i) { return h - y(d.value); })

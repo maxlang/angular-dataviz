@@ -194,6 +194,8 @@
       <barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></barchart>
       <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></a-pie>
       <a-number ng-if="viz.type==='number'" data="viz.parsedData" params="viz.parsedConfig"></a-number>
+      <a-linechart ng-if="viz.type==='line' || viz.type==='linechart'" data="viz.parsedData" params="viz.parsedConfig"></a-linechart>
+
 
 
     </maker-resize>
