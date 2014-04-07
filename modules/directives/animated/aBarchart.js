@@ -5,14 +5,13 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
       //TODO: change expected values to something more reasonable
       'data': '=', //expects an array of selected label strings
       //multidata format
-      //  {
-      //    "data": {
-      //      "label1":[...data...],
-      //      "label2":[...data...],
+      //  [
+      //     {"key":"label1",
+      //      "total": <db-total>,
+      //      "data":[...data...]
+      //     },
       //      ...
-      //    },
-      //    "totals": [...data...] //<-- total value for each key
-      // }
+      //    ]
       'data2': '=',
       //multi filter format
       /* {
@@ -312,7 +311,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
       }
 
       var legendSquareSizePx = 19;
-      var legendPadding = 10;
+      var legendPadding = 30;
       var legendSpacing = 5;
       var maxLegendWidth = 400;  //TODO: enforce
       var minLegendWidth = 100;
@@ -337,34 +336,38 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
 
       function drawChartMulti(data) {
-        var mapObject = {};
-        _.each(data.data, function(filteredData, label) {
-          _.each(filteredData, function(d) {
-            mapObject[d.key] = mapObject[d.key] || {key: d.key, data:{}};
-            mapObject[d.key].data[label] = d.value;
-          });
-        });
+//        var mapObject = {};
+//        _.each(data.data, function(filteredData, label) {
+//          _.each(filteredData, function(d) {
+//            mapObject[d.key] = mapObject[d.key] || {key: d.key, data:{}};
+//            mapObject[d.key].data[label] = d.value;
+//          });
+//        });
+//
+//        _.each(data.total, function(d) {
+//          if (mapObject[d.key]) {
+//            mapObject[d.key].total = d.value;
+//          }
+//        });
 
-        _.each(data.total, function(d) {
-          if (mapObject[d.key]) {
-            mapObject[d.key].total = d.value;
-          }
-        });
-
-        data = _.map(mapObject, function(d) {
+        var augmentedData = _.map(data, function(d) {
           var curTotal = 0;
           _.each(d.data, function(value) {
-              curTotal += value;
+              curTotal += value.value;
           });
-          d.computedTotal = curTotal;
-          return d;
+          return {
+            key: d.key,
+            total: d.total,
+            data: d.data,
+            computedTotal: curTotal
+          };
         });
 
         //figure out which max value to use
         var maxKey = 'total';
         var maxes = {
-          total: _.max(data, 'total').total,
-          computedTotal: _.max(data, 'total').computedTotal
+          total: _.max(augmentedData, 'total').total,
+          computedTotal: _.max(augmentedData, 'computedTotal').computedTotal
 
         };
         // if the largest given total is more than 3/4 the largest computed total, use computed totals
@@ -376,11 +379,11 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         //convert to percents if specified
         if (getOption('asPercent')) {
           maxes.percent = 1;
-          _.each(data, function(d) {
+          _.each(augmentedData, function(d) {
             d.percent = 1;
             var max = d[maxKey];
             _.each(d.data, function(v,l) {
-              d.data[l] = v/max;
+              v.value = v.value/max;
             });
           });
           maxKey = 'percent';
@@ -394,7 +397,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         };
 
         //sort the data
-        data.sort(function(a, b) {
+        augmentedData.sort(function(a, b) {
           var ak = parseFloat(a.key);
           var bk = parseFloat(b.key);
 
@@ -402,10 +405,10 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             return compare(ak, bk);
           }
           if (a[maxKey] === b[maxKey]) {
-            if (_.max(a.data) === _.max(b.data)) {
+            if (_.max(a.data,'value').value === _.max(b.data, 'value').value) {
               return -compare(a.key,b.key);
             } else {
-              return compare(_.max(a.data), _.max(b.data));
+              return compare(_.max(a.data,'value').value, _.max(b.data,'value').value);
             }
           }
           return compare(a[maxKey],b[maxKey]);
@@ -415,10 +418,10 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         //figure out the stacking order
         // sort largest to smallest using the largest entry (last in the array)
-        var first = d3.entries(data[data.length - 1].data);
+        var first = augmentedData[augmentedData.length - 1].data;
         var sortedLabels = _.pluck(_.sortBy(first, 'value'), 'key').reverse();
-        _.each(data, function(d) {
-          _.each(_.keys(d.data), function(k) {
+        _.each(augmentedData, function(d) {
+          _.each(_.pluck(d.data,'key'), function(k) {
             if (!_.contains(sortedLabels, k)) {
               sortedLabels.push(k);
             }
@@ -444,7 +447,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         var rightMargin = margins.right;
 
         if (getOption('autoMargin')) {
-          leftMargin = leftMargin + _.max(_.map(_.pluck(data, 'key'), function(key) {
+          leftMargin = leftMargin + _.max(_.map(_.pluck(augmentedData, 'key'), function(key) {
             var size = measure(key, "y axis").width;
             return size;
           })) || leftMargin;
@@ -457,7 +460,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         var w = width - leftMargin - rightMargin;
         var h = height - margins.top - margins.bottom;
 
-        var bars = getOption('bars') || data.length;
+        var bars = getOption('bars') || augmentedData.length;
         var barPadding = getOption('padding');
 
         var barWidth = (h/bars) - barPadding;
@@ -465,13 +468,13 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         var y;
         var x;
 
-        var d = _.pluck(data, 'key');
+        var d = _.pluck(augmentedData, 'key');
         var r = getOption('range');
 
         y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
 
         if (r === 'auto') {
-          var xMax = data.length > 0 ? max : 1;
+          var xMax = augmentedData.length > 0 ? max : 1;
           x = d3.scale.linear().domain([0, xMax]).range([0, w]);
         } else {
           x = d3.scale.linear().domain(r).range([0, w]);
@@ -577,7 +580,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 //
 //        } else {
 
-        var barHolders = g.selectAll('g.bar').data(data).enter().append('g')
+        var barHolders = g.selectAll('g.bar').data(augmentedData).enter().append('g')
             .classed('bar', true)
             .attr('width', function(d) { return x(d[maxKey]);})
             .attr('height', Math.abs(y.rangeBand()))
@@ -588,12 +591,17 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               clickFn.call(this, d);
             });
 
+        var sortedPriority = _.invert(sortedLabels);
+
         barHolders.selectAll('rect')
             .data(function(d) {
 //              console.log(d);
-              return _.map(d3.entries(d.data), function(obj) {
+              return _.map(d.data, function(obj) {
+                obj = _.clone(obj);
                 obj.parent = d;
                 return obj;
+              }).sort(function(a, b) {
+                return compare(sortedPriority[a.key], sortedPriority[b.key]);
               });
             })
             .enter().append('rect')
@@ -601,10 +609,17 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .classed('bar', true)
             .attr('y', function(d, i) { return y(d.parent.key);})
             .attr('x', function(d, i) {
-              return i === 0 ? 0 : x(d.parent.data[sortedLabels[i - 1]]);
+              if (i === 0) {
+                return 0;
+              }
+              var sum = 0;
+              _.times(i,function(idx) {
+                sum += x(_.find(d.parent.data, {key:sortedLabels[idx]}).value);
+              });
+              return sum;
             })
             .attr('width', function(d, i) {
-              return  x(d.parent.data[sortedLabels[i]]);
+              return  x(d.value);
             })
             .attr('height', Math.abs(y.rangeBand()))
             .attr('stroke-width', getOption('padding')+'px');
