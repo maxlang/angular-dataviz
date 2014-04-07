@@ -19,8 +19,8 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
       'data2': '=',
       //multi filter format
       /* {
-           "field": [... filter values ...],
-           "field2": [... filter values ...]
+       "field": [... filter values ...],
+       "field2": [... filter values ...]
        */
 
       'params' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
@@ -40,7 +40,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 //        'domain' : [],
         'range' : 'auto',
         'bars' : null,
-         'filterSelector' : false,
+        'filterSelector' : false,
         'percent':false,
         'multi':false,
         'mainFilter':0,      // used for multi data - main goes on y axis
@@ -186,7 +186,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .call(d3.svg.axis().scale(x).orient("bottom")
                 .tickSize(-height, 0, 0)
                 .tickFormat("")
-            );
+        );
 
         var g = svg.append('g')
             .attr('width', w)
@@ -227,20 +227,20 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         if (data2) {
 
-         var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
-            .classed('bar-holder', true)
-            .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
-            .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
-            .attr('height', Math.abs(y.rangeBand()))
-            .classed('selected', function(d, i) {
-              return _.contains(scope.params.filter, d.key);
-            })
-           .classed('selected2', function(d, i) {
-             return _.contains(scope.filter2, d.key);
-           })
-            .on('click', function(d, i) {
-              clickFn.call(this, d);
-            });
+          var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
+              .classed('bar-holder', true)
+              .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
+              .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
+              .attr('height', Math.abs(y.rangeBand()))
+              .classed('selected', function(d, i) {
+                return _.contains(scope.params.filter, d.key);
+              })
+              .classed('selected2', function(d, i) {
+                return _.contains(scope.filter2, d.key);
+              })
+              .on('click', function(d, i) {
+                clickFn.call(this, d);
+              });
 
           rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
               .classed('bar d1', true)
@@ -261,19 +261,19 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         } else {
 
-        g.selectAll('rect').data(data).enter().append('rect')
-            .classed('bar', true)
-            .attr('y', function(d, i) { return y(d.key);})
-            .attr('x', 0)
-            .attr('width', function(d, i) { return  x(d.value);})
-            .attr('height', Math.abs(y.rangeBand()))
-            .attr('stroke-width', getOption('padding')+'px')
-            .classed('selected', function(d, i) {
-              return _.contains(scope.params.filter, d.key);
-            })
-            .on('click', function(d, i) {
-              clickFn.call(this, d);
-            });
+          g.selectAll('rect').data(data).enter().append('rect')
+              .classed('bar', true)
+              .attr('y', function(d, i) { return y(d.key);})
+              .attr('x', 0)
+              .attr('width', function(d, i) { return  x(d.value);})
+              .attr('height', Math.abs(y.rangeBand()))
+              .attr('stroke-width', getOption('padding')+'px')
+              .classed('selected', function(d, i) {
+                return _.contains(scope.params.filter, d.key);
+              })
+              .on('click', function(d, i) {
+                clickFn.call(this, d);
+              });
 
         }
 
@@ -314,9 +314,10 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
       }
 
-      var legendSquareSizePx = 19;
-      var legendPadding = 30;
-      var legendSpacing = 5;
+      var legendSquareSizePx = 15;
+      var legendPadding = 10;
+      var legendPaddingLeft = 30;
+      var legendSpacing = 3;
       var maxLegendWidth = 400;  //TODO: enforce
       var minLegendWidth = 100;
 
@@ -328,7 +329,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 //        }
 
         return {
-          width: Math.min(Math.max((2 * legendPadding) +
+          width: Math.min(Math.max(( legendPadding + legendPaddingLeft) +
                   legendSquareSizePx +
                   legendSpacing + _.max(_(slices).map(function(v) {return measure(v, element[0], 'legend-text').width;}).value()),
               minLegendWidth), maxLegendWidth),
@@ -357,7 +358,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         var augmentedData = _.map(data, function(d) {
           var curTotal = 0;
           _.each(d.data, function(value) {
-              curTotal += value.value;
+            curTotal += value.value;
           });
           return {
             key: d.key,
@@ -432,6 +433,12 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
           });
         });
 
+        // we only want to take the top 6 - TODO: support more/better alg for selecting top
+        sortedLabels = _.take(sortedLabels, 6);
+
+
+        var sortedPriority = _.invert(sortedLabels);
+
         var legendDims = calcLegendDims(sortedLabels);
 
 
@@ -490,7 +497,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
 
         var xAxis = d3.svg.axis().scale(x);
-            xAxis.orient("bottom").ticks(4);
+        xAxis.orient("bottom").ticks(4);
 
         if (getOption('asPercent')) {
           xAxis.tickFormat(function(v) {
@@ -595,7 +602,6 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               clickFn.call(this, d);
             });
 
-        var sortedPriority = _.invert(sortedLabels);
 
         barHolders.selectAll('rect')
             .data(function(d) {
@@ -613,17 +619,23 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .classed('bar', true)
             .attr('y', function(d, i) { return y(d.parent.key);})
             .attr('x', function(d, i) {
-              if (i === 0) {
+              if (i === 0 || !(d.key in sortedPriority)) {
                 return 0;
               }
               var sum = 0;
-              _.times(i,function(idx) {
-                sum += x(_.find(d.parent.data, {key:sortedLabels[idx]}).value);
+              _.times(sortedPriority[d.key],function(idx) {
+                var segment = _.find(d.parent.data, {key:sortedLabels[idx]});
+                if (segment && segment.value) {
+                  sum += x(segment.value);
+                }
               });
               return sum;
             })
             .attr('width', function(d, i) {
-              return  x(d.value);
+              if (d.key in sortedPriority) {
+                return  x(d.value);
+              }
+              return 0;
             })
             .attr('height', Math.abs(y.rangeBand()))
             .attr('stroke-width', getOption('padding')+'px');
@@ -670,14 +682,14 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         keys = keys.data(sortedLabels);
 
         var k = keys.enter().append("g")
-            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPadding + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; });
+            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; });
 
         k.append("rect")
             .attr("width", legendSquareSizePx)
             .attr("height", legendSquareSizePx)
             .attr("class", function(d, i) { return "bar-" + i; } );
 
-        var nonTextWidth = legendSquareSizePx + (2 * legendPadding) + legendSpacing;
+        var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
         var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
 
         var tc = d3.rgb(getOption('textColor'));
@@ -692,10 +704,10 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d + "</div>";});
 //
         keys.transition().duration(300)
-            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPadding + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
+            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
             .call(function() {
               //TODO: incorporate into transition better
-              $(this[0]).width(textWidth).find('foreignObject').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+              $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
             });
 
 
