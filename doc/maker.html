@@ -5,8 +5,9 @@
 
   <meta charset="utf-8"> <!-- for d3 -->
 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
+  <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+  <script src="../components/jquery/jquery.js"></script>
+  <!--<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>-->
   <script src="../components/angular-unstable/angular.js"></script>
   <script src="../components/d3/d3.js"></script>
   <script src="../components/d3-plugins/sankey/sankey.js"></script>
@@ -16,9 +17,9 @@
   <script src="../components/gridster/dist/jquery.gridster.js"></script>
   <script src="../components/angular-ui-utils/modules/event/event.js"></script>
 
-  <script src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
-  <script src="../components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js"></script>
-  <script src="../components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js"></script>
+  <!--<script src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>-->
+  <!--<script src="../components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js"></script>-->
+  <!--<script src="../components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js"></script>-->
 
   <script src="../components/angular-ui-map/src/map.js"></script>
   <script src="../components/angular-ui/build/angular-ui.js"></script>
@@ -44,7 +45,7 @@
   <link rel="stylesheet" href="../components/jquery-ui/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="../components/select2/select2.css">
   <link rel="stylesheet" href="../components/Editr.js/editr/editr.css">
-  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">
+  <!--<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">-->
   <link rel="stylesheet" href="../dist/angular-dataviz.css">
   <link rel="stylesheet" href="../components/google-code-prettify/src/prettify.css">
   <link rel="stylesheet" href="css/doc.css">
@@ -89,6 +90,48 @@
 
     .link:hover {
       stroke-opacity: .5;
+    }
+
+    rect.bar-0, .bar-0 {
+      opacity: 0.9;
+      fill:red;
+    }
+
+    rect.bar-1, .bar-1 {
+      opacity: 0.5;
+      fill:red;
+    }
+
+    rect.bar-2, .bar-2 {
+      opacity: 0.7;
+    }
+
+    .bar-3 {
+      opacity: 0.6;
+    }
+
+    .bar-4 {
+      opacity: 0.5;
+    }
+
+    .bar-5 {
+      opacity: 0.4;
+    }
+
+    .bar-6 {
+      opacity: 0.3;
+    }
+
+    .bar-7 {
+      opacity: 0.2;
+    }
+
+    .bar-8 {
+      opacity: 0.1;
+    }
+
+    .bar-9 {
+      opacity: 0.01;
     }
 
   </style>
@@ -146,31 +189,31 @@
     <div class="bs-docs-social">
       <div class="container">
         <ul class="bs-docs-social-buttons">
-          <li>
-            <iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=watch&count=true"
-                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
-          </li>
-          <li>
-            <iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=fork&count=true"
-                    allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>
-          </li>
-          <li>
-            <a href="https://twitter.com/share" class="twitter-share-button" data-hashtags="angularjs">Tweet</a>
-            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-          </li>
-          <li>
-            <!-- Place this tag where you want the +1 button to render. -->
-            <div class="g-plusone" data-size="medium"></div>
+          <!--<li>-->
+            <!--<iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=watch&count=true"-->
+                    <!--allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--<iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=fork&count=true"-->
+                    <!--allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--<a href="https://twitter.com/share" class="twitter-share-button" data-hashtags="angularjs">Tweet</a>-->
+            <!--<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--&lt;!&ndash; Place this tag where you want the +1 button to render. &ndash;&gt;-->
+            <!--<div class="g-plusone" data-size="medium"></div>-->
 
-            <!-- Place this tag after the last +1 button tag. -->
-            <script type="text/javascript">
-              (function() {
-                var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-                po.src = 'https://apis.google.com/js/plusone.js';
-                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-              })();
-            </script>
-          </li>
+            <!--&lt;!&ndash; Place this tag after the last +1 button tag. &ndash;&gt;-->
+            <!--<script type="text/javascript">-->
+              <!--(function() {-->
+                <!--var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;-->
+                <!--po.src = 'https://apis.google.com/js/plusone.js';-->
+                <!--var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);-->
+              <!--})();-->
+            <!--</script>-->
+          <!--</li>-->
         </ul>
       </div>
     </div>
@@ -191,7 +234,7 @@
     <maker-resize style = "display:block; border:1px solid #000;">
       <block-calendar ng-if="viz.type==='calendar'" data="viz.parsedData" params="viz.parsedConfig"></block-calendar>
       <a-histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></a-histogram>
-      <barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></barchart>
+      <a-barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></a-barchart>
       <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></a-pie>
       <a-number ng-if="viz.type==='number'" data="viz.parsedData" params="viz.parsedConfig"></a-number>
       <a-linechart ng-if="viz.type==='line' || viz.type==='linechart'" data="viz.parsedData" params="viz.parsedConfig"></a-linechart>
