@@ -359,7 +359,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
           return {
             key: d.key,
             total: d.total,
-            data: d.data,
+            data: _.cloneDeep(d.data),
             computedTotal: curTotal
           };
         });
@@ -603,7 +603,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .data(function(d) {
 //              console.log(d);
               return _.map(d.data, function(obj) {
-                obj = _.clone(obj);
+                obj = obj;
                 obj.parent = d;
                 return obj;
               }).sort(function(a, b) {
