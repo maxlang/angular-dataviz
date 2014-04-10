@@ -232,6 +232,9 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .attr("stroke-opacity", function(d) {
               return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
+            .attr("class", function(d) {
+              return d.data.key.toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+            })
             .on('click', function(d, i) {
               if (d.data.other) {
                 if (_.difference(d.data.otherKeys, scope.params.filter).length === 0) { //all keys are in filter
@@ -333,7 +336,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
             .attr("height", o('legendSquareSizePx'))
             .attr("fill", function(d) {
               return color(d.data.key); })
-            .attr("fill-opacity", function(d) { return opacity(d.data.key); });
+            .attr("fill-opacity", function(d) { return opacity(d.data.key); })
+            .attr("class", function(d) {
+              return d.data.key.toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+            });
 
         var nonTextWidth = o('legendSquareSizePx') + (2 * o('legendPadding')) + o('legendSpacing') + padding;
         var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
