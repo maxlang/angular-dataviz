@@ -62,10 +62,10 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         }
 
         return {
-          width: Math.max(Math.min((2 * o('legendPadding')) +
+          width: Math.min(Math.max((2 * o('legendPadding')) +
               o('legendSquareSizePx') +
               o('legendSpacing') + _.max(_(data).map(function(v) {return VizUtils.measure(v.key, element[0], 'legend-text').width;})),
-              o('maxLegendWidth')), o('maxLegendWidth')),
+              o('minLegendWidth')), o('maxLegendWidth')),
           height: (slices.length * o('legendSquareSizePx')) +
               (2 * o('legendPadding')) +
               ((slices.length - 1) * o('legendSpacing'))
