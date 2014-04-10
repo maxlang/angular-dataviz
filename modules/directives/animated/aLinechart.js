@@ -30,7 +30,8 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         'snap' : false,
         'filterSelector' : false,
         'date': false,
-        'multi':false
+        'multi':false,
+        'asPercent':false
       });
       var initialized = false;
 
@@ -58,7 +59,11 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         change();
       }, true);
 
-      scope.$watch('params', function(params) {
+      scope.$watch('params', function(params, paramsOld) {
+        if (params.options.multi && !paramsOld.options.multi) {
+          init(scope.data);
+        }
+
         //reinit if certain things change like colors
         change();
       }, true);
