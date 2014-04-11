@@ -1293,17 +1293,19 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
 
         leftMargin = margins.left;
 
+        var mmax = max;
+
         if (o('autoMargin')) {
           //account for possible decimals
           var decimals = Math.ceil(-((Math.log(max/yTicks)/Math.log(10))));
           if (decimals > 0) {
-            max = Math.floor(max);
-            max += "." + Math.pow(10, decimals);
+            mmax = Math.floor(max);
+            mmax += "." + Math.pow(10, decimals);
           }
-          var maxString = max;
+          var maxString = mmax;
           //add commas
-          if (_.isNumber(max) && ((max + 1)!==max)) {
-            maxString += (Array(Math.floor((max+"").length/3)).join(","));
+          if (_.isNumber(max) && !isNaN(max) && ((max + 1)!==max)) {
+            maxString += (Array(Math.floor((mmax+"").length/3)).join(","));
           }
 
           leftMargin = (margins.left + VizUtils.measure(maxString, element[0], "y axis").width) || margins.left;
@@ -1373,11 +1375,6 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         labels = _.pluck(data, 'key');
         legendDims = calcLegendDims(labels);
 
-        //calc totals
-
-
-
-
         h = height - margins.top - margins.bottom;
 
         var yTicks = h/60;
@@ -1397,23 +1394,24 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         leftMargin = margins.left;
         rightMargin = margins.right;
 
+        var mmax = max;
+
         if (o('autoMargin')) {
           //account for possible decimals
           var decimals = Math.ceil(-((Math.log(max/yTicks)/Math.log(10))));
           if (decimals > 0) {
-            max = Math.floor(max);
-            max += "." + Math.pow(10, decimals);
+            mmax = Math.floor(max);
+            mmax += "." + Math.pow(10, decimals);
           }
-          var maxString = max;
+          var maxString = mmax;
           //add commas
-          if (_.isNumber(max) && ((max + 1)!==max)) {
-            maxString += (Array(Math.floor((max+"").length/3)).join(","));
+          if (_.isNumber(max) && !isNaN(max) && ((max + 1)!==max)) {
+            maxString += (Array(Math.floor((mmax+"").length/3)).join(","));
           }
 
           leftMargin = (margins.left + VizUtils.measure(maxString, element[0], "y axis").width) || margins.left;
           leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
           leftMargin += 9;
-
 
           rightMargin = rightMargin || 0;
           rightMargin += legendDims.width;
@@ -1584,6 +1582,16 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
           calcInfoMulti(scope.data);
         } else {
           calcInfo(scope.data);
+        }
+
+        if (o('asPercent')) {
+          yAxis.tickFormat(function(v) {
+            return 100*v + "%";
+          });
+        } else {
+          yAxis.tickFormat(function(v) {
+            return v;
+          });
         }
 
         svg.transition().duration(300)
