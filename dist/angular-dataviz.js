@@ -1240,16 +1240,31 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
 
       scope.$watch('data', function(data, oldData) {
         if (o('date')) {
-          var ensureDates = _.map(data, function(d) {
-            if (!d) {
-              return;
-            }
-            return {
-              key:moment(d.key),
-              value: d.value
-            };
-          });
-          Array.prototype.splice.apply(scope.data,[0,scope.data.length].concat(ensureDates));
+          if (!o('multi')) {
+            var ensureDates = _.map(data, function(d) {
+              if (!d) {
+                return;
+              }
+              return {
+                key:moment(d.key),
+                value: d.value
+              };
+            });
+            Array.prototype.splice.apply(scope.data,[0,scope.data.length].concat(ensureDates));
+          } else {
+            _.each(data, function(subdata) {
+              var ensureDates = _.map(subdata.data, function(d) {
+                if (!d) {
+                  return;
+                }
+                return {
+                  key:moment(d.key),
+                  value: d.value
+                };
+              });
+              Array.prototype.splice.apply(subdata.data,[0,subdata.data.length].concat(ensureDates));
+            });
+          }
         }
 
         if(!initialized) {
@@ -1565,14 +1580,15 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
             .attr("y", -6)
             .attr("height", h+8);
 
+        if (legendDims) {
+          legend = svg.append('g')
+              .attr("class", "legend")
+              .attr("width", legendDims.width)
+              .attr("height", legendDims.height)
+              .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
 
-        legend = svg.append('g')
-            .attr("class", "legend")
-            .attr("width", legendDims.width)
-            .attr("height", legendDims.height)
-            .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
-
-        keys = legend.selectAll("g");
+          keys = legend.selectAll("g");
+        }
 
         initialized = true;
       }
@@ -1686,52 +1702,58 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
             .attr("height", h+8);
 
 
-        legend.transition().duration(300)
-            .attr("width", legendDims.width)
-            .attr("height", legendDims.height)
-            .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
+        if (legend) {
+          legend.transition().duration(300)
+              .attr("width", legendDims.width)
+              .attr("height", legendDims.height)
+              .attr("transform", "translate(" + legendDims.left + "," + legendDims.top + ")");
+        }
 
-        keys = keys.data(labels);
+        if (keys) {
+          keys = keys.data(d3.entries(labels));
 
-        var k = keys.enter().append("g")
-            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; });
+          var k = keys.enter().append("g")
+              .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; });
 
-        k.append("rect")
-            .attr("width", legendSquareSizePx)
-            .attr("height", legendSquareSizePx)
-            .attr("class", function(d, i) { return "line-" + i; } );
+          k.append("rect")
+              .attr("width", legendSquareSizePx)
+              .attr("height", legendSquareSizePx)
+              .attr("class", function(d, i) { return "line-" + i; } );
 
-        var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
-        var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
+          var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
+          var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
 
-        var tc = d3.rgb(o('textColor'));
-        var rgba = [tc.r, tc.g, tc.b, o('fillOpacity')];
+          var tc = d3.rgb(o('textColor'));
+          var rgba = [tc.r, tc.g, tc.b, o('fillOpacity')];
 
-        var text = k.append("foreignObject")
-            .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
-            .attr("y", 0)
-            .attr('width', textWidth)
-            .attr('height', '1.2em')
-            .append("xhtml:div")
-            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d + "</div>";});
-//
-        keys.transition().duration(300)
-            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
-            .call(function() {
-              //TODO: incorporate into transition better
-              $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
-            });
+          var text = k.append("foreignObject")
+              .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
+              .attr("y", 0)
+              .attr('width', textWidth)
+              .attr('height', '1.2em')
+              .append("xhtml:div")
+              .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.value + "</div>";});
+  //
+          keys.transition().duration(300)
+              .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
+              .each(function(d, i) {
+                $(this).find('foreignObject').find('div').find('div').text(d.value);
+              })
+              .call(function() {
+                //TODO: incorporate into transition better
+                $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+              });
 
 
-//        k.append("text")
-//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-//            .attr("y", 9)
-//            .attr("dy", ".35em")
-//            .text(function(d) {
-//              return d.data.key; }).classed('pie-legend', true);
+  //        k.append("text")
+  //            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
+  //            .attr("y", 9)
+  //            .attr("dy", ".35em")
+  //            .text(function(d) {
+  //              return d.data.key; }).classed('pie-legend', true);
 
-        keys.exit().remove();
-
+          keys.exit().remove();
+        }
 //        g.transition()
 //            .duration(300)
 //            .attr("transform", "translate(" + (radius + padding) + "," + (radius + padding) + ")");
