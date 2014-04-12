@@ -1274,7 +1274,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
       }, true);
 
       scope.$watch('params', function(params, paramsOld) {
-        if (params.options.multi && !paramsOld.options.multi) {
+        if ((params.options.multi && !paramsOld.options.multi) || (paramsOld.options.multi && !params.options.multi)) {
           init(scope.data);
         }
 
@@ -1515,6 +1515,9 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
 
       function init(data) {
         $(element[0]).html('<svg></svg>');
+
+        labels=[];
+        legendDims={};
 
         if (o('multi')) {
           calcInfoMulti(data);
