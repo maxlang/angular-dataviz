@@ -394,10 +394,11 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         var max = maxes[maxKey];
 
+        var compare = function(a,b) {
+          return a > b ? 1 : (a===b ? 0 : -1);
+        };
+
         if (getOption('sorted')) {
-          var compare = function(a,b) {
-            return a > b ? 1 : (a===b ? 0 : -1);
-          };
 
           //sort the data
           augmentedData.sort(function(a, b) {
