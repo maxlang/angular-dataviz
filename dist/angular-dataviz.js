@@ -46,7 +46,8 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         'mainFilter':0,      // used for multi data - main goes on y axis
         'secondaryFilter':1,  // secondary = split
         'asPercent':false,
-        'total': 'auto'
+        'total': 'auto',
+        'sorted': true
       };
 
       //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
@@ -397,28 +398,29 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         var max = maxes[maxKey];
 
-        var compare = function(a,b) {
-          return a > b ? 1 : (a===b ? 0 : -1);
-        };
+        if (getOption('sorted')) {
+          var compare = function(a,b) {
+            return a > b ? 1 : (a===b ? 0 : -1);
+          };
 
-        //sort the data
-        augmentedData.sort(function(a, b) {
-          var ak = parseFloat(a.key);
-          var bk = parseFloat(b.key);
+          //sort the data
+          augmentedData.sort(function(a, b) {
+            var ak = parseFloat(a.key);
+            var bk = parseFloat(b.key);
 
-          if (!_.isNaN(ak) && !_.isNaN(b.key)) {
-            return compare(ak, bk);
-          }
-          if (a[maxKey] === b[maxKey]) {
-            if (_.max(a.data,'value').value === _.max(b.data, 'value').value) {
-              return -compare(a.key,b.key);
-            } else {
-              return compare(_.max(a.data,'value').value, _.max(b.data,'value').value);
+            if (!_.isNaN(ak) && !_.isNaN(b.key)) {
+              return compare(ak, bk);
             }
-          }
-          return compare(a[maxKey],b[maxKey]);
-        });
-
+            if (a[maxKey] === b[maxKey]) {
+              if (_.max(a.data,'value').value === _.max(b.data, 'value').value) {
+                return -compare(a.key,b.key);
+              } else {
+                return compare(_.max(a.data,'value').value, _.max(b.data,'value').value);
+              }
+            }
+            return compare(a[maxKey],b[maxKey]);
+          });
+        }
 
 
         //figure out the stacking order
@@ -2382,7 +2384,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
             .attr("class", function(d) {
-              return d.data.key.toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+              return String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
             })
             .on('click', function(d, i) {
               if (d.data.other) {
@@ -2487,7 +2489,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); })
             .attr("class", function(d) {
-              return d.data.key.toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+              return String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
             });
 
         var nonTextWidth = o('legendSquareSizePx') + (2 * o('legendPadding')) + o('legendSpacing') + padding;
