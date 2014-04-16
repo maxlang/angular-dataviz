@@ -239,64 +239,45 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               if (d.data.other) {
                 if (_.difference(d.data.otherKeys, scope.params.filter).length === 0) { //all keys are in filter
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.remove(scope.params.filter, function(v) {
                         return _.contains(d.data.otherKeys, v);
-                      });
                     });
                   } else {
-                    scope.$apply(function() {
                       Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length]);
-                    });
                   }
                 } else if (_.intersection(d.data.otherKeys, scope.params.filter).length > 0) { //some keys are in filter
                   var diff = _.difference(scope.params.filter, d.data.otherKeys);
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.each(diff, function(v) {
                         scope.params.filter.push(v);
                       });
-                    });
                   } else {
-                    scope.$apply(function() {
                       _.remove(scope.params.filter, function(v) {
                         return _.contains(d.data.otherKeys, v);
                       });
-                    });
                   }
                 } else { // no keys are in filter
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.each(d.data.otherKeys, function(v) {
                         scope.params.filter.push(v);
                       });
-                    });
                   } else {
-                    scope.$apply(function() {
                       Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length].concat(d.data.otherKeys));
-                    });
                   }
                 }
               } else if (_.contains(scope.params.filter, d.data.key)) {
                 if (scope.shifted) {
-                  scope.$apply(function() {
                     scope.params.filter.splice(scope.params.filter.indexOf(d.data.key), 1);
-                  });
                 } else {
-                  scope.$apply(function() {
                     scope.params.filter.splice(0, scope.params.filter.length);
-                  });
                 }
               } else {
                 if (!scope.shifted) {
-                  scope.$apply(function() {
                     scope.params.filter.splice(0, scope.params.filter.length);
-                  });
                 }
-                scope.$apply(function() {
                   scope.params.filter.push(d.data.key);
-                });
               }
+              scope.$apply();
             });
 
 
