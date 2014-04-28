@@ -2391,64 +2391,45 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               if (d.data.other) {
                 if (_.difference(d.data.otherKeys, scope.params.filter).length === 0) { //all keys are in filter
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.remove(scope.params.filter, function(v) {
                         return _.contains(d.data.otherKeys, v);
-                      });
                     });
                   } else {
-                    scope.$apply(function() {
                       Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length]);
-                    });
                   }
                 } else if (_.intersection(d.data.otherKeys, scope.params.filter).length > 0) { //some keys are in filter
                   var diff = _.difference(scope.params.filter, d.data.otherKeys);
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.each(diff, function(v) {
                         scope.params.filter.push(v);
                       });
-                    });
                   } else {
-                    scope.$apply(function() {
                       _.remove(scope.params.filter, function(v) {
                         return _.contains(d.data.otherKeys, v);
                       });
-                    });
                   }
                 } else { // no keys are in filter
                   if (scope.shifted) {
-                    scope.$apply(function() {
                       _.each(d.data.otherKeys, function(v) {
                         scope.params.filter.push(v);
                       });
-                    });
                   } else {
-                    scope.$apply(function() {
                       Array.prototype.splice.apply(scope.params.filter, [0, scope.params.filter.length].concat(d.data.otherKeys));
-                    });
                   }
                 }
               } else if (_.contains(scope.params.filter, d.data.key)) {
                 if (scope.shifted) {
-                  scope.$apply(function() {
                     scope.params.filter.splice(scope.params.filter.indexOf(d.data.key), 1);
-                  });
                 } else {
-                  scope.$apply(function() {
                     scope.params.filter.splice(0, scope.params.filter.length);
-                  });
                 }
               } else {
                 if (!scope.shifted) {
-                  scope.$apply(function() {
                     scope.params.filter.splice(0, scope.params.filter.length);
-                  });
                 }
-                scope.$apply(function() {
                   scope.params.filter.push(d.data.key);
-                });
               }
+              scope.$apply();
             });
 
 
@@ -3018,7 +2999,16 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           heightPx: 106,
           endTime: Date.now(),
           numAnnotationsShownPerGroup: 3,
-          annotationColumns: 8
+          annotationColumns: 8,
+          utc:false
+        };
+
+        var utcOptionalMoment = function(val) {
+          if (getOption('utc')) {
+            return moment.utc(val);
+          } else {
+            return moment(val);
+          }
         };
 
         //TODO: better way to handle options, esp option merging
@@ -3086,22 +3076,23 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           var annotations = (scope.params && scope.params.annotations) ? scope.params.annotations : [];
 
           // current week counts as an extra column
-          var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
+
+          var start = utcOptionalMoment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
-          var end = moment(endTime).startOf('day');
+          var end = utcOptionalMoment(endTime).startOf('day');
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
           function weeksFromStart(date) {
-            return moment(date).diff(start, 'weeks') + 2;
+            return utcOptionalMoment(date).diff(start, 'weeks') + 2;
           }
 
           var annotationsByWeek = _(annotations)
                 .filter(function(a) {
                   var ws = weeksFromStart(a.date);
-                  var we = moment(a.date).diff(end, 'weeks');
+                  var we = utcOptionalMoment(a.date).diff(end, 'weeks');
                   // NOTE/TODO (em) first 2 weeks after 'start' are not rendered (?)
                   return ws >= 2 && we <= 0;
                 })
@@ -3220,7 +3211,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .attr('class', 'annotation-date')
             .append("svg:text")
             .text(function(d) {
-              return moment(d.date).format('MMMM D, YYYY');
+              return utcOptionalMoment(d.date).format('MMMM D, YYYY');
             })
             .attr('font-size', 10)
             .attr('y', ANNOTATION_TEXT_HEIGHT);
@@ -3265,7 +3256,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
             .enter()
             .append("svg:text")
             .text(function(d) {
-              return moment(endTime).days(d).format("ddd");
+              return utcOptionalMoment(endTime).days(d).format("ddd");
             })
             .attr("y", function(d) {
               return d * totalCellHeight + xAxisHeight;
@@ -3275,7 +3266,7 @@ angular.module('dataviz.directives').directive('barchart', [function() {
           scope.chart = calendarG.append("g")
             .attr("transform", translate(yAxisWidth, xAxisHeight));
 
-          var pastDays = moment().diff(start, 'days', false);
+          var pastDays = utcOptionalMoment().diff(start, 'days', false);
 
           function setSelectedRangesForDay(d) {
             var rangeStartDate = start.clone().add("days", d);
