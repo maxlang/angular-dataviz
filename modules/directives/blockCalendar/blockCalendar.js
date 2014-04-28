@@ -82,7 +82,16 @@
           heightPx: 106,
           endTime: Date.now(),
           numAnnotationsShownPerGroup: 3,
-          annotationColumns: 8
+          annotationColumns: 8,
+          utc:false
+        };
+
+        var utcOptionalMoment = function(val) {
+          if (getOption('utc')) {
+            return moment.utc(val);
+          } else {
+            return moment(val);
+          }
         };
 
         //TODO: better way to handle options, esp option merging
@@ -150,22 +159,23 @@
           var annotations = (scope.params && scope.params.annotations) ? scope.params.annotations : [];
 
           // current week counts as an extra column
-          var start = moment(endTime).subtract('weeks',columns - 1).startOf('week');
+
+          var start = utcOptionalMoment(endTime).subtract('weeks',columns - 1).startOf('week');
           scope.start = start;
-          var end = moment(endTime).startOf('day');
+          var end = utcOptionalMoment(endTime).startOf('day');
           // current day counts as an extra day, don't count partial days
           var days = end.diff(start,'days', false) + 1;
 
           var maxCount = _.max(data, function(d) {return d.value;}).value;
 
           function weeksFromStart(date) {
-            return moment(date).diff(start, 'weeks') + 2;
+            return utcOptionalMoment(date).diff(start, 'weeks') + 2;
           }
 
           var annotationsByWeek = _(annotations)
                 .filter(function(a) {
                   var ws = weeksFromStart(a.date);
-                  var we = moment(a.date).diff(end, 'weeks');
+                  var we = utcOptionalMoment(a.date).diff(end, 'weeks');
                   // NOTE/TODO (em) first 2 weeks after 'start' are not rendered (?)
                   return ws >= 2 && we <= 0;
                 })
@@ -284,7 +294,7 @@
             .attr('class', 'annotation-date')
             .append("svg:text")
             .text(function(d) {
-              return moment(d.date).format('MMMM D, YYYY');
+              return utcOptionalMoment(d.date).format('MMMM D, YYYY');
             })
             .attr('font-size', 10)
             .attr('y', ANNOTATION_TEXT_HEIGHT);
@@ -329,7 +339,7 @@
             .enter()
             .append("svg:text")
             .text(function(d) {
-              return moment(endTime).days(d).format("ddd");
+              return utcOptionalMoment(endTime).days(d).format("ddd");
             })
             .attr("y", function(d) {
               return d * totalCellHeight + xAxisHeight;
@@ -339,7 +349,7 @@
           scope.chart = calendarG.append("g")
             .attr("transform", translate(yAxisWidth, xAxisHeight));
 
-          var pastDays = moment().diff(start, 'days', false);
+          var pastDays = utcOptionalMoment().diff(start, 'days', false);
 
           function setSelectedRangesForDay(d) {
             var rangeStartDate = start.clone().add("days", d);
