@@ -4495,8 +4495,9 @@ angular.module('dataviz.directives').directive('sankey', [function() {
             height = heightPx - margin.top - margin.bottom;
 
         var formatNumber = d3.format(",.0f"),
-            format = function(d) { return formatNumber(d) + " topics"; },
-            color = d3.scale.category20();
+//            format = function(d) { return formatNumber(d) + " topics"; },
+            format = function(d) { return "$" + formatNumber(d); },
+            color = d3.scale.category10();
 
         var svg = d3.select(element[0]).append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -4511,87 +4512,93 @@ angular.module('dataviz.directives').directive('sankey', [function() {
 
         var path = sankey.link();
 
-          sankey
-              .nodes(data.nodes)
-              .links(data.links)
-              .layout(32);
+        sankey
+            .nodes(data.nodes)
+            .links(data.links)
+            .layout(32);
 
-          var link = svg.append("g").selectAll(".link")
-              .data(data.links)
-              .enter().append("path")
-              .attr("class", "link")
-              .attr("d", path)
-              .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-              .sort(function(a, b) { return b.dy - a.dy; })
-              .classed('selected', function(d) {
+        var link = svg.append("g").selectAll(".link")
+            .data(data.links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", path)
+            .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+            .sort(function(a, b) { return b.dy - a.dy; })
+            .classed("positive",function(d) {
+              return d.signedValue >= 0;
+            })
+            .classed("negative",function(d) {
+              return d.signedValue < 0;
+            })
+            .classed('selected', function(d) {
+              var source = d.source;
+              var target = d.target;
+              var sourceIdx = _.indexOf(scope.params.filter[source.filterId], source.fieldValue);
+              var targetIdx = _.indexOf(scope.params.filter[target.filterId], target.fieldValue);
+              return sourceIdx > -1 && targetIdx > -1;
+            })
+            .on("click", function(d) {
+              var elt = d3.select(this);
+              scope.$apply(function() {
                 var source = d.source;
                 var target = d.target;
                 var sourceIdx = _.indexOf(scope.params.filter[source.filterId], source.fieldValue);
                 var targetIdx = _.indexOf(scope.params.filter[target.filterId], target.fieldValue);
-                return sourceIdx > -1 && targetIdx > -1;
-              })
-              .on("click", function(d) {
-                var elt = d3.select(this);
-                scope.$apply(function() {
-                  var source = d.source;
-                  var target = d.target;
-                  var sourceIdx = _.indexOf(scope.params.filter[source.filterId], source.fieldValue);
-                  var targetIdx = _.indexOf(scope.params.filter[target.filterId], target.fieldValue);
-                  if (elt.classed('selected')) {
-                    //splice out the one later in the array first, to prevent shifts
-                    if (sourceIdx > targetIdx) {
-                      scope.params.filter[source.filterId].splice(sourceIdx, 1);
-                      scope.params.filter[target.filterId].splice(targetIdx, 1);
-                    } else {
-                      scope.params.filter[target.filterId].splice(targetIdx, 1);
-                      scope.params.filter[source.filterId].splice(sourceIdx, 1);
-                    }
-                    elt.classed('selected', false);
+                if (elt.classed('selected')) {
+                  //splice out the one later in the array first, to prevent shifts
+                  if (sourceIdx > targetIdx) {
+                    scope.params.filter[source.filterId].splice(sourceIdx, 1);
+                    scope.params.filter[target.filterId].splice(targetIdx, 1);
                   } else {
-                    elt.classed('selected', true);
-                    scope.params.filter[source.filterId].push(source.fieldValue);
-                    scope.params.filter[target.filterId].push(target.fieldValue);
+                    scope.params.filter[target.filterId].splice(targetIdx, 1);
+                    scope.params.filter[source.filterId].splice(sourceIdx, 1);
                   }
-                });
+                  elt.classed('selected', false);
+                } else {
+                  elt.classed('selected', true);
+                  scope.params.filter[source.filterId].push(source.fieldValue);
+                  scope.params.filter[target.filterId].push(target.fieldValue);
+                }
               });
+            });
 
-          link.append("title")
-              .text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
+        link.append("title")
+            .text(function(d) { return (d.source.nodeType && d.source.nodeType + " : " || "") + d.source.name + " → " + (d.target.nodeType && d.target.nodeType + " : " || "") + d.target.name + "\n" + format(d.signedValue); });
 
-          var node = svg.append("g").selectAll(".node")
-              .data(data.nodes)
-              .enter().append("g")
-              .attr("class", "node")
-              .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-              .call(d3.behavior.drag()
-                  .origin(function(d) { return d; })
-                  .on("dragstart", function() { this.parentNode.appendChild(this); })
-                  .on("drag", dragmove));
+        var node = svg.append("g").selectAll(".node")
+            .data(data.nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .call(d3.behavior.drag()
+                .origin(function(d) { return d; })
+                .on("dragstart", function() { this.parentNode.appendChild(this); })
+                .on("drag", dragmove));
 
-          node.append("rect")
-              .attr("height", function(d) { return d.dy; })
-              .attr("width", sankey.nodeWidth())
-              .style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
-              .style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
-              .append("title")
-              .text(function(d) { return d.name + "\n" + format(d.value); });
+        node.append("rect")
+            .attr("height", function(d) { return d.dy; })
+            .attr("width", sankey.nodeWidth())
+            .style("fill", function(d) { return d.color = color(d.nodeType || ""); })
+            .style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
+            .append("title")
+            .text(function(d) { return (d.nodeType && d.nodeType + " : " || "") + d.name + "\n" + format(d.value); });
 
-          node.append("text")
-              .attr("x", -6)
-              .attr("y", function(d) { return d.dy / 2; })
-              .attr("dy", ".35em")
-              .attr("text-anchor", "end")
-              .attr("transform", null)
-              .text(function(d) { return d.name; })
-              .filter(function(d) { return d.x < width / 2; })
-              .attr("x", 6 + sankey.nodeWidth())
-              .attr("text-anchor", "start");
+        node.append("text")
+            .attr("x", -6)
+            .attr("y", function(d) { return d.dy / 2; })
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .attr("transform", null)
+            .text(function(d) { return d.name; })
+            .filter(function(d) { return d.x < width / 2; })
+            .attr("x", 6 + sankey.nodeWidth())
+            .attr("text-anchor", "start");
 
-          function dragmove(d) {
-            d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
-            sankey.relayout();
-            link.attr("d", path);
-          }
+        function dragmove(d) {
+          d3.select(this).attr("transform", "translate(" + (d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+          sankey.relayout();
+          link.attr("d", path);
+        }
 
 
       }
