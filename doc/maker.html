@@ -164,6 +164,18 @@
       fill: #00A651;
     }
 
+    .a-point {
+      fill: red;
+      stroke: black;
+      fill-opacity: .4;
+      stroke-opacity: .2;
+      stroke-width:1.5px;
+    }
+
+    .domain {
+      stroke-width:1;
+    }
+
   </style>
 </head>
 <body data-spy="scroll">
@@ -268,6 +280,7 @@
       <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></a-pie>
       <a-number ng-if="viz.type==='number'" data="viz.parsedData" params="viz.parsedConfig"></a-number>
       <a-linechart ng-if="viz.type==='line' || viz.type==='linechart'" data="viz.parsedData" params="viz.parsedConfig"></a-linechart>
+      <a-scatter ng-if="viz.type==='scatter' || viz.type==='scatterchart'" data="viz.parsedData" params="viz.parsedConfig"></a-scatter>
 
 
 
