@@ -5040,6 +5040,9 @@ angular.module('dataviz.directives').directive('sankey', [function() {
           var dataClone = JSON.parse(JSON.stringify(data));
           drawChart(dataClone);
         }
+        if(data!==undefined && data!==null && data.nodes && data.links && data.nodes.length === 0 && data.links.length === 0) {
+          element.html("");
+        }
       }, true);
 
 
