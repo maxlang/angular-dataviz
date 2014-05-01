@@ -355,7 +355,7 @@ angular.module('dataviz.directives').directive('aScatter', ['$timeout', 'VizUtil
 //      });
 
       function key(d) {
-        return d.key;
+        return  " k:" + d.key + " v: " + d.value;
       }
 
       function setSelected(filter, extent) {
