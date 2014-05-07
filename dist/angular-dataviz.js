@@ -4994,7 +4994,7 @@ angular.module('dataviz.directives').directive('sankey', [function() {
             });
 
         link.append("title")
-            .text(function(d) { return (d.source.nodeType && d.source.nodeType + " : " || "") + d.source.name + " → " + (d.target.nodeType && d.target.nodeType + " : " || "") + d.target.name + "\n" + format(d.signedValue); });
+            .text(function(d) { return d.linkText || ((d.source.nodeType && d.source.nodeType + " : " || "") + d.source.name + " → " + (d.target.nodeType && d.target.nodeType + " : " || "") + d.target.name + "\n" + format(d.signedValue)); });
 
         var node = svg.append("g").selectAll(".node")
             .data(data.nodes)
@@ -5012,7 +5012,7 @@ angular.module('dataviz.directives').directive('sankey', [function() {
             .style("fill", function(d) { return d.color = color(d.nodeType || ""); })
             .style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
             .append("title")
-            .text(function(d) { return (d.nodeType && d.nodeType + " : " || "") + d.name + "\n" + format(d.value); });
+            .text(function(d) { return d.nodeText || ( (d.nodeType && d.nodeType + " : " || "") + d.name + "\n" + format(d.value)); });
 
         node.append("text")
             .attr("x", -6)
