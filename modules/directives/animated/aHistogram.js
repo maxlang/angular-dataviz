@@ -229,7 +229,9 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
             .attr('x', rectX)
             .attr('width', barWidth)
             .attr('y', h)
-            .attr('height', 0);
+            .attr('height', 0)
+            .append("title")
+            .text(function(d) { return d.key + ":" + d.value; });
 //            .transition().delay(2000).duration(3000)
 //            .attr('y', function(d, i) { return y(d.value); })
 //            .attr('height', function(d, i) { return h - y(d.value); });

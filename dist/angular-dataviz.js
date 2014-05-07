@@ -251,14 +251,18 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               .attr('x', 0)
               .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0);})
               .attr('height', Math.abs(y.rangeBand()))
-              .attr('stroke-width', getOption('padding')+'px');
+              .attr('stroke-width', getOption('padding')+'px')
+              .append("title")
+              .text(function(d) { return d.key + ":" + d.value[0]; });
           rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
               .classed('bar d2', true)
               .attr('y', function(d, i) { return y(d.key);})
               .attr('x', function(d) { return (d.values[0] ? x(d.values[0]) : 0);})
               .attr('width', function(d, i) { return  (d.values[1] ? x(d.values[1]) : 0);})
               .attr('height', Math.abs(y.rangeBand()))
-              .attr('stroke-width', getOption('padding')+'px');
+              .attr('stroke-width', getOption('padding')+'px')
+              .append("title")
+              .text(function(d) { return d.key + ":" + d.values[1]; });
 
         } else {
 
@@ -274,7 +278,9 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               })
               .on('click', function(d, i) {
                 clickFn.call(this, d);
-              });
+              })
+              .append("title")
+              .text(function(d) { return d.key + ":" + d.value; });
 
         }
 
@@ -998,7 +1004,9 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
             .attr('x', rectX)
             .attr('width', barWidth)
             .attr('y', h)
-            .attr('height', 0);
+            .attr('height', 0)
+            .append("title")
+            .text(function(d) { return d.key + ":" + d.value; });
 //            .transition().delay(2000).duration(3000)
 //            .attr('y', function(d, i) { return y(d.value); })
 //            .attr('height', function(d, i) { return h - y(d.value); });
@@ -2430,7 +2438,9 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
                   scope.params.filter.push(d.data.key);
               }
               scope.$apply();
-            });
+            })
+            .append("title")
+            .text(function(d) { return d.data.key + ":" + d.data.value; });
 
 
         path.exit()

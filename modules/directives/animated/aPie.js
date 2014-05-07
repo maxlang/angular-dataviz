@@ -278,7 +278,9 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
                   scope.params.filter.push(d.data.key);
               }
               scope.$apply();
-            });
+            })
+            .append("title")
+            .text(function(d) { return d.data.key + ":" + d.data.value; });
 
 
         path.exit()
