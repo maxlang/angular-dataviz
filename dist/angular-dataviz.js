@@ -253,7 +253,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               .attr('height', Math.abs(y.rangeBand()))
               .attr('stroke-width', getOption('padding')+'px')
               .append("title")
-              .text(function(d) { return d.key + ":" + d.value[0]; });
+              .text(function(d) { return d.key + ":" + d.values[0]; });
           rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
               .classed('bar d2', true)
               .attr('y', function(d, i) { return y(d.key);})
