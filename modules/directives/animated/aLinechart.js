@@ -83,7 +83,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         change();
       }, true);
 
-      var width, height, margins, range, max, leftMargin, rightMargin, w, h, bars, barPadding, barWidth, svg, g, x, y, d, xAxis, yAxis, xAxisG, yAxisG, line, path, paths, brush, brushRect, labels, keys, legendDims, legend;
+      var width, height, margins, range, max, min, leftMargin, rightMargin, w, h, bars, barPadding, barWidth, svg, g, x, y, d, xAxis, yAxis, xAxisG, yAxisG, line, path, paths, brush, brushRect, labels, keys, legendDims, legend;
 
       var calcInfo = function(data) {
         width = o('widthPx');
@@ -103,8 +103,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
          */
         if (range !== 'auto') {
           max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(data, 'value'));
+          min = o('min') || (range && _.isArray(range) && range[0]) || _.min(_.pluck(data, 'value'));
         } else {
           max = _.max(_.pluck(data, 'value'));
+          min = _.min(_.pluck(data, 'value'));
         }
 
         leftMargin = margins.left;
@@ -157,10 +159,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         }
 
         if(range === 'auto') {
-          var yMax;
+          var yMax, yMin;
           yMax = max;
-          //var yMin = data[data.length - 1].value;
-          y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
+          yMin = min;
+          y = d3.scale.linear().domain([yMin, yMax]).range([h, 0]);
         } else {
           y = d3.scale.linear().domain(range).range([h, 0]);
         }
@@ -261,10 +263,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         }
 
         if(range === 'auto') {
-          var yMax;
+          var yMax,yMin;
           yMax = max;
-          //var yMin = data[data.length - 1].value;
-          y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
+          yMin = min;
+          y = d3.scale.linear().domain([yMin, yMax]).range([h, 0]);
         } else {
           y = d3.scale.linear().domain(range).range([h, 0]);
         }

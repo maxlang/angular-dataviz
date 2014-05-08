@@ -59,7 +59,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         change();
       }, true);
 
-      var width, height, margins, range, max, leftMargin, w, h, bars, barPadding, barWidth, svg, g, x, y, d, xAxis, yAxis, xAxisG, yAxisG, rects, brush, brushRect;
+      var width, height, margins, range, max, min, leftMargin, w, h, bars, barPadding, barWidth, svg, g, x, y, d, xAxis, yAxis, xAxisG, yAxisG, rects, brush, brushRect;
 
       var calcInfo = function(data) {
         width = o('widthPx');
@@ -79,8 +79,10 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
          */
         if (range !== 'auto') {
           max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(data, 'value'));
+          min = o('min') || (range && _.isArray(range) && range[0]) || _.min(_.pluck(data, 'value'));
         } else {
           max = _.max(_.pluck(data, 'value'));
+          min = _.min(_.pluck(data, 'value'));
         }
 
         leftMargin = margins.left;
@@ -131,10 +133,10 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         }
 
         if(range === 'auto') {
-          var yMax;
+          var yMax, yMin;
             yMax = max;
-          //var yMin = data[data.length - 1].value;
-          y = d3.scale.linear().domain([0, yMax]).range([h, 0]);
+            yMin = min;
+          y = d3.scale.linear().domain([yMin, yMax]).range([h, 0]);
         } else {
           y = d3.scale.linear().domain(range).range([h, 0]);
         }
@@ -242,9 +244,9 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         rects.transition().duration(300)
 
             .attr('x', rectX)
-            .attr('y', function(d, i) { return y(d.value); })
+            .attr('y', function(d, i) { return d.value > 0 ? y(d.value) : y(0); })
             .attr('width', barWidth)
-            .attr('height', function(d, i) { return h - y(d.value); })
+            .attr('height', function(d, i) { return Math.abs(y(0) - y(d.value)); })
             .attr('stroke-width', o('padding')+'px')
             .attr('fill', o('barColor'))
             .attr('fill-opacity', o('barOpacity'));
