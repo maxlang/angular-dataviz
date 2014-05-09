@@ -50,13 +50,13 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
       function measure(text, classname) {
         if(!text || text.length === 0) return {height: 0, width: 0};
 
-        var container = d3.select('body').append('svg').attr('class', classname);
+        var container = d3.select(element[0]).append('svg').attr('class', classname);
         container.append('text').attr({x: -1000, y: -1000}).text(text);
 
         var bbox = container.node().getBBox();
         container.remove();
 
-        return {height: bbox.height, width: bbox.width};
+        return {height: bbox.height, width: Math.min(bbox.width,100)};
       }
 
 
@@ -438,8 +438,8 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
           });
         });
 
-        // we only want to take the top 6 - TODO: support more/better alg for selecting top
-        sortedLabels = _.take(sortedLabels, 6);
+        // we only want to take the top 7 - TODO: support more/better alg for selecting top
+        sortedLabels = _.take(sortedLabels, 7);
 
 
         var sortedPriority = _.invert(sortedLabels);
@@ -643,7 +643,11 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               return 0;
             })
             .attr('height', Math.abs(y.rangeBand()))
-            .attr('stroke-width', getOption('padding')+'px');
+            .attr('stroke-width', getOption('padding')+'px')
+            .append('title')
+            .text(function(d) {
+              return d.parent.key + ", " + d.key + " : " + d.value;
+            });
 
 
 //        if (scope.filter2 && getOption('filterSelector')) {

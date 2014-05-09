@@ -286,7 +286,10 @@
             .text(function(d) {
               // TODO (em) truncate via styling instead of code.
               return truncate(d.title, MAX_TITLE_LEN);
-            });
+            })
+              .append('title')
+              .text(function(d) {return d.title; });
+
 
           // Date.
           annotationTextG
