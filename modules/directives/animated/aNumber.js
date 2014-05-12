@@ -187,9 +187,11 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
               this.__lastData = d;
             })
             .text(function(d,i) {
-              return format(d);
+              return format(d).replace("G", "B");
             }).attr('dy', '1em')
-            .call(resizeText);
+            .call(resizeText)
+            .append("title")
+            .text(function(d) {return d3.format(",")(d);});
 
 
 
@@ -205,13 +207,16 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
               var last = this.__lastData;
               var tI = d3.interpolateNumber(parseFloat(last) || 0, parseFloat(d) || 0);
               return function(t){
-                this.textContent = format(tI(t));
+                this.textContent = format(tI(t)).replace("G","B");
               };
             })
             .each('end', function(d){
               this.__lastData = d;
                 d3.select(this).style('font-size', o('fontSize'));
                 d3.select(this).call(resizeText);
+
+              d3.select(this).append("title")
+                  .text(function(d) {return d3.format(",")(d);});
             });
 
       }
