@@ -914,7 +914,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
         if(range === 'auto') {
           var yMax, yMin;
             yMax = max;
-            yMin = min;
+            yMin = Math.min(min, 0);
           y = d3.scale.linear().domain([yMin, yMax]).range([h, 0]);
         } else {
           y = d3.scale.linear().domain(range).range([h, 0]);
