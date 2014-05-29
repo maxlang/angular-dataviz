@@ -987,7 +987,7 @@ angular.module('dataviz.directives').directive('aHistogram', ['$timeout', 'VizUt
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
-        g.transition().duration()
+        g.transition().duration(300)
             .attr('width', w)
             .attr('height', h)
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
@@ -1262,10 +1262,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
               if (!d) {
                 return;
               }
-              return {
-                key:moment(d.key),
-                value: d.value
-              };
+              if (!moment.isMoment(d.key)) {
+                d.key = moment(d.key);
+              }
+              return d;
             });
             Array.prototype.splice.apply(scope.data,[0,scope.data.length].concat(ensureDates));
           } else {
@@ -1638,7 +1638,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
-        g.transition().duration()
+        g.transition().duration(300)
             .attr('width', w)
             .attr('height', h)
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
@@ -2800,7 +2800,7 @@ angular.module('dataviz.directives').directive('aScatter', ['$timeout', 'VizUtil
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
-        g.transition().duration()
+        g.transition().duration(300)
             .attr('width', w)
             .attr('height', h)
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');

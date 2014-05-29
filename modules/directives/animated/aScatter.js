@@ -209,7 +209,7 @@ angular.module('dataviz.directives').directive('aScatter', ['$timeout', 'VizUtil
             .attr("fill", o('textColor'))
             .attr("fill-opacity",o('fillOpacity'))
             .style("background-color", o('bgColor'));
-        g.transition().duration()
+        g.transition().duration(300)
             .attr('width', w)
             .attr('height', h)
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
