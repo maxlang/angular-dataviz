@@ -244,6 +244,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               });
 
           rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
+              .attr('class', function(d, i) { return "bar-" + i + " _" + d.key + "-color";})
               .classed('bar d1', true)
               .attr('y', function(d, i) {
                 return y(d.key);
@@ -624,7 +625,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               });
             })
             .enter().append('rect')
-            .attr('class', function(d, i) { return "bar-" + i;})
+            .attr('class', function(d, i) { return "bar-" + i + " _" + d.parent.key + "-color" + " _" + d.key + "-color";})
             .classed('bar', true)
             .attr('y', function(d, i) { return y(d.parent.key);})
             .attr('x', function(d, i) {
@@ -700,7 +701,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         k.append("rect")
             .attr("width", legendSquareSizePx)
             .attr("height", legendSquareSizePx)
-            .attr("class", function(d, i) { return "bar-" + i; } );
+            .attr('class', function(d, i) { return "bar-" + i + " _" + d + "-color";});
 
         var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
         var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
@@ -1394,7 +1395,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         yAxis = d3.svg.axis().scale(y).orient("left").ticks(yTicks);
 
         line = d3.svg.line()
-            .x(function(d, i) { return x(d.key); })
+            .x(function(d, i) { return x(d.key.valueOf()); })
             .y(function(d, i) { return y(d.value); });
 
       };
@@ -1421,8 +1422,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
          */
         if (range !== 'auto') {
           max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(flattenedData, 'value'));
+          min = o('min') || (range && _.isArray(range) && range[0]) || _.min(_.pluck(flattenedData, 'value'));
         } else {
           max = _.max(_.pluck(flattenedData, 'value'));
+          min = _.min(_.pluck(flattenedData, 'value'));
         }
 
         leftMargin = margins.left;
@@ -1644,7 +1647,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
         var line = d3.svg.line()
-            .x(function(d) { return x(d.key); })
+            .x(function(d) { return x(d.key.valueOf()); })
             .y(function(d) { return y(d.value); });
 
         if (o('multi')) {
@@ -2406,7 +2409,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               return _.contains(scope.params.filter, d.data.key) || (d.data.other && _.intersection(scope.params.filter, d.data.otherKeys).length > 0) ? o('selectedStrokeOpacity') : o('pieStrokeOpacity');
             })
             .attr("class", function(d) {
-              return String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+              return "_" + String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
             })
             .on('click', function(d, i) {
               if (d.data.other) {
@@ -2494,7 +2497,7 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
               return color(d.data.key); })
             .attr("fill-opacity", function(d) { return opacity(d.data.key); })
             .attr("class", function(d) {
-              return String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
+              return "_" + String(d.data.key).toLowerCase().replace(/[^\-A-Za-z0-9_]/g,"_") + "-color";
             });
 
         var nonTextWidth = o('legendSquareSizePx') + (2 * o('legendPadding')) + o('legendSpacing') + padding;

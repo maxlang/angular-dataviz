@@ -178,7 +178,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
         yAxis = d3.svg.axis().scale(y).orient("left").ticks(yTicks);
 
         line = d3.svg.line()
-            .x(function(d, i) { return x(d.key); })
+            .x(function(d, i) { return x(d.key.valueOf()); })
             .y(function(d, i) { return y(d.value); });
 
       };
@@ -205,8 +205,10 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
          */
         if (range !== 'auto') {
           max = o('max') || (range && _.isArray(range) && range[1]) || _.max(_.pluck(flattenedData, 'value'));
+          min = o('min') || (range && _.isArray(range) && range[0]) || _.min(_.pluck(flattenedData, 'value'));
         } else {
           max = _.max(_.pluck(flattenedData, 'value'));
+          min = _.min(_.pluck(flattenedData, 'value'));
         }
 
         leftMargin = margins.left;
@@ -428,7 +430,7 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
             .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
 
         var line = d3.svg.line()
-            .x(function(d) { return x(d.key); })
+            .x(function(d) { return x(d.key.valueOf()); })
             .y(function(d) { return y(d.value); });
 
         if (o('multi')) {

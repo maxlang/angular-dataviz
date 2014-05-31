@@ -240,6 +240,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               });
 
           rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
+              .attr('class', function(d, i) { return "bar-" + i + " _" + d.key + "-color";})
               .classed('bar d1', true)
               .attr('y', function(d, i) {
                 return y(d.key);
@@ -620,7 +621,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               });
             })
             .enter().append('rect')
-            .attr('class', function(d, i) { return "bar-" + i;})
+            .attr('class', function(d, i) { return "bar-" + i + " _" + d.parent.key + "-color" + " _" + d.key + "-color";})
             .classed('bar', true)
             .attr('y', function(d, i) { return y(d.parent.key);})
             .attr('x', function(d, i) {
@@ -696,7 +697,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         k.append("rect")
             .attr("width", legendSquareSizePx)
             .attr("height", legendSquareSizePx)
-            .attr("class", function(d, i) { return "bar-" + i; } );
+            .attr('class', function(d, i) { return "bar-" + i + " _" + d + "-color";});
 
         var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
         var textWidth = Math.min((legendDims.width - nonTextWidth), (width - nonTextWidth));
