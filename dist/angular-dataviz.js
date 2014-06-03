@@ -2064,22 +2064,22 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
         var fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
           if (!o('fontSize')) {
 
-            if (parseInt(elt.width(), 10) > w || parseInt(elt.height(), 10) > h) {
-            while ((parseInt(elt.width(), 10) > w || parseInt(elt.height(), 10) > h) && fs > 30 && times > 0) {
+            if (parseInt(e.getBBox().width, 10) > w || parseInt(e.getBBox().height, 10) > h) {
+            while ((parseInt(e.getBBox().width, 10) > w || parseInt(e.getBBox().height, 10) > h) && fs > 30 && times > 0) {
               fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
               times -= 1;
               elt.css('font-size', fs - 1);
             }
           } else {
-            while ((parseInt(elt.width(), 10) < w && parseInt(elt.height(), 10) < h) && fs < 400 && times > 0) {
+            while ((parseInt(e.getBBox().width, 10) < w && parseInt(e.getBBox().height, 10) < h) && fs < 400 && times > 0) {
               fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
               times -= 1;
               elt.css('font-size', fs + 1);
             }
           }
         }
-        elt.attr('dy', '1em');
-        elt.attr('y', o('bottomRight') ? (h - elt.height()) : ((h/2) - (elt.height()/2)));
+//        elt.attr('dy', '1em');
+        elt.attr('y', (o('bottomRight') ? h : h - (h - fs)/2 ));
       }
 
       function init(data) {
@@ -2119,21 +2119,22 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
             .attr('height', h)
             .attr('transform', 'translate(' + margins.left + ', ' + margins.top + ')');
 
-        text = text.data([scope.data.value], key);
+        text = text.data([scope.data.value || 0], key);
 
         text.enter().append('text')
             .classed('value', true)
             .attr('fill', o('textColor'))
             .attr('fill-opacity', o('fillOpacity'))
             .attr('x', o('bottomRight') ? w : w/2)
-            .style('font-size',o('font-size') || 250)
+            .style('font-size',o('font-size') || "250px")
             .attr('text-anchor', o('bottomRight') ? 'end' : 'middle')
             .each(function(d){
               this.__lastData = d;
             })
             .text(function(d,i) {
               return format(d).replace("G", "B");
-            }).attr('dy', '1em')
+            })
+//            .attr('dy', '1em')
             .call(resizeText)
             .append("title")
             .text(function(d) {return d3.format(",")(d);});
