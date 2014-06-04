@@ -330,20 +330,28 @@ angular.module('dataviz.directives').directive('aPie', ['$timeout', 'VizUtils', 
         var tc = d3.rgb(o('textColor'));
         var rgba = [tc.r, tc.g, tc.b,o('fillOpacity')];
 
-        var text = k.append("foreignObject")
+//        var text = k.append("foreignObject")
+//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
+//            .attr("y", 0)
+//            .attr('width', textWidth)
+//            .attr('height', '1.2em')
+//            .append("xhtml:div")
+//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.data.key + "</div>";});
+////
+//        keys.transition().duration(300)
+//            .attr("transform", function(d, i) { console.log(d,i); return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; })
+//        .call(function() {
+//          //TODO: incorporate into transition better
+//          $(this[0]).width(textWidth).find('foreignObject').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+//        });
+
+        var text = k.append("text")
             .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-            .attr("y", 0)
+            .attr("y", "1em")
             .attr('width', textWidth)
             .attr('height', '1.2em')
-            .append("xhtml:div")
-            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.data.key + "</div>";});
-//
-        keys.transition().duration(300)
-            .attr("transform", function(d, i) { console.log(d,i); return "translate(" + o('legendPadding') + "," + (o('legendPadding') + (i * (o('legendSpacing') + o('legendSquareSizePx')))) + ")"; })
-        .call(function() {
-          //TODO: incorporate into transition better
-          $(this[0]).width(textWidth).find('foreignObject').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
-        });
+            .attr('fill',"rgba(" + rgba.join(',') + ")")
+            .text(function(d, i) { return d.data.key; });
 
 
 //        k.append("text")

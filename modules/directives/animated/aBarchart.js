@@ -705,28 +705,39 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         var tc = d3.rgb(getOption('textColor'));
         var rgba = [tc.r, tc.g, tc.b, getOption('fillOpacity')];
 
-        var text = k.append("foreignObject")
+//        var text = k.append("foreignObject")
+//            .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
+//            .attr("y", 0)
+//            .attr('width', textWidth)
+//            .attr('height', '1.2em')
+//            .append("xhtml:div")
+//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d + "</div>";});
+//
+//        keys.transition().duration(300)
+//            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
+//            .call(function() {
+//              //TODO: incorporate into transition better
+//              $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+//            });
+
+//        var text = k.append("text")
+//            .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
+//            .attr("y", 0)
+//            .attr('width', textWidth)
+//            .attr('height', '1.2em')
+//            .attr('fill',"rgba(" + rgba.join(',') + ")");
+//            .append("xhtml:div")
+//            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d + "</div>";});
+
+
+        var text = k.append("text")
             .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
-            .attr("y", 0)
+            .attr("y", '1em')
             .attr('width', textWidth)
             .attr('height', '1.2em')
-            .append("xhtml:div")
-            .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d + "</div>";});
-//
-        keys.transition().duration(300)
-            .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
-            .call(function() {
-              //TODO: incorporate into transition better
-              $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
-            });
+            .attr('fill', "rgba(" + rgba.join(',') + ")")
+            .text(function(d, i) { return  d ;});
 
-
-//        k.append("text")
-//            .attr("x", o('legendSquareSizePx') + o('legendPadding') + o('legendSpacing'))
-//            .attr("y", 9)
-//            .attr("dy", ".35em")
-//            .text(function(d) {
-//              return d.data.key; }).classed('pie-legend', true);
 
         keys.exit().remove();
 

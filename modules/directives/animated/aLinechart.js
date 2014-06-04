@@ -534,23 +534,31 @@ angular.module('dataviz.directives').directive('aLinechart', ['$timeout', 'VizUt
           var tc = d3.rgb(o('textColor'));
           var rgba = [tc.r, tc.g, tc.b, o('fillOpacity')];
 
-          var text = k.append("foreignObject")
+//          var text = k.append("foreignObject")
+//              .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
+//              .attr("y", 0)
+//              .attr('width', textWidth)
+//              .attr('height', '1.2em')
+//              .append("xhtml:div")
+//              .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.value + "</div>";});
+//  //
+//          keys.transition().duration(300)
+//              .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
+//              .each(function(d, i) {
+//                $(this).find('foreignObject').find('div').find('div').text(d.value);
+//              })
+//              .call(function() {
+//                //TODO: incorporate into transition better
+//                $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
+//              });
+
+            var text = k.append("text")
               .attr("x", legendSquareSizePx + legendPadding + legendSpacing)
-              .attr("y", 0)
+              .attr("y", '1em')
               .attr('width', textWidth)
               .attr('height', '1.2em')
-              .append("xhtml:div")
-              .html(function(d, i) { return "<div style='width:" + textWidth + "px; height:1.2em; overflow:hidden; text-overflow:ellipsis;color: rgba(" + rgba.join(',') + ");white-space:nowrap'>" + d.value + "</div>";});
-  //
-          keys.transition().duration(300)
-              .attr("transform", function(d, i) { /*console.log(d,i);*/ return "translate(" + legendPaddingLeft + "," + (legendPadding + (i * (legendSpacing + legendSquareSizePx))) + ")"; })
-              .each(function(d, i) {
-                $(this).find('foreignObject').find('div').find('div').text(d.value);
-              })
-              .call(function() {
-                //TODO: incorporate into transition better
-                $(this[0]).width(textWidth).find('foreignObject').attr('class','legend-text').attr('width', textWidth).find('div').width(textWidth).css('color', "rgba(" + rgba.join(',') + ")");
-              });
+              .attr('fill', "rgba(" + rgba.join(',') + ")")
+              .text(function(d, i) { return d.value ;});
 
 
   //        k.append("text")
