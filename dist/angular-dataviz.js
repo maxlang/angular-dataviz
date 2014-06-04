@@ -2083,14 +2083,14 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
         var fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
           if (!o('fontSize')) {
 
-            if (parseInt(e.getBBox().width, 10) > w || parseInt(e.getBBox().height, 10) > h) {
+            if (parseInt(elt.width() || e.getBBox().width, 10) > w || parseInt(elt.height() || e.getBBox().height, 10) > h) {
             while ((parseInt(e.getBBox().width, 10) > w || parseInt(e.getBBox().height, 10) > h) && fs > 30 && times > 0) {
               fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
               times -= 1;
               elt.css('font-size', fs - 1);
             }
           } else {
-            while ((parseInt(e.getBBox().width, 10) < w && parseInt(e.getBBox().height, 10) < h) && fs < 400 && times > 0) {
+            while ((parseInt(elt.width() || e.getBBox().width, 10) < w && parseInt(elt.height() || e.getBBox().height, 10) < h) && fs < 400 && times > 0) {
               fs = parseInt(window.getComputedStyle(e, null)['font-size'], 10);
               times -= 1;
               elt.css('font-size', fs + 1);
