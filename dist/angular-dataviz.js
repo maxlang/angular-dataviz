@@ -443,8 +443,8 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
           });
         });
 
-        // we only want to take the top 7 - TODO: support more/better alg for selecting top
-        sortedLabels = _.take(sortedLabels, 7);
+        // we only want to take the top 9 - TODO: support more/better alg for selecting top
+        sortedLabels = _.take(sortedLabels, 9);
 
 
         var sortedPriority = _.invert(sortedLabels);
@@ -613,6 +613,24 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             });
 
 
+        //from : https://github.com/mbostock/d3/blob/master/lib/colorbrewer/colorbrewer.js
+        var blues = {
+          3: ["#deebf7","#9ecae1","#3182bd"],
+            4: ["#eff3ff","#bdd7e7","#6baed6","#2171b5"],
+            5: ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
+            6: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
+            7: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+            8: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+            9: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
+        };
+
+
+        //TODO: make configurable
+        var color = d3.scale.ordinal().domain(sortedLabels).range(blues[Math.max(Math.min(sortedLabels.length,9),3)].reverse());
+//        opacity = d3.scale.ordinal().range([
+//          0.95,0.8,0.65,0.5,0.35,0.1
+//        ]);
+
         barHolders.selectAll('rect')
             .data(function(d) {
 //              console.log(d);
@@ -627,9 +645,10 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             .enter().append('rect')
             .attr('class', function(d, i) { return "bar-" + i + " _" + d.parent.key + "-color" + " _" + d.key + "-color";})
             .classed('bar', true)
+            .attr('style', function(d, i) { return "fill:" + color(d.key); })
             .attr('y', function(d, i) { return y(d.parent.key);})
             .attr('x', function(d, i) {
-              if (i === 0 || !(d.key in sortedPriority)) {
+              if (!(d.key in sortedPriority)) {
                 return 0;
               }
               var sum = 0;
@@ -701,6 +720,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         k.append("rect")
             .attr("width", legendSquareSizePx)
             .attr("height", legendSquareSizePx)
+            .attr('style', function(d) { return "fill:" + color(d); })
             .attr('class', function(d, i) { return "bar-" + i + " _" + d + "-color";});
 
         var nonTextWidth = legendSquareSizePx + (legendPadding + legendPaddingLeft) + legendSpacing;
