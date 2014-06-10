@@ -405,9 +405,26 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
 
         var max = maxes[maxKey];
 
+        var logOn = false;
+
         var compare = function(a,b) {
-          return a > b ? 1 : (a===b ? 0 : -1);
+          if (logOn) {
+            console.log("A", a);
+            console.log("B", b);
+            console.log("result", a > b ? 1 : (a === b ? 0 : -1));
+          }
+          if (a!==undefined && b===undefined) {
+            return 1;
+          } else if (a===undefined && b!==undefined) {
+            return -1;
+          } else if (a===b) {
+            return 0;
+          }
+
+          return a > b ? 1 : -1;
         };
+
+        var numKeys = true;
 
         if (getOption('sorted')) {
 
@@ -419,6 +436,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             if (!_.isNaN(ak) && !_.isNaN(b.key)) {
               return compare(ak, bk);
             }
+            numKeys = false;
             if (a[maxKey] === b[maxKey]) {
               if (_.max(a.data,'value').value === _.max(b.data, 'value').value) {
                 return -compare(a.key,b.key);
@@ -446,8 +464,41 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
         // we only want to take the top 9 - TODO: support more/better alg for selecting top
         sortedLabels = _.take(sortedLabels, 9);
 
-
         var sortedPriority = _.invert(sortedLabels);
+
+        logOn = true;
+
+        //TODO: inefficient to sort twice :(
+        if (getOption('sorted')) {
+
+          //resort using the new bar stacking order
+          augmentedData.sort(function(a, b) {
+            console.log("A.key", a.key);
+            console.log("B.key", b.key);
+
+            if (numKeys) {
+              var ak = parseFloat(a.key);
+              var bk = parseFloat(b.key);
+              return compare(ak, bk);
+            }
+            if (a[maxKey] === b[maxKey]) {
+              for (var i=0; i<sortedLabels.length;i++) {
+                var aval = _.find(a.data,{key:sortedLabels[i]});
+                var bval = _.find(b.data,{key:sortedLabels[i]});
+                aval = aval && aval.value;
+                bval = bval && bval.value;
+
+                if (aval !== bval) {
+                  return compare(aval, bval);
+                }
+              }
+              return -compare(a.key,b.key);
+
+            }
+            return compare(a[maxKey],b[maxKey]);
+          });
+        }
+
 
         var legendDims = calcLegendDims(sortedLabels);
 
