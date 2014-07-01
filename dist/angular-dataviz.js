@@ -461,8 +461,8 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
           });
         });
 
-        // we only want to take the top 9 - TODO: support more/better alg for selecting top
-        sortedLabels = _.take(sortedLabels, 9);
+        // we only want to take the top 20 - TODO: support more/better alg for selecting top
+        sortedLabels = _.take(sortedLabels, 20);
 
         var sortedPriority = _.invert(sortedLabels);
 
@@ -672,12 +672,17 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
             6: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
             7: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
             8: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
-            9: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
+            9: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"],
+          10: d3.scale.category10().range()
         };
+
+        _.times(10, function(i) {
+          blues[i + 11] = d3.scale.category20().range();
+        });
 
 
         //TODO: make configurable
-        var color = d3.scale.ordinal().domain(sortedLabels).range(blues[Math.max(Math.min(sortedLabels.length,9),3)].reverse());
+        var color = d3.scale.ordinal().domain(sortedLabels).range(blues[Math.max(Math.min(sortedLabels.length,20),3)].reverse());
 //        opacity = d3.scale.ordinal().range([
 //          0.95,0.8,0.65,0.5,0.35,0.1
 //        ]);
