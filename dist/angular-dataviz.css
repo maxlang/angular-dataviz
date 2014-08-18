@@ -427,7 +427,7 @@ nv-barchart * {
   content: '\275d';
 }
 .iconic.x:before {
-  content: '\2713';
+  content:'\2716';
 }
 .iconic.last:before {
   content: '\e04d';
@@ -933,7 +933,7 @@ nv-barchart * {
   content: '\275d';
 }
 .iconic.x:before {
-  content: '\2713';
+  content:'\2716';
 }
 .iconic.last:before {
   content: '\e04d';
@@ -1551,7 +1551,7 @@ nv-barchart * {
 }
 .sidebars ul li.selected span.cancel.x:before,
 .sidebars ul sidebar.selected span.cancel.x:before {
-  content: '\2713';
+  content:'\2716';
 }
 .sidebars ul li.selected span.cancel.last:before,
 .sidebars ul sidebar.selected span.cancel.last:before {
