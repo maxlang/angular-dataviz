@@ -2135,7 +2135,18 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
         //var hasDecimal = Math.floor(scaledValue) !== scaledValue;
         var digits = (scaledValue + '').replace(/-\./g,'').length;
         var p = Math.min( digits, 3);
-        if (o('units') !== '%') {
+        if (o('units') !== 'time') {
+          format = function(value) {
+            return moment.duration(value).humanize().replace((/^an? /),'1').replace((/few /),'')
+                .replace((/seconds?/),'s')
+                .replace((/minutes?/),'m')
+                .replace((/hours?/),'h')
+                .replace((/days?/),'d')
+                .replace((/weeks?/),'w')
+                .replace((/months?/),'mon')
+                .replace((/years?/),'y');
+          };
+        } else if (o('units') !== '%') {
           format = d3.format((o('units')==='$' ? '$' : '') +  '.' + p + 's');
         } else {
           p = Math.min( digits, 5);
