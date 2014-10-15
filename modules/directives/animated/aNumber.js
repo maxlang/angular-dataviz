@@ -97,7 +97,7 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
         var p = Math.min( digits, 3);
         if (o('units') !== 'time') {
           format = function(value) {
-            return moment.duration(value).humanize().replace((/^an? /),'1').replace((/few /),'')
+            return moment.duration(value).humanize().replace((/^an?/),'1').replace((/1 few /),'~1')
                 .replace((/seconds?/),'s')
                 .replace((/minutes?/),'m')
                 .replace((/hours?/),'h')
