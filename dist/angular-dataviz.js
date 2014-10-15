@@ -2135,7 +2135,7 @@ angular.module('dataviz.directives').directive('aNumber', ['$timeout', 'VizUtils
         //var hasDecimal = Math.floor(scaledValue) !== scaledValue;
         var digits = (scaledValue + '').replace(/-\./g,'').length;
         var p = Math.min( digits, 3);
-        if (o('units') !== 'time') {
+        if (o('units') === 'time') {
           format = function(value) {
             return moment.duration(value).humanize().replace((/^an?/),'1').replace((/1 few /),'~1')
                 .replace((/seconds?/),'s')
