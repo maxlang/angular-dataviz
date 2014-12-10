@@ -99,7 +99,7 @@ module.exports = function (grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default', ['build', 'test', 'concat', 'less:dist']);
+  grunt.registerTask('default', ['build', 'test', 'watch']);
 
   grunt.registerTask('build', ['clean', 'jshint', 'concat', 'less:dist', 'ngdocs']);
 

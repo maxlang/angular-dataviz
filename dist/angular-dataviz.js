@@ -5017,7 +5017,7 @@ angular.module('dataviz.rewrite')
         restrict: 'E',
         replace: true,
         transclude: true,
-        template:'<svg width="400px" height="400px"></svg>',
+        template:'<div width="400px" height="400px"></div>',
         scope: {
           data: '=?'
         },
@@ -5093,7 +5093,7 @@ angular.module('dataviz.rewrite')
       replace: true,
       scope: false,
       require: ['^blGraph'],
-      template: '<g ng-attr-width="{{layout.graph.height}}" ng-attr-height="{{layout.graph.height}}" class="bl-line"></g>',
+      template: '<svg ng-attr-width="{{layout.graph.height}}" ng-attr-height="{{layout.graph.height}}" class="bl-line"></svg>',
       templateNamespace: 'svg', //http://www.benlesh.com/2014/09/working-with-svg-in-angular.html
       link: function(scope, iElem, iAttrs, controllers) {
         var vizConfig = {
@@ -5135,7 +5135,7 @@ angular.module('dataviz.rewrite')
       require: ['^blGraph'],
       templateNamespace: 'svg',
       scope: false,
-      template: '<g class="axis" ng-attr-height="{{config.height}}" ng-attr-width="{{config.width}}" ng-attr-transform="translate({{config.translateX}}, {{config.translateY}})"></g>',
+      template: '<svg class="axis" ng-attr-height="{{config.height}}" ng-attr-width="{{config.width}}" ng-attr-transform="translate({{config.translateX}}, {{config.translateY}})"></svg>',
       link: function(scope, iElem, iAttrs, controllers) {
         scope.config = LayoutConfig.axis.config;
         var graphCtrl = controllers[0];
