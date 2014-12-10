@@ -21,9 +21,16 @@ angular.module('dataviz.rewrite')
             v.key = parseFloat(v.key);
           });
 
+          var dims = {
+            height: 400,
+            width: 400
+          };
+
           var getMinMax = function(data, key) {
             return [_.min(data, key)[key], _.max(data,key)[key]];
           };
+
+          $scope.layout = {};
 
           $scope.metadata = {
             total: _.reduce($scope.data, function(sum, num) {
@@ -34,6 +41,32 @@ angular.module('dataviz.rewrite')
             count: $scope.data.length
           };
           $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
+
+          this.scaleX = d3.scale.linear()
+            .domain($scope.metadata.domain)
+            .range([0, 400]);
+
+          this.scaleY = d3.scale.linear()
+            .domain($scope.metadata.range)
+            .range([0, 400]);
+
+
+          this.registerComponent = function(componentType, config) {
+            var t = componentType;
+
+            if (_.isEmpty($scope.layout)) {
+              $scope.layout[t] = config;
+            } else {
+              if (t === 'xAxis') {
+                $scope.layout.graph.height = dims.height - config.height;
+              } else if (t === 'graph') {
+                config.height -= $scope.layout.xAxis.height;
+              }
+              $scope.layout[t] = config;
+
+            }
+          };
+
         }
       };
     });
