@@ -1,3 +1,38 @@
+/**
+ * @ngdoc directive
+ * @name dataviz.directives:aBarchart
+ * @param {Array<KVPair>} data barchart data
+ * @param {null} data2 unused
+ * @param {ConfigObject} params object with config params
+ * @param {null} filter2 unused
+ * @restrict E
+ * @element a-barchart
+ * @scope
+ *
+ * @description
+ * Creates a barchart.
+ *
+ * @example
+ <example module="test">
+  <file name="index.html">
+    <div ng-controller="dataController">
+      data: {{data}}
+      viz: <a-barchart data="data" params="params" data2="[]" filter2="[]"></a-barchart>
+    </div>
+  </file>
+ <file name="script.js">
+  angular.module('test',['dataviz'])
+    .controller('dataController', function($scope) {
+      $scope.data = [{key: 1, value:1}, {key:2, value:2}];
+      $scope.params = {
+        options: {},
+        filter: []
+      };
+    });
+ </file>
+ </example>
+ */
+
 angular.module('dataviz.directives').directive('aBarchart', [function() {
   return {
     restrict: 'E',

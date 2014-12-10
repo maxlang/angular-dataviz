@@ -1,4 +1,4 @@
-
+angular.module('dataviz.rewrite', []);
 angular.module('dataviz.directives', ['ui.map']);
 angular.module('dataviz', ['dataviz.directives']);
 
@@ -5008,6 +5008,173 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 //    }
 //  };
 //}]);
+
+angular.module('dataviz.rewrite');
+
+angular.module('dataviz.rewrite')
+    .directive('blGraph', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        template:'<svg width="400px" height="400px"></svg>',
+        scope: {
+          data: '=?'
+        },
+        link: function(scope, element, attrs, trl, transclude) {
+          transclude(scope, function(clone) {
+            element.append(clone);
+          });
+        },
+        controller: function($scope) {
+          $scope.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
+            { key: 40,  value: 10}, { key: 60,  value: 40},
+            { key: 80,  value: 5},  { key: 300, value: 300}];
+          _.each($scope.data, function(v) {
+            v.key = parseFloat(v.key);
+          });
+
+          var getMinMax = function(data, key) {
+            return [_.min(data, key)[key], _.max(data,key)[key]];
+          };
+
+          $scope.metadata = {
+            total: _.reduce($scope.data, function(sum, num) {
+              return sum + num.y;
+            }, 0),
+            domain: getMinMax($scope.data, 'key'),
+            range: getMinMax($scope.data, 'value'),
+            count: $scope.data.length
+          };
+          $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
+        }
+      };
+    });
+
+angular.module('dataviz.rewrite');
+
+angular.module('dataviz.rewrite')
+    .directive('blLine', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        scope: false,
+        require: ['^blGraph'],
+        template: '<g width="400px" class="bl-line" height="400px"></g>',
+        templateNamespace: 'svg', //http://www.benlesh.com/2014/09/working-with-svg-in-angular.html
+        link: function(scope, iElem, iAttrs) {
+          console.log('Running line link!');
+
+          // NOTE, when using ng-transclude, you need to select the
+          // child g element but not
+          // if you're overriding the transclude behavior
+          // Need to select the child 'g', since the parent is the bl-line el
+
+          var lineContainer = d3.select(iElem[0]); // strip off the jquery wrapper
+
+          scope.line = d3.svg.line()
+              .x(function(d) { return d.key; })
+              .y(function(d) { return d.value; })
+              .interpolate('basis');
+
+          lineContainer.append('path')
+              .attr('d', scope.line(scope.data));
+        },
+        controller: function($scope, $transclude) {
+
+        }
+      };
+    });
+
+angular.module('dataviz.rewrite')
+.directive('blNumber', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        template: '<text>{{text}}</text>',
+        scope: false,
+        link: function(scope, iElem, iAttrs) {
+          console.log('blNumber link!');
+          var vizConfig = {
+            height: 400,
+            width: 400,
+            padding: 20
+          };
+
+          iElem
+              .attr('height', vizConfig.height)
+              .attr('width', vizConfig.width)
+              .attr('transform', 'translate(' + vizConfig.padding + ', ' + vizConfig.padding * 2 + ')')
+              .attr('font-family', 'Verdana')
+              .attr('color', 'blue')
+              .attr('font-size', 40);
+          scope.text = 'AMAZING!!!';
+
+        }
+      };
+    });
+
+angular.module('dataviz.rewrite')
+    .directive('blPie', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        scope: false,
+        require: ['^blGraph'],
+        template: '<g width="400px" class="bl-pie" height="400px"></g>',
+        templateNamespace: 'svg',
+        link: function(scope, iElem, iAttrs) {
+          // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
+          // With modifications
+
+          var vizConfig = {
+            width: parseInt(iAttrs.width, 10),
+            height: parseInt(iAttrs.height, 10),
+            radius: function() { return this.height/2; }
+          };
+
+          var color = d3.scale.category20c();
+
+          var data = [{"label":"Category A", "value":20},
+            {"label":"Category B", "value":50},
+            {"label":"Category C", "value":30}];
+
+
+          var vis = d3.select(iElem[0])
+              .data([scope.data])
+              .attr("width", vizConfig.width)
+              .attr("height", vizConfig.height)
+              .append("g")
+              .attr("transform", "translate(" + vizConfig.radius() + "," + vizConfig.radius() + ")");
+
+          var pie = d3.layout.pie().value(function(d){return d.value;});
+
+          // declare an arc generator function
+          var arcGen = d3.svg.arc().outerRadius(vizConfig.radius());
+
+          // select paths, use arc generator to draw
+          var arcs = vis.selectAll("g.slice").data(pie).enter().append("g").attr("class", "slice");
+          arcs.append("path")
+              .attr("fill", function(d, i){
+                return color(i);
+              })
+              .attr("d", function (d) {
+                return arcGen(d);
+              });
+
+          // add the text
+          arcs.append("text")
+              .attr("transform", function(d){
+                d.innerRadius = 0;
+                d.outerRadius = vizConfig.radius();
+                return "translate(" + arcGen.centroid(d) + ")";
+              })
+              .attr("text-anchor", "middle").text( function(d, i) {
+                return d.data.key;}
+          );
+        }
+      };
+    });
 
 //TODO: add prefixes to directives
 

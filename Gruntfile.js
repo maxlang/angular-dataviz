@@ -9,6 +9,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-ngdocs');
+
 
   // Project configuration.
   grunt.initConfig({
@@ -21,7 +23,7 @@ module.exports = function (grunt) {
       ' * @license MIT License, http://www.opensource.org/licenses/MIT\n' + ' */'
     },
     clean: {
-      src: ['dist']
+      src: ['dist', 'ngdocs']
     },
     concat: {
       options: {
@@ -65,10 +67,33 @@ module.exports = function (grunt) {
     },
     watch: {
       files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less',
-              'doc/**/*.js', 'doc/**/*.css', 'doc/*.html'],
+              'doc/**/*.js', 'doc/**/*.css', 'doc/*.html', 'Gruntfile.js'],
       tasks: ['build', 'test'],
       options: {
         livereload: 35730
+      }
+    },
+    //https://www.npmjs.org/package/grunt-ngdocs
+    ngdocs: {
+      src: 'modules/**/*.js',
+      options: {
+        dest: 'ngdocs',
+        html5Mode: false,
+        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+          'components/angular/angular.js', 'components/angular-animate/angular-animate.js',
+          'http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js',
+          'components/d3/d3.js',
+          'components/d3-plugins/sankey/sankey.js',
+          'components/nvd3/nv.d3.js',
+          'components/moment/moment.js',
+          'components/lodash/lodash.js',
+          'components/gridster/dist/jquery.gridster.js',
+          'components/angular-ui-utils/ui-utils.js',
+          'http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization',
+          'components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js',
+          'components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js',
+          'components/angular-ui-map/src/map.js',
+          'dist/angular-dataviz.js']
       }
     }
   });
@@ -76,7 +101,7 @@ module.exports = function (grunt) {
   // Default task.
   grunt.registerTask('default', ['build', 'test', 'concat', 'less:dist']);
 
-  grunt.registerTask('build', ['jshint', 'concat', 'less:dist']);
+  grunt.registerTask('build', ['clean', 'jshint', 'concat', 'less:dist', 'ngdocs']);
 
   grunt.registerTask('server', 'start testacular server', function () {
     //Mark the task as async but never call done, so the server stays up
