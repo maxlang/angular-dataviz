@@ -5017,7 +5017,7 @@ angular.module('dataviz.rewrite')
         restrict: 'E',
         replace: true,
         transclude: true,
-        template:'<div class="bl-graph" ng-attr-width="layout.container.width" ng-attr-height="layout.container.height"></div>',
+        template:'<div class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></div>',
         scope: {
           data: '=?'
         },
@@ -5036,12 +5036,14 @@ angular.module('dataviz.rewrite')
         controller: function($scope, $element, $attrs) {
           var height = parseInt($attrs.containerHeight, 10);
           var width = parseInt($attrs.containerWidth, 10);
-          $scope.layout = LayoutService.getDefaultLayout(height, width);
+          this.layout = LayoutService.getDefaultLayout(height, width);
+          $scope.layout = this.layout.container;
+          var ctrl = this;
 
-          $scope.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
+          this.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
             { key: 40,  value: 10}, { key: 60,  value: 40},
             { key: 80,  value: 5},  { key: 300, value: 300}];
-          _.each($scope.data, function(v) {
+          _.each(this.data, function(v) {
             v.key = parseFloat(v.key);
           });
 
@@ -5050,39 +5052,37 @@ angular.module('dataviz.rewrite')
           };
 
           $scope.metadata = {
-            total: _.reduce($scope.data, function(sum, num) {
+            total: _.reduce(ctrl.data, function(sum, num) {
               return sum + num.y;
             }, 0),
-            domain: getMinMax($scope.data, 'key'),
-            range: getMinMax($scope.data, 'value'),
-            count: $scope.data.length
+            domain: getMinMax(ctrl.data, 'key'),
+            range: getMinMax(ctrl.data, 'value'),
+            count: ctrl.data.length
           };
 
           $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
 
           this._id = _.uniq();
-
-
           this.scale = {
             x: d3.scale.linear()
               .domain($scope.metadata.domain)
-              .range([0, $scope.layout.container.width]),
+              .range([0, ctrl.layout.container.width]),
             y: d3.scale.linear()
               .domain($scope.metadata.range)
-              .range([0, $scope.layout.container.height])
+              .range([0, ctrl.layout.container.height])
           };
 
           this.components = {
             registered: [],
             register: function(componentType, config) {
               this.registered.push(componentType);
+              var self = this;
               console.log('Registering %s', componentType);
 
-              $scope.layout = LayoutService.updateLayout(componentType, config || {}, $scope.layout);
+              ctrl.layout = LayoutService.updateLayout(componentType, config || {}, ctrl.layout);
 
-              var self = this;
               $timeout(function() {
-                Events.emitIfEqual(self._id, self.registered.length, $scope.componentCount, $scope, Events.LAYOUT_READY);
+                Events.emitIfEqual(ctrl._id, self.registered.length, $scope.componentCount, $scope, Events.LAYOUT_READY);
               });
             }
           };
@@ -5117,38 +5117,38 @@ angular.module('dataviz.rewrite');
 angular.module('dataviz.rewrite')
   .directive('blLine', function(ChartFactory, Events) {
     return new ChartFactory.Component({
-      template: '<svg ng-attr-width="{{layout.graph.width}}" ng-attr-height="{{layout.graph.height}}" class="bl-line chart"></svg>',
+      template: '<svg ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart"></svg>',
       link: function(scope, iElem, iAttrs, controllers) {
+        var COMPONENT_TYPE = 'graph';
         var graphCtrl = controllers[0];
         var lineContainer = d3.select(iElem[0]); // strip off the jquery wrapper
 
-        scope.$on(Events.LAYOUT_READY, function() {
-          scope.line = d3.svg.line()
-            .x(function(d) { return graphCtrl.scale.x(d.key); })
-            .y(function(d) { return graphCtrl.scale.y(d.value); })
-            .interpolate('basis');
+        graphCtrl.components.register(COMPONENT_TYPE);
 
 
-          lineContainer.append('path')
-            .attr('d', scope.line(scope.data));
+        scope.line = d3.svg.line()
+          .x(function(d) { return graphCtrl.scale.x(d.key); })
+          .y(function(d) { return graphCtrl.scale.y(d.value); })
+          .interpolate('basis');
 
-          console.log('scope.layout is: ', scope.layout);
-        });
+        lineContainer.append('path')
+          .attr('d', scope.line(graphCtrl.data));
 
-        graphCtrl.components.register('graph');
+        scope.layout = graphCtrl.layout[COMPONENT_TYPE];
 
+        console.log('scope.layout for %s is: ', COMPONENT_TYPE, scope.layout);
       }
     });
   })
 
-  .directive('blAxis', function(LayoutDefaults, ChartFactory) {
+  .directive('blAxis', function(LayoutDefaults, ChartFactory, Events) {
     return new ChartFactory.Component({
-      template: '<svg class="bl-axis" ng-attr-height="{{layout[axisType].height}}" ng-attr-width="{{layout[axisType].width}}" ng-attr-transform="translate({{config.translateX}}, {{config.translateY}})"></svg>',
+      template: '<svg class="bl-axis" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}"></svg>',
       link: function(scope, iElem, iAttrs, controllers) {
         // force lowercase
+        var graphCtrl = controllers[0];
         var direction = iAttrs.direction.toLowerCase();
         var axisType = iAttrs.direction + 'Axis';
-        var graphCtrl = controllers[0];
 
         var axis = d3.svg.axis()
           .scale(graphCtrl.scale[direction]);
@@ -5157,6 +5157,7 @@ angular.module('dataviz.rewrite')
         axisContainer.call(axis);
 
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
+        scope.layout = graphCtrl.layout[axisType];
       }
     });
   });
@@ -5177,7 +5178,7 @@ angular.module('dataviz.rewrite.services', [])
       return _.defaults(config, {
         restrict: 'E',
         replace: true,
-        scope: false,
+        scope: true,
         require: ['^blGraph'],
         templateNamespace: 'svg'
       });
@@ -5203,6 +5204,8 @@ angular.module('dataviz.rewrite.services', [])
       case 'yAxis':
         layout.graph.width -= componentConfig.width || LayoutDefaults.components.yAxis.width;
         layout[componentType] = componentConfig;
+        break;
+      case 'graph':
         break;
       default:
         $log.warn('You are updating the layout with an unsupported component type (%s)', componentType);
