@@ -5154,6 +5154,11 @@ angular.module('dataviz.rewrite')
           .scale(graphCtrl.scale[direction]);
 
         var axisContainer = d3.select(iElem[0]);
+
+        if (direction === 'y') {
+          axis.orient('right');
+        }
+
         axisContainer.call(axis);
 
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
