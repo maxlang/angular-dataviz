@@ -49,7 +49,7 @@ module.exports = function (grunt) {
       },
       dist: {
         files: {
-          'dist/<%= pkg.name %>.css': ['modules/**/*.less']
+          'dist/<%= pkg.name %>.css': ['modules/**/*.less', 'common/stylesheets/**/*.less']
         }
       }
     },
@@ -93,7 +93,10 @@ module.exports = function (grunt) {
           'components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js',
           'components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js',
           'components/angular-ui-map/src/map.js',
-          'dist/angular-dataviz.js']
+          'dist/angular-dataviz.js'],
+        styles: [
+          'dist/angular-dataviz.css'
+        ]
       }
     }
   });
