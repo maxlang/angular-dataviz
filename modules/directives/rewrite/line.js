@@ -19,15 +19,13 @@
  </file>
  </example>
  */
+
+
+
 angular.module('dataviz.rewrite')
-  .directive('blLine', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: false,
-      require: ['^blGraph'],
-      template: '<svg ng-attr-width="{{layout.graph.height}}" ng-attr-height="{{layout.graph.height}}" class="bl-line"></svg>',
-      templateNamespace: 'svg', //http://www.benlesh.com/2014/09/working-with-svg-in-angular.html
+  .directive('blLine', function(ChartFactory) {
+    return _.extend(ChartFactory.defaults, {
+      template: '<svg ng-attr-width="{{layout.graph.height}}" ng-attr-height="{{layout.graph.height}}" class="bl-line chart"></svg>',
       link: function(scope, iElem, iAttrs, controllers) {
         var vizConfig = {
           height: parseInt(iAttrs.height, 10),
@@ -58,17 +56,12 @@ angular.module('dataviz.rewrite')
       controller: function($scope, $transclude) {
 
       }
-    };
+    });
   })
 
-  .directive('blAxis', function(LayoutConfig) {
-    return {
-      restrict: 'E',
-      replace: true,
-      require: ['^blGraph'],
-      templateNamespace: 'svg',
-      scope: false,
-      template: '<svg class="axis" ng-attr-height="{{config.height}}" ng-attr-width="{{config.width}}" ng-attr-transform="translate({{config.translateX}}, {{config.translateY}})"></svg>',
+  .directive('blAxis', function(LayoutConfig, ChartFactory) {
+    return _.extend(ChartFactory.defaults, {
+      template: '<svg class="bl-axis" ng-attr-height="{{config.height}}" ng-attr-width="{{config.width}}" ng-attr-transform="translate({{config.translateX}}, {{config.translateY}})"></svg>',
       link: function(scope, iElem, iAttrs, controllers) {
         scope.config = LayoutConfig.axis.config;
         var graphCtrl = controllers[0];
@@ -85,7 +78,7 @@ angular.module('dataviz.rewrite')
         graphCtrl.registerComponent('xAxis', scope.config);
 
       }
-    };
+    });
   });
 
 
@@ -113,6 +106,19 @@ angular.module('dataviz.rewrite.services', [])
       axis: axis
     };
 
+  })
+  .factory('ChartFactory', function() {
+    var defaults = {
+      restrict: 'E',
+      replace: true,
+      scope: false,
+      require: ['^blGraph'],
+      templateNamespace: 'svg'
+    };
+
+    return {
+      defaults: defaults
+    };
   })
   .service('LayoutService', function() {
 

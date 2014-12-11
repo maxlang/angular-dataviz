@@ -19,12 +19,9 @@
  </example>
  */
 angular.module('dataviz.rewrite')
-.directive('blNumber', function() {
-      return {
-        restrict: 'E',
-        replace: true,
+.directive('blNumber', function(ChartFactory) {
+      return _.extend(ChartFactory.defaults, {
         template: '<text>{{text}}</text>',
-        scope: false,
         link: function(scope, iElem, iAttrs) {
           console.log('blNumber link!');
           var vizConfig = {
@@ -43,5 +40,5 @@ angular.module('dataviz.rewrite')
           scope.text = 'AMAZING!!!';
 
         }
-      };
+      });
     });

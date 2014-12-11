@@ -4,7 +4,7 @@ angular.module('dataviz.rewrite')
         restrict: 'E',
         replace: true,
         transclude: true,
-        template:'<div width="400px" height="400px"></div>',
+        template:'<div class="bl-graph" width="400px" height="400px"></div>',
         scope: {
           data: '=?'
         },

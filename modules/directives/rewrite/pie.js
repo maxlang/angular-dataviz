@@ -20,14 +20,9 @@
  */
 
 angular.module('dataviz.rewrite')
-    .directive('blPie', function() {
-      return {
-        restrict: 'E',
-        replace: true,
-        scope: false,
-        require: ['^blGraph'],
+    .directive('blPie', function(ChartFactory) {
+      return _.extend(ChartFactory.defaults, {
         template: '<g width="400px" class="bl-pie" height="400px"></g>',
-        templateNamespace: 'svg',
         link: function(scope, iElem, iAttrs) {
           // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
           // With modifications
@@ -78,7 +73,7 @@ angular.module('dataviz.rewrite')
                 return d.data.key;}
           );
         }
-      };
+      });
     });
 
 
