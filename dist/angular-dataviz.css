@@ -2019,3 +2019,34 @@ nv-barchart * {
   cursor: pointer;
 }
 
+
+/**
+ * import components to builds angular-dataviz.css
+ */
+
+.graph-wrapper {
+  border: solid lightgrey 1px;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+}
+.bl-graph {
+  display: block;
+  overflow: hidden;
+  height: 400px;
+}
+.bl-graph .bl-axis {
+  float: left;
+  display: block;
+}
+.bl-graph .bl-axis.x {
+  height: 30px;
+  width: 100%;
+}
+.bl-graph .bl-axis.y {
+  height: 100%;
+  width: 30px;
+}
+.bl-graph .chart {
+  display: block;
+  overflow: hidden;
+}
+

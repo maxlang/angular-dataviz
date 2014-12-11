@@ -22,7 +22,7 @@
 angular.module('dataviz.rewrite')
     .directive('blPie', function(ChartFactory) {
       return _.extend(ChartFactory.defaults, {
-        template: '<g width="400px" class="bl-pie" height="400px"></g>',
+        template: '<svg class="bl-pie chart" width="400px" class="bl-pie" height="400px"></svg>',
         link: function(scope, iElem, iAttrs) {
           // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
           // With modifications

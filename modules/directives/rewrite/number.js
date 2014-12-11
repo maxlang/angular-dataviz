@@ -21,7 +21,7 @@
 angular.module('dataviz.rewrite')
 .directive('blNumber', function(ChartFactory) {
       return _.extend(ChartFactory.defaults, {
-        template: '<text>{{text}}</text>',
+        template: '<text class="bl-number chart">{{text}}</text>',
         link: function(scope, iElem, iAttrs) {
           console.log('blNumber link!');
           var vizConfig = {
