@@ -11,22 +11,22 @@
  <example module="dataviz.rewrite">
  <file name="index.html">
  <div class="graph-wrapper">
-   <bl-graph container-height="400" container-width="400">
+   <bl-graph container-height="200" container-width="600">
       <bl-line></bl-line>
       <bl-axis direction="x"></bl-axis>
-      <bl-axis direction="y"></bl-axis>
    </bl-graph>
  </div>
  </file>
  </example>
  */
 
+  //<bl-axis direction="y"></bl-axis>
 
 
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Events) {
+  .directive('blLine', function(ChartFactory, Translate) {
     return new ChartFactory.Component({
-      template: '<svg ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart"></svg>',
+      template: '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         var COMPONENT_TYPE = 'graph';
         var graphCtrl = controllers[0];
@@ -34,47 +34,52 @@ angular.module('dataviz.rewrite')
 
         graphCtrl.components.register(COMPONENT_TYPE);
 
-
         scope.line = d3.svg.line()
           .x(function(d) { return graphCtrl.scale.x(d.key); })
           .y(function(d) { return graphCtrl.scale.y(d.value); })
           .interpolate('basis');
 
+        var translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+
         lineContainer.append('path')
-          .attr('d', scope.line(graphCtrl.data));
+          .attr('d', scope.line(graphCtrl.data))
+          .attr('transform', 'translate(' + translate.x + ',' + translate.y + ')');
 
         scope.layout = graphCtrl.layout[COMPONENT_TYPE];
-
-        console.log('scope.layout for %s is: ', COMPONENT_TYPE, scope.layout);
       }
     });
   })
 
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Events) {
+  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate) {
     return new ChartFactory.Component({
-      template: '<svg class="bl-axis" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}"></svg>',
+      template: '<g  ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // force lowercase
         var graphCtrl = controllers[0];
         var direction = iAttrs.direction.toLowerCase();
         var axisType = iAttrs.direction + 'Axis';
+        scope.layout = graphCtrl.layout[axisType];
 
         var axis = d3.svg.axis()
-          .scale(graphCtrl.scale[direction]);
+          .scale(graphCtrl.scale[direction])
+          .orient(direction === 'y' ? 'left' : 'bottom');
 
-        var axisContainer = d3.select(iElem[0]);
+        var translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
 
-        if (direction === 'y') {
-          axis.orient('right');
-        }
+        var axisContainer = d3.select(iElem[0])
+          .attr('class', 'bl-axis ' + direction)
+          .attr('transform', 'translate(' + translate.x + ', ' + translate.y + ')');
 
         axisContainer.call(axis);
 
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
-        scope.layout = graphCtrl.layout[axisType];
       }
     });
-  });
+  })
+  .directive('blLegend', function() {
+    return {};
+  })
+;
 
 
 /**
@@ -102,6 +107,42 @@ angular.module('dataviz.rewrite.services', [])
       Component: Component
     };
   })
+
+  .factory('Translate', function(LayoutDefaults) {
+    var getAxisTranslation = function(layout, registered, direction) {
+      var translateObj;
+
+      if (direction === 'x') {
+        translateObj = {
+          y: layout.container.height - LayoutDefaults.components.xAxis.height,
+          x: LayoutDefaults.components.yAxis.width
+        };
+      } else if (direction === 'y') {
+        translateObj = {
+          y: layout.container.height - layout.yAxis.height - LayoutDefaults.components.xAxis.height + 10, // why?
+          x: LayoutDefaults.components.yAxis.width
+        };
+      } else {
+        console.warn('Choose a direction of x or y.');
+        return {};
+      }
+
+      return translateObj;
+    };
+
+    var getGraphTranslation = function(layout, registered, graphType) {
+      return {
+        x: LayoutDefaults.components.yAxis.width,
+        y: 10 // why?
+      };
+    };
+
+    return {
+      getAxisTranslation: getAxisTranslation,
+      getGraphTranslation: getGraphTranslation
+    };
+  })
+
   .service('LayoutService', function(LayoutDefaults, $log) {
     var updateLayout = function(componentType, componentConfig, layout) {
       // the format for this is as follows:
@@ -110,14 +151,14 @@ angular.module('dataviz.rewrite.services', [])
       // xAxis registration subtracts 30px from h
       // yAxis registration subtracts 30px from w
 
+      // updatelayout is aware of what components have been registered
+
       switch(componentType) {
       case 'xAxis':
-        layout.graph.height -= componentConfig.height || LayoutDefaults.components.xAxis.height;
-        layout[componentType] = componentConfig;
+        layout.graph.height -= componentConfig.height || LayoutDefaults.components.xAxis.height || 0;
         break;
       case 'yAxis':
-        layout.graph.width -= componentConfig.width || LayoutDefaults.components.yAxis.width;
-        layout[componentType] = componentConfig;
+        layout.graph.width -= componentConfig.width || LayoutDefaults.components.yAxis.width || 0;
         break;
       case 'graph':
         break;
@@ -125,18 +166,39 @@ angular.module('dataviz.rewrite.services', [])
         $log.warn('You are updating the layout with an unsupported component type (%s)', componentType);
       }
 
+      if (_.isEmpty(layout[componentType])) {
+        layout[componentType] = _.extend(componentConfig, LayoutDefaults.components[componentType]);
+      }
+
       return layout;
     };
-
     var getDefaultLayout = function(attrHeight, attrWidth) {
+      var withoutPadding = function(num, orientation) {
+        var trimmed;
+        if (orientation === 'h') {
+          trimmed = num - (LayoutDefaults.padding.left + LayoutDefaults.padding.right);
+        } else if (orientation === 'v') {
+          trimmed = num - (LayoutDefaults.padding.top + LayoutDefaults.padding.bottom);
+        }
+        return trimmed;
+      };
+
       return {
         container: {
           height: attrHeight,
           width: attrWidth
         },
         graph: {
-          height: attrHeight - (LayoutDefaults.padding.top + LayoutDefaults.padding.bottom),
-          width: attrWidth - (LayoutDefaults.padding.left + LayoutDefaults.padding.right)
+          height: attrHeight - LayoutDefaults.components.xAxis.height,
+          width: attrWidth - LayoutDefaults.components.yAxis.width
+        },
+        xAxis: {
+          width: attrWidth - LayoutDefaults.components.yAxis.width,
+          height: LayoutDefaults.components.xAxis.height
+        },
+        yAxis: {
+          height: attrHeight - LayoutDefaults.components.xAxis.height,
+          width: LayoutDefaults.components.yAxis.width
         }
       };
     };
@@ -146,26 +208,23 @@ angular.module('dataviz.rewrite.services', [])
       getDefaultLayout: getDefaultLayout
     };
   })
+
   .factory('LayoutDefaults', function() {
-
-
     return {
       padding: {
-        top: 15,
-        bottom: 15,
-        right: 15,
-        left: 15
+        top: 0,
+        bottom: 0,
+        right: 0,
+        left: 0
       },
       components: {
         xAxis: {
-          height: 30,
-          width: '100%'
+          height: 20
         },
         yAxis: {
-          height: '100%',
           width: 30
         }
       }
     };
-  });
+  })
 ;

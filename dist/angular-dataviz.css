@@ -2027,26 +2027,20 @@ nv-barchart * {
 .graph-wrapper {
   border: solid lightgrey 1px;
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+  padding: 15px;
 }
-.bl-graph {
-  display: block;
-  overflow: hidden;
-  height: 400px;
+.bl-graph .bl-axis path,
+.bl-graph .bl-axis line {
+  shape-rendering: crispEdges;
 }
-.bl-graph .bl-axis {
-  float: left;
-  display: block;
+.bl-graph .bl-axis path.domain {
+  fill: none;
+  stroke: grey;
 }
-.bl-graph .bl-axis.x {
-  height: 30px;
-  width: 100%;
-}
-.bl-graph .bl-axis.y {
-  height: 100%;
-  width: 30px;
+.bl-graph .bl-axis text {
+  font-size: 12px;
 }
 .bl-graph .chart {
   display: block;
-  overflow: hidden;
 }
 

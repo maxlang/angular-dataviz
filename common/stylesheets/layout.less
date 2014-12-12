@@ -1,32 +1,37 @@
 .graph-wrapper {
   border: solid lightgrey 1px;
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+  padding: 15px;
 }
 
 
 .bl-graph {
-  display: block;
-  overflow: hidden;
-  height: 400px;
 
   .bl-axis {
-    float: left;
-    display: block;
 
-    &.x {
-      height: 30px;
-      width: 100%;
+    path, line {
+      shape-rendering: crispEdges;
+
     }
 
-    &.y {
-      height: 100%;
-      width: 30px;
+    path.domain {
+      fill: none;
+      stroke: grey;
+    }
+
+    text {
+      font-size: 12px;
+    }
+
+    &[direction="x"] {
+    }
+
+    &[direction="y"] {
     }
   }
 
   // This class is generic and applies to all chart types
   .chart {
     display: block;
-    overflow: hidden;
   }
 }
