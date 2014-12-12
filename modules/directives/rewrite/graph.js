@@ -1,5 +1,5 @@
 angular.module('dataviz.rewrite')
-  .directive('blGraph', function(LayoutService, $timeout) {
+  .directive('blGraph', function(Layout, $timeout) {
     return {
       restrict: 'E',
       replace: true,
@@ -23,7 +23,7 @@ angular.module('dataviz.rewrite')
       controller: function($scope, $element, $attrs) {
         var height = parseInt($attrs.containerHeight, 10);
         var width = parseInt($attrs.containerWidth, 10);
-        this.layout = LayoutService.getDefaultLayout(height, width);
+        this.layout = Layout.getDefaultLayout(height, width);
         $scope.layout = this.layout.container;
         var ctrl = this;
 
@@ -71,7 +71,7 @@ angular.module('dataviz.rewrite')
             var self = this;
             console.log('Registering %s', componentType);
 
-            ctrl.layout = LayoutService.updateLayout(componentType, config, ctrl.layout);
+            ctrl.layout = Layout.updateLayout(componentType, config, ctrl.layout);
             console.log('ctrl.layout is: ', ctrl.layout);
 
             $timeout(function() {

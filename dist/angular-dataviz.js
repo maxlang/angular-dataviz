@@ -5012,7 +5012,7 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 angular.module('dataviz.rewrite');
 
 angular.module('dataviz.rewrite')
-  .directive('blGraph', function(LayoutService, $timeout) {
+  .directive('blGraph', function(Layout, $timeout) {
     return {
       restrict: 'E',
       replace: true,
@@ -5036,7 +5036,7 @@ angular.module('dataviz.rewrite')
       controller: function($scope, $element, $attrs) {
         var height = parseInt($attrs.containerHeight, 10);
         var width = parseInt($attrs.containerWidth, 10);
-        this.layout = LayoutService.getDefaultLayout(height, width);
+        this.layout = Layout.getDefaultLayout(height, width);
         $scope.layout = this.layout.container;
         var ctrl = this;
 
@@ -5084,7 +5084,7 @@ angular.module('dataviz.rewrite')
             var self = this;
             console.log('Registering %s', componentType);
 
-            ctrl.layout = LayoutService.updateLayout(componentType, config, ctrl.layout);
+            ctrl.layout = Layout.updateLayout(componentType, config, ctrl.layout);
             console.log('ctrl.layout is: ', ctrl.layout);
 
             $timeout(function() {
@@ -5227,7 +5227,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .service('LayoutService', function(LayoutDefaults, $log) {
+  .factory('Layout', function(LayoutDefaults, $log) {
     var updateLayout = function(componentType, componentConfig, layout) {
       // the format for this is as follows:
       // the graph starts at totalWidth - padding
@@ -5239,10 +5239,10 @@ angular.module('dataviz.rewrite.services', [])
 
       switch(componentType) {
       case 'xAxis':
-        layout.graph.height -= componentConfig.height || LayoutDefaults.components.xAxis.height || 0;
+        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
         break;
       case 'yAxis':
-        layout.graph.width -= componentConfig.width || LayoutDefaults.components.yAxis.width || 0;
+        layout.graph.width = layout.container.width  - LayoutDefaults.components.yAxis.width;
         break;
       case 'graph':
         break;
@@ -5273,8 +5273,8 @@ angular.module('dataviz.rewrite.services', [])
           width: attrWidth
         },
         graph: {
-          height: attrHeight - LayoutDefaults.components.xAxis.height,
-          width: attrWidth - LayoutDefaults.components.yAxis.width
+          height: attrHeight,
+          width: attrWidth
         },
         xAxis: {
           width: attrWidth - LayoutDefaults.components.yAxis.width,

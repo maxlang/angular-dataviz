@@ -143,7 +143,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .service('LayoutService', function(LayoutDefaults, $log) {
+  .factory('Layout', function(LayoutDefaults, $log) {
     var updateLayout = function(componentType, componentConfig, layout) {
       // the format for this is as follows:
       // the graph starts at totalWidth - padding
