@@ -45,7 +45,7 @@ angular.module('dataviz.rewrite')
           { key: 80,  value: 5},  { key: 300, value: 300}];
         _.each(this.data, function(v) {
           v.key = parseFloat(v.key);
-        });
+        }
 
         var getMinMax = function(data, key) {
           return [_.min(data, key)[key], _.max(data,key)[key]];
@@ -77,7 +77,6 @@ angular.module('dataviz.rewrite')
               // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
                 ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
-                console.log('Emitting layout.draw');
                 $scope.$broadcast(Layout.DRAW);
               }
             });
@@ -87,7 +86,6 @@ angular.module('dataviz.rewrite')
         $scope.$watch('[containerHeight, containerWidth]', function(nv, ov) {
           if (angular.equals(nv, ov)) { return; }
 
-          console.log('Size change.');
           var height = nv[0];
           var width = nv[1];
           ctrl.layout = Layout.getDefaultLayout(height, width);
@@ -96,8 +94,8 @@ angular.module('dataviz.rewrite')
             ctrl.layout = Layout.updateLayout(componentType, {}, ctrl.layout);
           });
 
-          ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
           $scope.layout = ctrl.layout.container;
+          ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
           $scope.$broadcast(Layout.DRAW);
         });
 
