@@ -123,7 +123,7 @@ angular.module('dataviz.rewrite.services', [])
     return {
       updateLayout: updateLayout,
       getDefaultLayout: getDefaultLayout,
-      REDRAW: 'layout.redraw'
+      DRAW: 'layout.draw'
     };
   })
 

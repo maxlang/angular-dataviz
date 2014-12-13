@@ -21,10 +21,9 @@ angular.module('dataviz.rewrite')
         scope.layout = graphCtrl.layout[axisType];
         scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
 
-        drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
-        scope.$on(Layout.REDRAW, function() {
+        scope.$on(Layout.DRAW, function() {
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }

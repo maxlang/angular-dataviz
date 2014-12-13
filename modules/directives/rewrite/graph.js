@@ -77,8 +77,8 @@ angular.module('dataviz.rewrite')
               // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
                 ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
-                console.log('Emitting layout.redraw');
-                $scope.$broadcast(Layout.REDRAW);
+                console.log('Emitting layout.draw');
+                $scope.$broadcast(Layout.DRAW);
               }
             });
           }

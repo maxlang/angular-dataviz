@@ -5032,10 +5032,9 @@ angular.module('dataviz.rewrite')
         scope.layout = graphCtrl.layout[axisType];
         scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
 
-        drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
-        scope.$on(Layout.REDRAW, function() {
+        scope.$on(Layout.DRAW, function() {
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }
@@ -5120,8 +5119,8 @@ angular.module('dataviz.rewrite')
               // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
                 ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
-                console.log('Emitting layout.redraw');
-                $scope.$broadcast(Layout.REDRAW);
+                console.log('Emitting layout.draw');
+                $scope.$broadcast(Layout.DRAW);
               }
             });
           }
@@ -5162,17 +5161,22 @@ angular.module('dataviz.rewrite')
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
         }
 
-        drawLine();
-
-        scope.$on(Layout.REDRAW, function() {
+        scope.$on(Layout.DRAW, function() {
           drawLine();
         });
       }
     });
   })
 
-  .directive('blLegend', function() {
-    return {};
+  .directive('blLegend', function(ChartFactory) {
+    return new ChartFactory.Component({
+      template: '<div class="legend"></div>',
+      link: function(scope, iElem, iAttrs, controllers) {
+        // graphCtrl is responsible for communicating the
+        var graphCtrl = controllers[0];
+
+      }
+    });
   })
 ;
 
@@ -5385,7 +5389,7 @@ angular.module('dataviz.rewrite.services', [])
     return {
       updateLayout: updateLayout,
       getDefaultLayout: getDefaultLayout,
-      REDRAW: 'layout.redraw'
+      DRAW: 'layout.draw'
     };
   })
 

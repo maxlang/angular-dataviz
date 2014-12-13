@@ -49,16 +49,21 @@ angular.module('dataviz.rewrite')
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
         }
 
-        drawLine();
-
-        scope.$on(Layout.REDRAW, function() {
+        scope.$on(Layout.DRAW, function() {
           drawLine();
         });
       }
     });
   })
 
-  .directive('blLegend', function() {
-    return {};
+  .directive('blLegend', function(ChartFactory) {
+    return new ChartFactory.Component({
+      template: '<div class="legend"></div>',
+      link: function(scope, iElem, iAttrs, controllers) {
+        // graphCtrl is responsible for communicating the
+        var graphCtrl = controllers[0];
+
+      }
+    });
   })
 ;
