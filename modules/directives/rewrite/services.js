@@ -62,6 +62,7 @@ angular.module('dataviz.rewrite.services', [])
 
   .factory('Layout', function(LayoutDefaults, $log) {
     var updateLayout = function(componentType, componentConfig, layout) {
+      componentConfig = componentConfig || {};
       // the format for this is as follows:
       // the graph starts at totalWidth - padding
 
@@ -116,6 +117,9 @@ angular.module('dataviz.rewrite.services', [])
         yAxis: {
           height: attrHeight - LayoutDefaults.components.xAxis.height,
           width: LayoutDefaults.components.yAxis.width
+        },
+        legend: {
+          width: 100
         }
       };
     };

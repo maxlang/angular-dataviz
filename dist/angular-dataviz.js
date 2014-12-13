@@ -5035,6 +5035,9 @@ angular.module('dataviz.rewrite')
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
         scope.$on(Layout.DRAW, function() {
+          console.log('Heard layout.draw');
+          scope.layout = graphCtrl.layout[axisType];
+          scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }
@@ -5059,14 +5062,16 @@ angular.module('dataviz.rewrite')
       transclude: true,
       template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></div>',
       scope: {
-        data: '=?'
+        data: '=?',
+        containerHeight: '=',
+        containerWidth: '='
       },
       compile: function() {
         return {
           pre: function(scope, iElem, iAttrs, ctrl, transclude) {
             transclude(scope, function(clone) {
               iElem.append(clone);
-            });
+             });
           },
           post: function(scope, iElem, iAttrs) {
             scope.componentCount = iElem.children().length;
@@ -5074,8 +5079,8 @@ angular.module('dataviz.rewrite')
         };
       },
       controller: function($scope, $element, $attrs) {
-        var height = parseInt($attrs.containerHeight, 10);
-        var width = parseInt($attrs.containerWidth, 10);
+        var height = $scope.containerHeight;
+        var width = $scope.containerWidth;
         this.layout = Layout.getDefaultLayout(height, width);
         $scope.layout = this.layout.container;
         var ctrl = this;
@@ -5107,13 +5112,11 @@ angular.module('dataviz.rewrite')
         this.components = {
           registered: [],
           register: function(componentType, config) {
-            config = config || {};
             this.registered.push(componentType);
             var self = this;
             console.log('Registering %s', componentType);
 
             ctrl.layout = Layout.updateLayout(componentType, config, ctrl.layout);
-            console.log('ctrl.layout is: ', ctrl.layout);
 
             $timeout(function() {
               // Update the scale if we have all the components registered
@@ -5125,6 +5128,23 @@ angular.module('dataviz.rewrite')
             });
           }
         };
+
+        $scope.$watch('[containerHeight, containerWidth]', function(nv, ov) {
+          if (angular.equals(nv, ov)) { return; }
+
+          console.log('Size change.');
+          var height = nv[0];
+          var width = nv[1];
+          ctrl.layout = Layout.getDefaultLayout(height, width);
+
+          _.each(ctrl.components.registered, function(componentType) {
+            ctrl.layout = Layout.updateLayout(componentType, {}, ctrl.layout);
+          });
+
+          ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+          $scope.layout = ctrl.layout.container;
+          $scope.$broadcast(Layout.DRAW);
+        });
 
       }
     };
@@ -5155,6 +5175,7 @@ angular.module('dataviz.rewrite')
         graphCtrl.components.register(COMPONENT_TYPE);
 
         function drawLine() {
+          console.log('Redrawing line');
           scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
           scope.translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path.attr('d', scope.line(graphCtrl.data));
@@ -5172,8 +5193,12 @@ angular.module('dataviz.rewrite')
     return new ChartFactory.Component({
       template: '<div class="legend"></div>',
       link: function(scope, iElem, iAttrs, controllers) {
-        // graphCtrl is responsible for communicating the
+        // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
+        var COMPONENT_TYPE = 'legend';
+        graphCtrl.components.register(COMPONENT_TYPE);
+
+
 
       }
     });
@@ -5328,6 +5353,7 @@ angular.module('dataviz.rewrite.services', [])
 
   .factory('Layout', function(LayoutDefaults, $log) {
     var updateLayout = function(componentType, componentConfig, layout) {
+      componentConfig = componentConfig || {};
       // the format for this is as follows:
       // the graph starts at totalWidth - padding
 
@@ -5382,6 +5408,9 @@ angular.module('dataviz.rewrite.services', [])
         yAxis: {
           height: attrHeight - LayoutDefaults.components.xAxis.height,
           width: LayoutDefaults.components.yAxis.width
+        },
+        legend: {
+          width: 100
         }
       };
     };

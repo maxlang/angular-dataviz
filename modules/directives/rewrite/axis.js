@@ -24,6 +24,9 @@ angular.module('dataviz.rewrite')
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
         scope.$on(Layout.DRAW, function() {
+          console.log('Heard layout.draw');
+          scope.layout = graphCtrl.layout[axisType];
+          scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }

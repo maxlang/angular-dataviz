@@ -10,8 +10,10 @@
  * @example
  <example module="dataviz.rewrite">
  <file name="index.html">
- <div class="graph-wrapper">
-   <bl-graph container-height="200" container-width="600">
+ <div class="graph-wrapper" ng-init="width = 500; height = 200;">
+    Height: <input type="number" ng-model="height"><br />
+    Width: <input type="number" ng-model="width">
+   <bl-graph container-height="height" container-width="width">
       <bl-line></bl-line>
       <bl-axis direction="x"></bl-axis>
       <bl-axis direction="y"></bl-axis>
@@ -43,6 +45,7 @@ angular.module('dataviz.rewrite')
         graphCtrl.components.register(COMPONENT_TYPE);
 
         function drawLine() {
+          console.log('Redrawing line');
           scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
           scope.translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path.attr('d', scope.line(graphCtrl.data));
@@ -60,8 +63,12 @@ angular.module('dataviz.rewrite')
     return new ChartFactory.Component({
       template: '<div class="legend"></div>',
       link: function(scope, iElem, iAttrs, controllers) {
-        // graphCtrl is responsible for communicating the
+        // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
+        var COMPONENT_TYPE = 'legend';
+        graphCtrl.components.register(COMPONENT_TYPE);
+
+
 
       }
     });
