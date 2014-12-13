@@ -5175,6 +5175,7 @@ angular.module('dataviz.rewrite')
     return {};
   })
 ;
+
 angular.module('dataviz.rewrite')
 .directive('blNumber', function(ChartFactory) {
       return _.extend(ChartFactory.defaults, {
