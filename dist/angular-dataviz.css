@@ -2032,10 +2032,10 @@ nv-barchart * {
 .bl-graph .bl-axis path,
 .bl-graph .bl-axis line {
   shape-rendering: crispEdges;
+  stroke: grey;
 }
 .bl-graph .bl-axis path.domain {
   fill: none;
-  stroke: grey;
 }
 .bl-graph .bl-axis text {
   font-size: 12px;
