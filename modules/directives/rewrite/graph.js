@@ -1,5 +1,16 @@
 angular.module('dataviz.rewrite')
   .directive('blGraph', function(Layout, $timeout) {
+    var setScale = function(metadata, xRange, yRange) {
+      return {
+        x: d3.scale.linear()
+          .domain(metadata.domain)
+          .range(xRange),
+        y: d3.scale.linear()
+          .domain(metadata.range)
+          .range(yRange)
+      };
+    };
+
     return {
       restrict: 'E',
       replace: true,
@@ -50,19 +61,7 @@ angular.module('dataviz.rewrite')
         $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
 
         this._id = _.uniq();
-
-
-        console.log('this.layout is: ', this.layout);
-
-        this.scale = {
-          x: d3.scale.linear()
-            .domain($scope.metadata.domain)
-            .range([0, this.layout.graph.width - 10]),
-          y: d3.scale.linear()
-            .domain($scope.metadata.range)
-            .range([this.layout.graph.height - 10, 0])
-        };
-
+        this.scale = setScale($scope.metadata, [0, this.layout.graph.width - 10], [this.layout.graph.height - 10, 0]);
         this.components = {
           registered: [],
           register: function(componentType, config) {
@@ -77,8 +76,9 @@ angular.module('dataviz.rewrite')
             $timeout(function() {
               // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
-                ctrl.scale.x.range([0, ctrl.layout.graph.width - 10]);
-                ctrl.scale.x.range([ctrl.layout.graph.height - 10, 0]);
+                ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+                console.log('Emitting layout.redraw');
+                $scope.$broadcast(Layout.REDRAW);
               }
             });
           }

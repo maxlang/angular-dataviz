@@ -11,27 +11,39 @@
  <example module="dataviz.rewrite">
  <file name="index.html">
  <div>
- <bl-graph>
- <bl-pie></bl-pie>
- </bl-graph>
+   <bl-graph container-width="600" container-height="400">
+    <bl-pie></bl-pie>
+   </bl-graph>
  </div>
  </file>
  </example>
  */
 
+// Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
     .directive('blPie', function(ChartFactory) {
-      return _.extend(ChartFactory.defaults, {
-        template: '<svg class="bl-pie chart" width="400px" class="bl-pie" height="400px"></svg>',
-        link: function(scope, iElem, iAttrs) {
-          // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
-          // With modifications
+      return new ChartFactory.Component({
+        template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
+        link: function(scope, iElem, iAttrs, controllers) {
+          var graphCtrl = controllers[0];
+          var COMPONENT_TYPE = 'graph';
 
-          var vizConfig = {
-            width: parseInt(iAttrs.width, 10),
-            height: parseInt(iAttrs.height, 10),
-            radius: function() { return this.height/2; }
+          graphCtrl.components.register(COMPONENT_TYPE);
+
+          // With modifications
+          var diameter = Math.min(graphCtrl.layout.graph.height, graphCtrl.layout.graph.width);
+          scope.layout = {
+            width: diameter,
+            height: diameter,
+            radius: Math.floor(diameter/2)
           };
+
+          scope.translate = {
+            x: scope.layout.radius,
+            y: scope.layout.radius
+          };
+
+          console.log('scope is: ', scope);
 
           var color = d3.scale.category20c();
 
@@ -41,16 +53,13 @@ angular.module('dataviz.rewrite')
 
 
           var vis = d3.select(iElem[0])
-              .data([scope.data])
-              .attr("width", vizConfig.width)
-              .attr("height", vizConfig.height)
-              .append("g")
-              .attr("transform", "translate(" + vizConfig.radius() + "," + vizConfig.radius() + ")");
+              .data([graphCtrl.data])
+              .append("g");
 
           var pie = d3.layout.pie().value(function(d){return d.value;});
 
           // declare an arc generator function
-          var arcGen = d3.svg.arc().outerRadius(vizConfig.radius());
+          var arcGen = d3.svg.arc().outerRadius(scope.layout.radius);
 
           // select paths, use arc generator to draw
           var arcs = vis.selectAll("g.slice").data(pie).enter().append("g").attr("class", "slice");
@@ -66,7 +75,7 @@ angular.module('dataviz.rewrite')
           arcs.append("text")
               .attr("transform", function(d){
                 d.innerRadius = 0;
-                d.outerRadius = vizConfig.radius();
+                d.outerRadius = scope.layout.radius;
                 return "translate(" + arcGen.centroid(d) + ")";
               })
               .attr("text-anchor", "middle").text( function(d, i) {

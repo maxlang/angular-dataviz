@@ -14,68 +14,50 @@
    <bl-graph container-height="200" container-width="600">
       <bl-line></bl-line>
       <bl-axis direction="x"></bl-axis>
+      <bl-axis direction="y"></bl-axis>
    </bl-graph>
  </div>
  </file>
  </example>
  */
 
-  //<bl-axis direction="y"></bl-axis>
-
-
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate) {
+  .directive('blLine', function(ChartFactory, Translate, Layout) {
+    var setLine = function(xScale, yScale) {
+      return d3.svg.line()
+        .x(function(d) { return xScale(d.key); })
+        .y(function(d) { return yScale(d.value); })
+        .interpolate('basis');
+    };
+
     return new ChartFactory.Component({
-      template: '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart"></g>',
+      template:
+      '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
+        '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"' +
+      '</g>',
       link: function(scope, iElem, iAttrs, controllers) {
         var COMPONENT_TYPE = 'graph';
         var graphCtrl = controllers[0];
-        var lineContainer = d3.select(iElem[0]); // strip off the jquery wrapper
+        var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
 
         graphCtrl.components.register(COMPONENT_TYPE);
 
-        scope.line = d3.svg.line()
-          .x(function(d) { return graphCtrl.scale.x(d.key); })
-          .y(function(d) { return graphCtrl.scale.y(d.value); })
-          .interpolate('basis');
+        function drawLine() {
+          scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
+          scope.translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          path.attr('d', scope.line(graphCtrl.data));
+          scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+        }
 
-        var translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+        drawLine();
 
-        lineContainer.append('path')
-          .attr('d', scope.line(graphCtrl.data))
-          .attr('transform', 'translate(' + translate.x + ',' + translate.y + ')');
-
-        scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+        scope.$on(Layout.REDRAW, function() {
+          drawLine();
+        });
       }
     });
   })
 
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate) {
-    return new ChartFactory.Component({
-      template: '<g  ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}"></g>',
-      link: function(scope, iElem, iAttrs, controllers) {
-        // force lowercase
-        var graphCtrl = controllers[0];
-        var direction = iAttrs.direction.toLowerCase();
-        var axisType = iAttrs.direction + 'Axis';
-        scope.layout = graphCtrl.layout[axisType];
-
-        var axis = d3.svg.axis()
-          .scale(graphCtrl.scale[direction])
-          .orient(direction === 'y' ? 'left' : 'bottom');
-
-        var translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
-
-        var axisContainer = d3.select(iElem[0])
-          .attr('class', 'bl-axis ' + direction)
-          .attr('transform', 'translate(' + translate.x + ', ' + translate.y + ')');
-
-        axisContainer.call(axis);
-
-        graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
-      }
-    });
-  })
   .directive('blLegend', function() {
     return {};
   })
@@ -155,10 +137,10 @@ angular.module('dataviz.rewrite.services', [])
 
       switch(componentType) {
       case 'xAxis':
-        layout.graph.height -= componentConfig.height || LayoutDefaults.components.xAxis.height || 0;
+        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
         break;
       case 'yAxis':
-        layout.graph.width -= componentConfig.width || LayoutDefaults.components.yAxis.width || 0;
+        layout.graph.width = layout.container.width  - LayoutDefaults.components.yAxis.width;
         break;
       case 'graph':
         break;
@@ -189,8 +171,8 @@ angular.module('dataviz.rewrite.services', [])
           width: attrWidth
         },
         graph: {
-          height: attrHeight - LayoutDefaults.components.xAxis.height,
-          width: attrWidth - LayoutDefaults.components.yAxis.width
+          height: attrHeight,
+          width: attrWidth
         },
         xAxis: {
           width: attrWidth - LayoutDefaults.components.yAxis.width,
@@ -205,7 +187,8 @@ angular.module('dataviz.rewrite.services', [])
 
     return {
       updateLayout: updateLayout,
-      getDefaultLayout: getDefaultLayout
+      getDefaultLayout: getDefaultLayout,
+      REDRAW: 'layout.redraw'
     };
   })
 

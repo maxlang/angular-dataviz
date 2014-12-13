@@ -5009,10 +5009,51 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 //  };
 //}]);
 
-angular.module('dataviz.rewrite');
+angular.module('dataviz.rewrite')
+  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
+    var drawAxis = function(scale, direction, axisContainer) {
+      var axis = d3.svg.axis()
+        .scale(scale)
+        .orient(direction === 'y' ? 'left' : 'bottom');
 
+      axisContainer.call(axis);
+    };
+
+    return new ChartFactory.Component({
+      template: '<g ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
+      link: function(scope, iElem, iAttrs, controllers) {
+        // force lowercase
+        var graphCtrl = controllers[0];
+        var direction = iAttrs.direction.toLowerCase();
+        var axisType = iAttrs.direction + 'Axis';
+        var axisContainer = d3.select(iElem[0])
+          .attr('class', 'bl-axis ' + direction);
+
+        scope.layout = graphCtrl.layout[axisType];
+        scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
+
+        drawAxis(graphCtrl.scale[direction], direction, axisContainer);
+        graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
+
+        scope.$on(Layout.REDRAW, function() {
+          drawAxis(graphCtrl.scale[direction], direction, axisContainer);
+        });
+      }
+    });
+  });
 angular.module('dataviz.rewrite')
   .directive('blGraph', function(Layout, $timeout) {
+    var setScale = function(metadata, xRange, yRange) {
+      return {
+        x: d3.scale.linear()
+          .domain(metadata.domain)
+          .range(xRange),
+        y: d3.scale.linear()
+          .domain(metadata.range)
+          .range(yRange)
+      };
+    };
+
     return {
       restrict: 'E',
       replace: true,
@@ -5063,19 +5104,7 @@ angular.module('dataviz.rewrite')
         $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
 
         this._id = _.uniq();
-
-
-        console.log('this.layout is: ', this.layout);
-
-        this.scale = {
-          x: d3.scale.linear()
-            .domain($scope.metadata.domain)
-            .range([0, this.layout.graph.width - 10]),
-          y: d3.scale.linear()
-            .domain($scope.metadata.range)
-            .range([this.layout.graph.height - 10, 0])
-        };
-
+        this.scale = setScale($scope.metadata, [0, this.layout.graph.width - 10], [this.layout.graph.height - 10, 0]);
         this.components = {
           registered: [],
           register: function(componentType, config) {
@@ -5090,8 +5119,9 @@ angular.module('dataviz.rewrite')
             $timeout(function() {
               // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
-                ctrl.scale.x.range([0, ctrl.layout.graph.width - 10]);
-                ctrl.scale.x.range([ctrl.layout.graph.height - 10, 0]);
+                ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+                console.log('Emitting layout.redraw');
+                $scope.$broadcast(Layout.REDRAW);
               }
             });
           }
@@ -5104,62 +5134,43 @@ angular.module('dataviz.rewrite')
 
 angular.module('dataviz.rewrite');
 
-//<bl-axis direction="y"></bl-axis>
-
-
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate) {
+  .directive('blLine', function(ChartFactory, Translate, Layout) {
+    var setLine = function(xScale, yScale) {
+      return d3.svg.line()
+        .x(function(d) { return xScale(d.key); })
+        .y(function(d) { return yScale(d.value); })
+        .interpolate('basis');
+    };
+
     return new ChartFactory.Component({
-      template: '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart"></g>',
+      template:
+      '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
+        '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"' +
+      '</g>',
       link: function(scope, iElem, iAttrs, controllers) {
         var COMPONENT_TYPE = 'graph';
         var graphCtrl = controllers[0];
-        var lineContainer = d3.select(iElem[0]); // strip off the jquery wrapper
+        var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
 
         graphCtrl.components.register(COMPONENT_TYPE);
 
-        scope.line = d3.svg.line()
-          .x(function(d) { return graphCtrl.scale.x(d.key); })
-          .y(function(d) { return graphCtrl.scale.y(d.value); })
-          .interpolate('basis');
+        function drawLine() {
+          scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
+          scope.translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          path.attr('d', scope.line(graphCtrl.data));
+          scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+        }
 
-        var translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+        drawLine();
 
-        lineContainer.append('path')
-          .attr('d', scope.line(graphCtrl.data))
-          .attr('transform', 'translate(' + translate.x + ',' + translate.y + ')');
-
-        scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+        scope.$on(Layout.REDRAW, function() {
+          drawLine();
+        });
       }
     });
   })
 
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate) {
-    return new ChartFactory.Component({
-      template: '<g  ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}"></g>',
-      link: function(scope, iElem, iAttrs, controllers) {
-        // force lowercase
-        var graphCtrl = controllers[0];
-        var direction = iAttrs.direction.toLowerCase();
-        var axisType = iAttrs.direction + 'Axis';
-        scope.layout = graphCtrl.layout[axisType];
-
-        var axis = d3.svg.axis()
-          .scale(graphCtrl.scale[direction])
-          .orient(direction === 'y' ? 'left' : 'bottom');
-
-        var translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
-
-        var axisContainer = d3.select(iElem[0])
-          .attr('class', 'bl-axis ' + direction)
-          .attr('transform', 'translate(' + translate.x + ', ' + translate.y + ')');
-
-        axisContainer.call(axis);
-
-        graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
-      }
-    });
-  })
   .directive('blLegend', function() {
     return {};
   })
@@ -5289,7 +5300,8 @@ angular.module('dataviz.rewrite.services', [])
 
     return {
       updateLayout: updateLayout,
-      getDefaultLayout: getDefaultLayout
+      getDefaultLayout: getDefaultLayout,
+      REDRAW: 'layout.redraw'
     };
   })
 
@@ -5338,19 +5350,31 @@ angular.module('dataviz.rewrite')
       });
     });
 
+// Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
     .directive('blPie', function(ChartFactory) {
-      return _.extend(ChartFactory.defaults, {
-        template: '<svg class="bl-pie chart" width="400px" class="bl-pie" height="400px"></svg>',
-        link: function(scope, iElem, iAttrs) {
-          // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
-          // With modifications
+      return new ChartFactory.Component({
+        template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
+        link: function(scope, iElem, iAttrs, controllers) {
+          var graphCtrl = controllers[0];
+          var COMPONENT_TYPE = 'graph';
 
-          var vizConfig = {
-            width: parseInt(iAttrs.width, 10),
-            height: parseInt(iAttrs.height, 10),
-            radius: function() { return this.height/2; }
+          graphCtrl.components.register(COMPONENT_TYPE);
+
+          // With modifications
+          var diameter = Math.min(graphCtrl.layout.graph.height, graphCtrl.layout.graph.width);
+          scope.layout = {
+            width: diameter,
+            height: diameter,
+            radius: Math.floor(diameter/2)
           };
+
+          scope.translate = {
+            x: scope.layout.radius,
+            y: scope.layout.radius
+          };
+
+          console.log('scope is: ', scope);
 
           var color = d3.scale.category20c();
 
@@ -5360,16 +5384,13 @@ angular.module('dataviz.rewrite')
 
 
           var vis = d3.select(iElem[0])
-              .data([scope.data])
-              .attr("width", vizConfig.width)
-              .attr("height", vizConfig.height)
-              .append("g")
-              .attr("transform", "translate(" + vizConfig.radius() + "," + vizConfig.radius() + ")");
+              .data([graphCtrl.data])
+              .append("g");
 
           var pie = d3.layout.pie().value(function(d){return d.value;});
 
           // declare an arc generator function
-          var arcGen = d3.svg.arc().outerRadius(vizConfig.radius());
+          var arcGen = d3.svg.arc().outerRadius(scope.layout.radius);
 
           // select paths, use arc generator to draw
           var arcs = vis.selectAll("g.slice").data(pie).enter().append("g").attr("class", "slice");
@@ -5385,7 +5406,7 @@ angular.module('dataviz.rewrite')
           arcs.append("text")
               .attr("transform", function(d){
                 d.innerRadius = 0;
-                d.outerRadius = vizConfig.radius();
+                d.outerRadius = scope.layout.radius;
                 return "translate(" + arcGen.centroid(d) + ")";
               })
               .attr("text-anchor", "middle").text( function(d, i) {
