@@ -5090,7 +5090,7 @@ angular.module('dataviz.rewrite')
           { key: 80,  value: 5},  { key: 300, value: 300}];
         _.each(this.data, function(v) {
           v.key = parseFloat(v.key);
-        }
+        });
 
         var getMinMax = function(data, key) {
           return [_.min(data, key)[key], _.max(data,key)[key]];
