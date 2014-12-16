@@ -34,11 +34,9 @@ angular.module('dataviz.rewrite')
         };
       },
       controller: function($scope, $element, $attrs) {
-        var height = $scope.containerHeight;
-        var width = $scope.containerWidth;
-        this.layout = Layout.getDefaultLayout(height, width);
-        $scope.layout = this.layout.container;
         var ctrl = this;
+        this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
+        $scope.layout = this.layout.container;
 
         this.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
           { key: 40,  value: 10}, { key: 60,  value: 40},
@@ -66,17 +64,15 @@ angular.module('dataviz.rewrite')
         this.scale = setScale($scope.metadata, [0, this.layout.graph.width - 10], [this.layout.graph.height - 10, 0]);
         this.components = {
           registered: [],
-          register: function(componentType, config) {
+          register: function(componentType) {
             this.registered.push(componentType);
             var self = this;
             console.log('Registering %s', componentType);
 
-            ctrl.layout = Layout.updateLayout(componentType, config, ctrl.layout);
-
             $timeout(function() {
-              // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
                 ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+                ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
                 $scope.$broadcast(Layout.DRAW);
               }
             });
@@ -88,13 +84,12 @@ angular.module('dataviz.rewrite')
 
           var height = nv[0];
           var width = nv[1];
+
           ctrl.layout = Layout.getDefaultLayout(height, width);
-
-          _.each(ctrl.components.registered, function(componentType) {
-            ctrl.layout = Layout.updateLayout(componentType, {}, ctrl.layout);
-          });
-
+          ctrl.layout = Layout.updateLayout(ctrl.components.registered, ctrl.layout);
           $scope.layout = ctrl.layout.container;
+          //console.log('ctrl.layout.graph.width is: ', ctrl.layout.graph.width);
+          //ctrl.layout.graph.height
           ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
           $scope.$broadcast(Layout.DRAW);
         });

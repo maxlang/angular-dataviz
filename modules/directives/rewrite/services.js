@@ -25,18 +25,19 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults) {
-    var getAxisTranslation = function(layout, registered, direction) {
+  .factory('Translate', function(LayoutDefaults, Layout, components) {
+    var axis = function(layout, registered, direction) {
+      var layoutHas = Layout.makeLayoutHas(registered);
       var translateObj;
 
       if (direction === 'x') {
         translateObj = {
           y: layout.container.height - LayoutDefaults.components.xAxis.height,
-          x: LayoutDefaults.components.yAxis.width
+          x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         translateObj = {
-          y: layout.container.height - layout.yAxis.height - LayoutDefaults.components.xAxis.height + 10, // why?
+          y: layout.container.height - layout.yAxis.height - (layoutHas(components.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -47,49 +48,56 @@ angular.module('dataviz.rewrite.services', [])
       return translateObj;
     };
 
-    var getGraphTranslation = function(layout, registered, graphType) {
+    var graph = function(layout, registered, graphType) {
+      var layoutHas = Layout.makeLayoutHas(registered);
+
       return {
-        x: LayoutDefaults.components.yAxis.width,
+        x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
         y: 10 // why?
       };
     };
 
+    var legend = function(layout, registered) {
+      return {
+        x: layout.container.width - layout.legend.width, //width of the container minus the width of the legend itself
+        y: 0
+      };
+    };
+
     return {
-      getAxisTranslation: getAxisTranslation,
-      getGraphTranslation: getGraphTranslation
+      axis: axis,
+      graph: graph,
+      legend: legend
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log) {
-    var updateLayout = function(componentType, componentConfig, layout) {
-      componentConfig = componentConfig || {};
-      // the format for this is as follows:
-      // the graph starts at totalWidth - padding
+  .factory('Layout', function(LayoutDefaults, $log, components) {
+    var makeLayoutHas = function(registeredComponents) {
+      return function(componentName) {
+        return _.contains(registeredComponents, componentName);
+      };
+    };
 
-      // xAxis registration subtracts 30px from h
-      // yAxis registration subtracts 30px from w
+    var updateLayout = function(registered, layout) {
+      var layoutHas = makeLayoutHas(registered);
 
-      // updatelayout is aware of what components have been registered
-
-      switch(componentType) {
-        case 'xAxis':
-          layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
-          break;
-        case 'yAxis':
-          layout.graph.width = layout.container.width  - LayoutDefaults.components.yAxis.width;
-          break;
-        case 'graph':
-          break;
-        default:
-          $log.warn('You are updating the layout with an unsupported component type (%s)', componentType);
+      // Handle graph width
+      if (layoutHas(components.legend) && layoutHas(components.yAxis)) {
+        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
+      } else if (layoutHas(components.legend)) {
+        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right);
+      } else if (layoutHas(components.yAxis)) {
+        layout.graph.width = layout.container.width - LayoutDefaults.components.yAxis.width;
       }
 
-      if (_.isEmpty(layout[componentType])) {
-        layout[componentType] = _.extend(componentConfig, LayoutDefaults.components[componentType]);
+      // Handle graph height
+      if (layoutHas(components.xAxis)) {
+        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
       }
 
       return layout;
     };
+
     var getDefaultLayout = function(attrHeight, attrWidth) {
       var withoutPadding = function(num, orientation) {
         var trimmed;
@@ -119,7 +127,7 @@ angular.module('dataviz.rewrite.services', [])
           width: LayoutDefaults.components.yAxis.width
         },
         legend: {
-          width: 100
+          width: LayoutDefaults.components.legend.width
         }
       };
     };
@@ -127,17 +135,39 @@ angular.module('dataviz.rewrite.services', [])
     return {
       updateLayout: updateLayout,
       getDefaultLayout: getDefaultLayout,
+      makeLayoutHas: makeLayoutHas,
       DRAW: 'layout.draw'
     };
+  })
+
+  .constant('components', {
+    xAxis: 'xAxis',
+    yAxis: 'yAxis',
+    graph: 'graph',
+    legend: 'legend'
   })
 
   .factory('LayoutDefaults', function() {
     return {
       padding: {
-        top: 0,
-        bottom: 0,
-        right: 0,
-        left: 0
+        graph: {
+          bottom: 0,
+          top: 0,
+          right: 15,
+          left: 0
+        },
+        legend: {
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          series: {
+            bottom: 4,
+            top: 0,
+            left: 0,
+            right: 0
+          }
+        }
       },
       components: {
         xAxis: {
@@ -145,6 +175,9 @@ angular.module('dataviz.rewrite.services', [])
         },
         yAxis: {
           width: 30
+        },
+        legend: {
+          width: 150
         }
       }
     };

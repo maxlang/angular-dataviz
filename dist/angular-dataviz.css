@@ -2040,6 +2040,14 @@ nv-barchart * {
 .bl-graph .bl-axis text {
   font-size: 12px;
 }
+.bl-graph .bl-legend {
+  fill: transparent;
+  stroke: grey;
+}
+.bl-graph .bl-legend text {
+  stroke: none;
+  fill: black;
+}
 .bl-graph .chart {
   display: block;
 }

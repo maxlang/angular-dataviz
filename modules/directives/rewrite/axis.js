@@ -15,18 +15,21 @@ angular.module('dataviz.rewrite')
         var graphCtrl = controllers[0];
         var direction = iAttrs.direction.toLowerCase();
         var axisType = iAttrs.direction + 'Axis';
+
+        console.log('Link function for %s', axisType);
+
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + direction);
 
         scope.layout = graphCtrl.layout[axisType];
-        scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
+        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
 
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
         scope.$on(Layout.DRAW, function() {
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
-          scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
+          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }

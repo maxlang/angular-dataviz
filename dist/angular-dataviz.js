@@ -5026,18 +5026,21 @@ angular.module('dataviz.rewrite')
         var graphCtrl = controllers[0];
         var direction = iAttrs.direction.toLowerCase();
         var axisType = iAttrs.direction + 'Axis';
+
+        console.log('Link function for %s', axisType);
+
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + direction);
 
         scope.layout = graphCtrl.layout[axisType];
-        scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
+        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
 
         graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
 
         scope.$on(Layout.DRAW, function() {
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
-          scope.translate = Translate.getAxisTranslation(graphCtrl.layout, graphCtrl.components.registered, direction);
+          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
           drawAxis(graphCtrl.scale[direction], direction, axisContainer);
         });
       }
@@ -5079,11 +5082,9 @@ angular.module('dataviz.rewrite')
         };
       },
       controller: function($scope, $element, $attrs) {
-        var height = $scope.containerHeight;
-        var width = $scope.containerWidth;
-        this.layout = Layout.getDefaultLayout(height, width);
-        $scope.layout = this.layout.container;
         var ctrl = this;
+        this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
+        $scope.layout = this.layout.container;
 
         this.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
           { key: 40,  value: 10}, { key: 60,  value: 40},
@@ -5111,17 +5112,15 @@ angular.module('dataviz.rewrite')
         this.scale = setScale($scope.metadata, [0, this.layout.graph.width - 10], [this.layout.graph.height - 10, 0]);
         this.components = {
           registered: [],
-          register: function(componentType, config) {
+          register: function(componentType) {
             this.registered.push(componentType);
             var self = this;
             console.log('Registering %s', componentType);
 
-            ctrl.layout = Layout.updateLayout(componentType, config, ctrl.layout);
-
             $timeout(function() {
-              // Update the scale if we have all the components registered
               if (self.registered.length === $scope.componentCount) {
                 ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+                ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
                 $scope.$broadcast(Layout.DRAW);
               }
             });
@@ -5133,13 +5132,12 @@ angular.module('dataviz.rewrite')
 
           var height = nv[0];
           var width = nv[1];
+
           ctrl.layout = Layout.getDefaultLayout(height, width);
-
-          _.each(ctrl.components.registered, function(componentType) {
-            ctrl.layout = Layout.updateLayout(componentType, {}, ctrl.layout);
-          });
-
+          ctrl.layout = Layout.updateLayout(ctrl.components.registered, ctrl.layout);
           $scope.layout = ctrl.layout.container;
+          //console.log('ctrl.layout.graph.width is: ', ctrl.layout.graph.width);
+          //ctrl.layout.graph.height
           ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
           $scope.$broadcast(Layout.DRAW);
         });
@@ -5151,8 +5149,10 @@ angular.module('dataviz.rewrite')
 
 angular.module('dataviz.rewrite');
 
+//<bl-axis direction="y"></bl-axis>
+
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate, Layout) {
+  .directive('blLine', function(ChartFactory, Translate, Layout, components) {
     var setLine = function(xScale, yScale) {
       return d3.svg.line()
         .x(function(d) { return xScale(d.key); })
@@ -5166,17 +5166,19 @@ angular.module('dataviz.rewrite')
         '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"' +
       '</g>',
       link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = 'graph';
+        var COMPONENT_TYPE = components.graph;
         var graphCtrl = controllers[0];
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
 
         graphCtrl.components.register(COMPONENT_TYPE);
 
         function drawLine() {
-          console.log('Redrawing line');
           scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
-          scope.translate = Translate.getGraphTranslation(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          path.attr('d', scope.line(graphCtrl.data));
+          scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          path
+            .attr('d', scope.line(graphCtrl.data));
+            //.attr('data-legend', function(d) { return 'Name'; });
+
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
         }
 
@@ -5187,19 +5189,69 @@ angular.module('dataviz.rewrite')
     });
   })
 
-  .directive('blLegend', function(ChartFactory) {
+  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, components) {
     return new ChartFactory.Component({
-      template: '<div class="legend"></div>',
+      template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
         var COMPONENT_TYPE = 'legend';
+        var seriesData = ['Series1'];
         graphCtrl.components.register(COMPONENT_TYPE);
+        var RECT_SIZE = 18;
 
+        function drawLegend() {
+          scope.layout = graphCtrl.layout.legend;
+          scope.translate = Translate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+        }
 
+        var legend = d3.select(iElem[0])
+          .attr('height', function(d) { return 100; });
 
+        // set up the series tags
+        var series = legend.selectAll('.series')
+          .data(seriesData)
+          .enter()
+          .append('g')
+          .attr('class', 'series')
+          .attr('height', function(d) { return RECT_SIZE + LayoutDefaults.padding.legend.series.bottom; })
+          .attr('width', '100%')
+          .attr('transform', function(d, i) {
+            var height = RECT_SIZE + LayoutDefaults.padding.legend.series.bottom;
+            var horz = 0;
+            var vert = i * height;
+            return 'translate(' + horz + ',' + vert + ')';
+          });
+
+        series.append('rect')
+          .attr('width', RECT_SIZE)
+          .attr('height', RECT_SIZE)
+          .attr('fill', 'red')
+          .attr('stroke', 'none');
+
+        series.append('text')
+          .attr('x', RECT_SIZE + 5)
+          .attr('font-size', 14)
+          .attr('y', 14)
+          .text(function(d) { console.log(d); return d; });
+
+        scope.$on(Layout.DRAW, drawLegend);
       }
     });
+  })
+
+  .factory('LegendFactory', function() {
+    var Legend = function(config) {
+      this.label = config.label;
+      this.visualization = {
+        type: config.vizType,
+        color: config.color
+      };
+    };
+
+    return {
+      Legend: Legend
+    };
   })
 ;
 
@@ -5314,18 +5366,19 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults) {
-    var getAxisTranslation = function(layout, registered, direction) {
+  .factory('Translate', function(LayoutDefaults, Layout, components) {
+    var axis = function(layout, registered, direction) {
+      var layoutHas = Layout.makeLayoutHas(registered);
       var translateObj;
 
       if (direction === 'x') {
         translateObj = {
           y: layout.container.height - LayoutDefaults.components.xAxis.height,
-          x: LayoutDefaults.components.yAxis.width
+          x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         translateObj = {
-          y: layout.container.height - layout.yAxis.height - LayoutDefaults.components.xAxis.height + 10, // why?
+          y: layout.container.height - layout.yAxis.height - (layoutHas(components.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -5336,49 +5389,56 @@ angular.module('dataviz.rewrite.services', [])
       return translateObj;
     };
 
-    var getGraphTranslation = function(layout, registered, graphType) {
+    var graph = function(layout, registered, graphType) {
+      var layoutHas = Layout.makeLayoutHas(registered);
+
       return {
-        x: LayoutDefaults.components.yAxis.width,
+        x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
         y: 10 // why?
       };
     };
 
+    var legend = function(layout, registered) {
+      return {
+        x: layout.container.width - layout.legend.width, //width of the container minus the width of the legend itself
+        y: 0
+      };
+    };
+
     return {
-      getAxisTranslation: getAxisTranslation,
-      getGraphTranslation: getGraphTranslation
+      axis: axis,
+      graph: graph,
+      legend: legend
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log) {
-    var updateLayout = function(componentType, componentConfig, layout) {
-      componentConfig = componentConfig || {};
-      // the format for this is as follows:
-      // the graph starts at totalWidth - padding
+  .factory('Layout', function(LayoutDefaults, $log, components) {
+    var makeLayoutHas = function(registeredComponents) {
+      return function(componentName) {
+        return _.contains(registeredComponents, componentName);
+      };
+    };
 
-      // xAxis registration subtracts 30px from h
-      // yAxis registration subtracts 30px from w
+    var updateLayout = function(registered, layout) {
+      var layoutHas = makeLayoutHas(registered);
 
-      // updatelayout is aware of what components have been registered
-
-      switch(componentType) {
-        case 'xAxis':
-          layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
-          break;
-        case 'yAxis':
-          layout.graph.width = layout.container.width  - LayoutDefaults.components.yAxis.width;
-          break;
-        case 'graph':
-          break;
-        default:
-          $log.warn('You are updating the layout with an unsupported component type (%s)', componentType);
+      // Handle graph width
+      if (layoutHas(components.legend) && layoutHas(components.yAxis)) {
+        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
+      } else if (layoutHas(components.legend)) {
+        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right);
+      } else if (layoutHas(components.yAxis)) {
+        layout.graph.width = layout.container.width - LayoutDefaults.components.yAxis.width;
       }
 
-      if (_.isEmpty(layout[componentType])) {
-        layout[componentType] = _.extend(componentConfig, LayoutDefaults.components[componentType]);
+      // Handle graph height
+      if (layoutHas(components.xAxis)) {
+        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
       }
 
       return layout;
     };
+
     var getDefaultLayout = function(attrHeight, attrWidth) {
       var withoutPadding = function(num, orientation) {
         var trimmed;
@@ -5408,7 +5468,7 @@ angular.module('dataviz.rewrite.services', [])
           width: LayoutDefaults.components.yAxis.width
         },
         legend: {
-          width: 100
+          width: LayoutDefaults.components.legend.width
         }
       };
     };
@@ -5416,17 +5476,39 @@ angular.module('dataviz.rewrite.services', [])
     return {
       updateLayout: updateLayout,
       getDefaultLayout: getDefaultLayout,
+      makeLayoutHas: makeLayoutHas,
       DRAW: 'layout.draw'
     };
+  })
+
+  .constant('components', {
+    xAxis: 'xAxis',
+    yAxis: 'yAxis',
+    graph: 'graph',
+    legend: 'legend'
   })
 
   .factory('LayoutDefaults', function() {
     return {
       padding: {
-        top: 0,
-        bottom: 0,
-        right: 0,
-        left: 0
+        graph: {
+          bottom: 0,
+          top: 0,
+          right: 15,
+          left: 0
+        },
+        legend: {
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          series: {
+            bottom: 4,
+            top: 0,
+            left: 0,
+            right: 0
+          }
+        }
       },
       components: {
         xAxis: {
@@ -5434,6 +5516,9 @@ angular.module('dataviz.rewrite.services', [])
         },
         yAxis: {
           width: 30
+        },
+        legend: {
+          width: 150
         }
       }
     };
