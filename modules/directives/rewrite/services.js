@@ -182,4 +182,8 @@ angular.module('dataviz.rewrite.services', [])
       }
     };
   })
+
+  .service('ThemeService', function() {
+
+  })
 ;

@@ -5259,8 +5259,43 @@ angular.module('dataviz.rewrite')
 ;
 
 angular.module('dataviz.rewrite')
-  .directive('blNumber', function(ChartFactory, components, Layout) {
+  .directive('blNumber', function(ChartFactory, components, Layout, FormatUtils) {
+    return new ChartFactory.Component({
+      //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
+      template: '<text class="bl-number chart" font-size="250px"></text>',
+      scope: {
+        content: '='
+      },
+      link: function(scope, iElem, iAttrs, controllers) {
+        var COMPONENT_TYPE = components.graph;
+        var graphCtrl = controllers[0];
+        var format = FormatUtils.getFormatFunction(scope.content, 'plain');
+        graphCtrl.components.register(COMPONENT_TYPE);
 
+        scope.layout = graphCtrl.layout.graph;
+        //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
+
+        w = scope.layout.height;
+        h = scope.layout.width;
+
+
+        var text = d3.select(iElem[0])
+          .attr('font-family', 'Verdana')
+          .text(function() { return format(scope.content); })
+          .call(FormatUtils.resizeText);
+
+        // If the content unit changes, update the formatting function
+        scope.$watch('content', function() {
+          format = FormatUtils.getFormatFunction(scope.content);
+        });
+
+        scope.$on(Layout.DRAW, function() {
+          text.call(FormatUtils.resizeText);
+        })
+      }
+    });
+  })
+  .factory('FormatUtils', function() {
     var resizeText = function(d, i) {
       var iEl = angular.element(this[0]);
       var parent = iEl.closest('svg');
@@ -5299,40 +5334,47 @@ angular.module('dataviz.rewrite')
       });
     };
 
-    return new ChartFactory.Component({
-      //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
-      template: '<text class="bl-number chart" font-size="250px"></text>',
-      scope: {
-        content: '='
-      },
-      link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = components.graph;
-        var graphCtrl = controllers[0];
-        graphCtrl.components.register(COMPONENT_TYPE);
+    var getFormatFunction = function(numToParse, forcedType) {
+      // Determine whether unit type is: 'time' / '$', '', '%'
+      // Returns a d3-style function return
 
-        scope.layout = graphCtrl.layout.graph;
-        //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
+      var v = parseFloat(numToParse);
+      var prefix = d3.formatPrefix(v);
+      var scaledValue = prefix.scale(v);
+      var digits = (scaledValue + '').replace(/-\./g,'').length;
+      var p = Math.min(digits, 3);
 
-        w = scope.layout.height;
-        h = scope.layout.width;
-
-        //scope.$watch('content', function(nv, ov) {
-        //  if (nv === ov) { return; }
-        //});
-
-        // start the font-size at 250, calc the width and see if it's over
-
-        var text = d3.select(iElem[0])
-          .attr('font-family', 'Verdana')
-          .text(scope.content)
-          .call(resizeText);
-
-        scope.$on(Layout.DRAW, function() {
-          text.call(resizeText);
-        })
+      if (forcedType === 'plain') {
+        return function(value) {
+          return value;
+        }
       }
-    });
-  });
+
+      if (moment(numToParse).isValid()) {
+        // Date
+        return function(value) {
+          return moment.duration(value).humanize().replace((/^an?/),'1').replace((/1 few /),'~1')
+            .replace((/seconds?/),'s')
+            .replace((/minutes?/),'m')
+            .replace((/hours?/),'h')
+            .replace((/days?/),'d')
+            .replace((/weeks?/),'w')
+            .replace((/months?/),'mon')
+            .replace((/years?/),'y');
+        };
+      } else {
+        p = Math.min( digits, 5);
+        p = Math.max(0,p - 2);
+        return d3.format('.' + (p - 2) + '%');
+      }
+    };
+
+    return {
+      resizeText: resizeText,
+      getFormatFunction: getFormatFunction
+    };
+  })
+;
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
@@ -5576,6 +5618,10 @@ angular.module('dataviz.rewrite.services', [])
         }
       }
     };
+  })
+
+  .service('ThemeService', function() {
+
   })
 ;
 
