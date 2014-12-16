@@ -19,7 +19,8 @@ angular.module('dataviz.rewrite')
       scope: {
         data: '=?',
         containerHeight: '=',
-        containerWidth: '='
+        containerWidth: '=',
+        resource: '=?'
       },
       compile: function() {
         return {

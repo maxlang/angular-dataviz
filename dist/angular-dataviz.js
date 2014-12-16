@@ -5067,7 +5067,8 @@ angular.module('dataviz.rewrite')
       scope: {
         data: '=?',
         containerHeight: '=',
-        containerWidth: '='
+        containerWidth: '=',
+        resource: '=?'
       },
       compile: function() {
         return {
@@ -5147,48 +5148,7 @@ angular.module('dataviz.rewrite')
   })
 ;
 
-angular.module('dataviz.rewrite');
-
-//<bl-axis direction="y"></bl-axis>
-
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate, Layout, components) {
-    var setLine = function(xScale, yScale) {
-      return d3.svg.line()
-        .x(function(d) { return xScale(d.key); })
-        .y(function(d) { return yScale(d.value); })
-        .interpolate('basis');
-    };
-
-    return new ChartFactory.Component({
-      template:
-      '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
-        '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"' +
-      '</g>',
-      link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = components.graph;
-        var graphCtrl = controllers[0];
-        var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
-
-        graphCtrl.components.register(COMPONENT_TYPE);
-
-        function drawLine() {
-          scope.line = setLine(graphCtrl.scale.x, graphCtrl.scale.y);
-          scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          path
-            .attr('d', scope.line(graphCtrl.data));
-            //.attr('data-legend', function(d) { return 'Name'; });
-
-          scope.layout = graphCtrl.layout[COMPONENT_TYPE];
-        }
-
-        scope.$on(Layout.DRAW, function() {
-          drawLine();
-        });
-      }
-    });
-  })
-
   .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, components) {
     return new ChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
@@ -5252,33 +5212,125 @@ angular.module('dataviz.rewrite')
     return {
       Legend: Legend
     };
+  });
+
+// resource for namespacing all the fields
+// the line is declaratively told which field to aggregate on
+
+angular.module('dataviz.rewrite')
+  .directive('blLine', function(ChartFactory, Translate, Layout, components) {
+
+    // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
+    var setLine = function(scales, fields) {
+      return d3.svg.line()
+        .x(function(d) { return scales.x(d[fields.x]); })
+        .y(function(d) { return scales.y(d[fields.y]); })
+        .interpolate('linear');
+    };
+
+    return new ChartFactory.Component({
+      template:
+      '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
+        '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></path>' +
+      '</g>',
+      scope: {
+        fieldX: '=',
+        fieldY: '='
+      },
+      link: function(scope, iElem, iAttrs, controllers) {
+        var COMPONENT_TYPE = components.graph;
+        var graphCtrl = controllers[0];
+        graphCtrl.components.register(COMPONENT_TYPE);
+        var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
+
+        function drawLine() {
+          scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
+          scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          path.attr('d', scope.line(graphCtrl.data));
+          scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+        }
+
+        scope.$on(Layout.DRAW, function() {
+          drawLine();
+        });
+      }
+    });
   })
 ;
 
 angular.module('dataviz.rewrite')
-.directive('blNumber', function(ChartFactory) {
-      return _.extend(ChartFactory.defaults, {
-        template: '<text class="bl-number chart">{{text}}</text>',
-        link: function(scope, iElem, iAttrs) {
-          console.log('blNumber link!');
-          var vizConfig = {
-            height: 400,
-            width: 400,
-            padding: 20
-          };
+  .directive('blNumber', function(ChartFactory, components, Layout) {
 
-          iElem
-              .attr('height', vizConfig.height)
-              .attr('width', vizConfig.width)
-              .attr('transform', 'translate(' + vizConfig.padding + ', ' + vizConfig.padding * 2 + ')')
-              .attr('font-family', 'Verdana')
-              .attr('color', 'blue')
-              .attr('font-size', 40);
-          scope.text = 'AMAZING!!!';
+    var resizeText = function(d, i) {
+      var iEl = angular.element(this[0]);
+      var parent = iEl.closest('svg');
+      var maxTries = 100;
 
+      var firstElBigger = function(el1, el2) {
+        return el1.width() > el2.width() || el1.height() > el2.height();
+      };
+
+      var getFontSize = function(el) {
+        return parseInt(el.attr('font-size'), 10);
+      };
+
+      var fs = getFontSize(iEl);
+
+
+      if (firstElBigger(iEl, parent)) {
+        // If number is too big for the box, make it progressively smaller
+        while (firstElBigger(iEl, parent) && maxTries) {
+          maxTries -= 1;
+          fs = getFontSize(iEl);
+          iEl.attr('font-size', fs - 1)
         }
-      });
+      } else {
+        // If number is too small for the box, make it progressively bigger
+        while(!firstElBigger(iEl, parent) && maxTries) {
+          maxTries -= 1;
+          fs = getFontSize(iEl);
+          iEl.attr('font-size', fs + 1);
+        }
+      }
+
+      iEl.attr('y', function() { return fs });
+    };
+
+    return new ChartFactory.Component({
+      //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
+      template: '<text class="bl-number chart" font-size="250px"></text>',
+      scope: {
+        content: '='
+      },
+      link: function(scope, iElem, iAttrs, controllers) {
+        var COMPONENT_TYPE = components.graph;
+        var graphCtrl = controllers[0];
+        graphCtrl.components.register(COMPONENT_TYPE);
+
+        scope.layout = graphCtrl.layout.graph;
+        //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
+
+        w = scope.layout.height;
+        h = scope.layout.width;
+
+        //scope.$watch('content', function(nv, ov) {
+        //  if (nv === ov) { return; }
+        //});
+
+        // start the font-size at 250, calc the width and see if it's over
+
+        var text = d3.select(iElem[0])
+          .attr('font-family', 'Verdana')
+          .attr('color', 'green')
+          .text(scope.content)
+          .call(resizeText);
+
+        scope.$on(Layout.DRAW, function() {
+          text.call(resizeText);
+        })
+      }
     });
+  });
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
