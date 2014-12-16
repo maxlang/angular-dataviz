@@ -60,6 +60,9 @@ angular.module('dataviz.rewrite')
       }
 
       iEl.attr('y', function() { return fs });
+      iEl.attr('x', function() {
+        return (iEl.width() / w) + ((parent.width() - iEl.width()) / 2);
+      });
     };
 
     return new ChartFactory.Component({
@@ -87,7 +90,6 @@ angular.module('dataviz.rewrite')
 
         var text = d3.select(iElem[0])
           .attr('font-family', 'Verdana')
-          .attr('color', 'green')
           .text(scope.content)
           .call(resizeText);
 
