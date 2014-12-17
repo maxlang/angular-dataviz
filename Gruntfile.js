@@ -86,13 +86,14 @@ module.exports = function (grunt) {
           'components/d3-plugins/sankey/sankey.js',
           'components/nvd3/nv.d3.js',
           'components/moment/moment.js',
-          'components/lodash/lodash.js',
+          'components/lodash/dist/lodash.js',
           'components/gridster/dist/jquery.gridster.js',
           'components/angular-ui-utils/ui-utils.js',
           'http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization',
           'components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js',
           'components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js',
           'components/angular-ui-map/src/map.js',
+          'components/abstractquerylanguage/dist/aql.js',
           'dist/angular-dataviz.js'],
         styles: [
           'dist/angular-dataviz.css'
