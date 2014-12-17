@@ -25,7 +25,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults, Layout, components) {
+  .factory('Translate', function(LayoutDefaults, Layout, componentTypes) {
     var axis = function(layout, registered, direction) {
       var layoutHas = Layout.makeLayoutHas(registered);
       var translateObj;
@@ -33,11 +33,11 @@ angular.module('dataviz.rewrite.services', [])
       if (direction === 'x') {
         translateObj = {
           y: layout.container.height - LayoutDefaults.components.xAxis.height,
-          x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
+          x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         translateObj = {
-          y: layout.container.height - layout.yAxis.height - (layoutHas(components.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
+          y: layout.container.height - layout.yAxis.height - (layoutHas(componentTypes.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -52,7 +52,7 @@ angular.module('dataviz.rewrite.services', [])
       var layoutHas = Layout.makeLayoutHas(registered);
 
       return {
-        x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
+        x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
         y: 10 // why?
       };
     };
@@ -71,7 +71,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, components) {
+  .factory('Layout', function(LayoutDefaults, $log, componentTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
         return _.contains(registeredComponents, componentName);
@@ -82,16 +82,16 @@ angular.module('dataviz.rewrite.services', [])
       var layoutHas = makeLayoutHas(registered);
 
       // Handle graph width
-      if (layoutHas(components.legend) && layoutHas(components.yAxis)) {
+      if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
         layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
-      } else if (layoutHas(components.legend)) {
+      } else if (layoutHas(componentTypes.legend)) {
         layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right);
-      } else if (layoutHas(components.yAxis)) {
+      } else if (layoutHas(componentTypes.yAxis)) {
         layout.graph.width = layout.container.width - LayoutDefaults.components.yAxis.width;
       }
 
       // Handle graph height
-      if (layoutHas(components.xAxis)) {
+      if (layoutHas(componentTypes.xAxis)) {
         layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
       }
 
@@ -140,11 +140,31 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .constant('components', {
+  .constant('componentTypes', {
     xAxis: 'xAxis',
     yAxis: 'yAxis',
-    graph: 'graph',
-    legend: 'legend'
+    legend: 'legend',
+    axis: 'axis'
+  })
+
+  .constant('chartTypes', {
+    barchart: 'barchart',
+    linechart: 'linechart',
+    pie: 'pie',
+    number: 'number',
+    histogram: 'histogram'
+  })
+
+  .factory('ChartHelper', function(chartTypes) {
+    var ordinalCharts = [chartTypes.barchart, chartTypes.histogram];
+
+    var isOrdinal = function(chartType) {
+      return _.contains(ordinalCharts, chartType);
+    };
+
+    return {
+      isOrdinal: isOrdinal
+    };
   })
 
   .factory('LayoutDefaults', function() {
@@ -174,7 +194,7 @@ angular.module('dataviz.rewrite.services', [])
           height: 20
         },
         yAxis: {
-          width: 30
+          width: 50
         },
         legend: {
           width: 150

@@ -255,6 +255,7 @@ angular.module('dataviz.directives').directive('aBarchart', [function() {
               .attr('stroke-width', getOption('padding')+'px')
               .append("title")
               .text(function(d) { return d.key + ":" + d.values[0]; });
+
           rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
               .classed('bar d2', true)
               .attr('y', function(d, i) { return y(d.key);})
@@ -3161,331 +3162,379 @@ angular.module('dataviz.directives').service('VizUtils',function() {
 
 });
 
-angular.module('dataviz.directives').directive('barchart', [function() {
-  return {
-    restrict: 'E',
-    scope: {
-      //TODO: change expected values to something more reasonable
-      'data': '=', //expects an array of selected label strings
-      'data2': '=',
-      'params' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
-      'filter2' : '='
-    },
-    link: function(scope, element, attributes) {
+angular.module('dataviz.rewrite')
+  .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
-      var defaultOptions = {
-        'tooltips' : false,
-        'showValues': true,
-        'staggerLabels': true,
-        'widthPx' : 586,
-        'heightPx' : 286,
-        'padding': 2,
-        'margins': {top:10, left: 20, bottom:20, right: 15},
-        'autoMargin': true,
-//        'domain' : [],
-        'range' : 'auto',
-        'bars' : null,
-         'filterSelector' : false
-      };
+    return new ChartFactory.Component({
+      template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
+      scope: {
+        field: '='
+      },
+      link: function(scope, iElem, iAttrs, controllers) {
+        console.log('Link function!!');
+        var graphCtrl = controllers[0];
+        var COMPONENT_TYPE = chartTypes.barchart;
+        var g = d3.select(iElem[0]);
 
-      //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
-      function measure(text, classname) {
-        if(!text || text.length === 0) return {height: 0, width: 0};
+        graphCtrl.components.register(COMPONENT_TYPE);
 
-        var container = d3.select('body').append('svg').attr('class', classname);
-        container.append('text').attr({x: -1000, y: -1000}).text(text);
+        function drawChart() {
+          scope.layout = graphCtrl.layout.chart;
+          scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
 
-        var bbox = container.node().getBBox();
-        container.remove();
+          var bars = g.selectAll('rect').data(graphCtrl.data);
 
-        return {height: bbox.height, width: bbox.width};
-      }
-
-
-
-      //TODO: better way to handle options, esp option merging
-      function getOption(optionName) {
-        return _.defaults(scope.params.options, defaultOptions)[optionName];
-        //return (scope.params && scope.params.options && !_scope.params.options[optionName]) || defaultOptions[optionName];
-      }
-
-
-      //INIT:
-      element.append("<svg></svg>");
-
-      $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
-
-
-      scope.params.filterNum = 0;
-
-      function drawChart(data, data2) {
-
-        element.html('');
-        element.append("<svg></svg>");
-
-
-        var width = getOption('widthPx');
-        var height = getOption('heightPx');
-
-        element.find("svg").width(width);
-        element.find("svg").height(height);
-
-        var margins = getOption('margins');
-
-        var leftMargin = margins.left;
-
-        if (getOption('autoMargin')) {
-          leftMargin = leftMargin + _.max(_.map(_.pluck(data, 'key'), function(key) {
-            var size = measure(key, "y axis").width;
-            return size;
-          })) || leftMargin;
-          leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
-        }
-
-        var w = width - leftMargin - margins.right;
-        var h = height - margins.top - margins.bottom;
-
-        var bars = getOption('bars') || data.length;
-        var barPadding = getOption('padding');
-
-        var barWidth = (h/bars) - barPadding;
-
-        var y;
-        var x;
-
-        var d = _.pluck(data, 'key');
-        var r = getOption('range');
-
-//        if(d === 'auto') {
-//
-//          var xMax = _.max(_.pluck(data, 'key'));
-//          var xMin = _.min(_.pluck(data, 'key'));
-//          x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
-//        } else {
-//          x = d3.scale.linear().domain(d).range([0, w]);
-//        }
-        var mergedData = null;
-        if (data2) {
-
-          mergedData = {};
-
-          _.each(data, function(d) {
-            mergedData[d.key] = {key: d.key, values: [d.value]};
-          });
-
-          _.each(data2, function(d) {
-            if (mergedData[d.key]) {
-              mergedData[d.key].values[1] = d.value;
-            } else {
-              mergedData[d.key] = {key: d.key, values: [null, d.value]};
-            }
-          });
-          d = _.pluck(mergedData, 'key');
-
-        }
-
-        y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
-
-        if (r === 'auto') {
-          var xMax;
-          if (mergedData) {
-            var xMaxObj = _.max(mergedData, function(d) {
-              return (d.values[0] || 0) + (d.values[1] || 0);
-            });
-            xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;
-          } else {
-            xMax = data.length > 0 ? data[0].value : 1;
-          }
-
-
-          x = d3.scale.linear().domain([0, xMax]).range([0, w]);
-        } else {
-          x = d3.scale.linear().domain(r).range([0, w]);
-        }
-
-
-//              scope.brush.x(x);
-
-        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
-        var yAxis = d3.svg.axis().scale(y).orient("left");
-
-        var svg = d3.select(element[0]).select('svg');
-
-
-        svg.append("g")
-            .attr("class", "grid")
-            .attr("transform", "translate(" + leftMargin + ", " + (margins.top + h) + ")")
-            .call(d3.svg.axis().scale(x).orient("bottom")
-                .tickSize(-height, 0, 0)
-                .tickFormat("")
-            );
-
-        var g = svg.append('g')
-            .attr('width', w)
-            .attr('height', h)
-            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
-
-        function setSelectedLabels(filter, labels) {
-          var args = [0, filter.length].concat(labels);
-          scope.$apply(function() {
-            Array.prototype.splice.apply(filter, args);
-          });
-        }
-
-        function clickFn(d) {
-          var filter = scope.params.filterNum ? scope.filter2 : scope.params.filter;
-          var selClass = scope.params.filterNum ? 'selected2' : 'selected';
-
-          if( _.contains(filter, d.key) ) {
-            if(scope.shifted) {
-              setSelectedLabels(filter, _.without(filter, d.key));
-            } else {
-              g.selectAll('rect.' + selClass).classed(selClass, false);
-              setSelectedLabels(filter, []);
-            }
-            d3.select(this).classed(selClass, false);
-          } else {
-            if(scope.shifted) {
-              filter.push(d.key);
-              setSelectedLabels(filter, filter);
-            } else {
-              g.selectAll('rect.' + selClass).classed(selClass, false);
-              g.selectAll('g.' + selClass).classed(selClass, false);
-              setSelectedLabels(filter, [d.key]);
-            }
-            d3.select(this).classed(selClass, true);
-          }
-        }
-
-        if (data2) {
-
-         var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
-            .classed('bar-holder', true)
-            .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
-            .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
-            .attr('height', Math.abs(y.rangeBand()))
-            .classed('selected', function(d, i) {
-              return _.contains(scope.params.filter, d.key);
-            })
-           .classed('selected2', function(d, i) {
-             return _.contains(scope.filter2, d.key);
-           })
-            .on('click', function(d, i) {
-              clickFn.call(this, d);
-            });
-
-          rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
-              .classed('bar d1', true)
-              .attr('y', function(d, i) {
-                return y(d.key);
-              })
-              .attr('x', 0)
-              .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0);})
-              .attr('height', Math.abs(y.rangeBand()))
-              .attr('stroke-width', getOption('padding')+'px');
-          rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
-              .classed('bar d2', true)
-              .attr('y', function(d, i) { return y(d.key);})
-              .attr('x', function(d) { return (d.values[0] ? x(d.values[0]) : 0);})
-              .attr('width', function(d, i) { return  (d.values[1] ? x(d.values[1]) : 0);})
-              .attr('height', Math.abs(y.rangeBand()))
-              .attr('stroke-width', getOption('padding')+'px');
-
-        } else {
-
-        g.selectAll('rect').data(data).enter().append('rect')
+          // Do this for all the
+          bars.enter().append('rect')
             .classed('bar', true)
-            .attr('y', function(d, i) { return y(d.key);})
             .attr('x', 0)
-            .attr('width', function(d, i) { return  x(d.value);})
-            .attr('height', Math.abs(y.rangeBand()))
-            .attr('stroke-width', getOption('padding')+'px')
+            .attr('stroke-width', '0px')
             .classed('selected', function(d, i) {
-              return _.contains(scope.params.filter, d.key);
+              return true;
+              //return _.contains(scope.params.filter, d.key);
             })
             .on('click', function(d, i) {
-              clickFn.call(this, d);
+              //clickFn.call(this, d);
             });
 
+          bars
+            .attr('y', function(d) { return graphCtrl.scale.y(d.key); })
+            .attr('width', function(d) { return graphCtrl.scale.x(d.value); })
+            .attr('height', Math.abs(graphCtrl.scale.y.rangeBand()));
         }
 
-        if (scope.filter2 && getOption('filterSelector')) {
-          g.selectAll('rect.compare').data([0,1]).enter().append('rect')
-              .attr('x', function(d) {return w - (12 * d) + 2;})
-              .attr('y', -8)
-              .attr('width', 10)
-              .attr('height', 10)
-              .attr('stroke-width', 2)
-              .classed('compare', true)
-              .classed('d1', function(d) {return d;})
-              .classed('d2', function(d) {return !d;})
-              .on('click', function(d) {
-                scope.params.filterNum = d;
-              });
-        }
-
-
-        var xaxis =   svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
-            .call(xAxis);
-
-        var yaxis =   svg.append("g")
-            .attr("class", "y axis")
-            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
-            .call(yAxis);
-
-
-
-//        var brush = g.append("g")
-//            .attr("class", "x brush")
-//            .call(scope.brush)
-//            .selectAll("rect")
-//            .attr("y", -6)
-//            .attr("height", h+8);
+        scope.$on(Layout.DRAW, drawChart);
 
       }
-
-      scope.$watch('data',function(counts) {
-        if(counts!==undefined && counts!==null) {
-          drawChart(counts, scope.data2);
-        }
-      }, true);
-
-      scope.$watch('data2',function() {
-        if(scope.data!==undefined && scope.data!==null) {
-          drawChart(scope.data, scope.data2);
-        }
-      }, true);
-
-//            scope.$watch('params.filter', function(f) {
-//              if (f) {
-//                console.log('setting brush');
-//                setBrush(f[0]);
-//              }
-//            }, true);
-
-      scope.$watch('params.options', function() {
-        if (scope.data) {
-          drawChart(scope.data, scope.data2);
-        }
-      }, true);
-
-      scope.$watch('params.filter', function() {
-        if (scope.data) {
-          drawChart(scope.data, scope.data2);
-        }
-      }, true);
-
-      scope.$watch('filter2', function() {
-        if (scope.data) {
-          drawChart(scope.data, scope.data2);
-        }
-      }, true);
-
-    }
-  };
-}]);
+    });
+  });
+//
+//angular.module('dataviz.directives').directive('barchart', [function() {
+//
+//  return {
+//    restrict: 'E',
+//    scope: {
+//      //TODO: change expected values to something more reasonable
+//      'data': '=', //expects an array of selected label strings
+//      'data2': '=',
+//      'params' : '=',  // expects an array of {key:<lable>,value:<count>} pairs
+//      'filter2' : '='
+//    },
+//    link: function(scope, element, attributes) {
+//
+//      var defaultOptions = {
+//        'tooltips' : false,
+//        'showValues': true,
+//        'staggerLabels': true,
+//        'widthPx' : 586,
+//        'heightPx' : 286,
+//        'padding': 2,
+//        'margins': {top:10, left: 20, bottom:20, right: 15},
+//        'autoMargin': true,
+////        'domain' : [],
+//        'range' : 'auto',
+//        'bars' : null,
+//         'filterSelector' : false
+//      };
+//
+//      //FROM: http://stackoverflow.com/questions/14605348/title-and-axis-labels
+//      function measure(text, classname) {
+//        if(!text || text.length === 0) return {height: 0, width: 0};
+//
+//        var container = d3.select('body').append('svg').attr('class', classname);
+//        container.append('text').attr({x: -1000, y: -1000}).text(text);
+//
+//        var bbox = container.node().getBBox();
+//        container.remove();
+//
+//        return {height: bbox.height, width: bbox.width};
+//      }
+//
+//
+//
+//      //TODO: better way to handle options, esp option merging
+//      function getOption(optionName) {
+//        return _.defaults(scope.params.options, defaultOptions)[optionName];
+//        //return (scope.params && scope.params.options && !_scope.params.options[optionName]) || defaultOptions[optionName];
+//      }
+//
+//
+//      //INIT:
+//      element.append("<svg></svg>");
+//
+//      $(document).on('keyup keydown', function(e){scope.shifted = e.shiftKey; return true;} );
+//
+//
+//      scope.params.filterNum = 0;
+//
+//      function drawChart(data, data2) {
+//
+//        element.html('');
+//        element.append("<svg></svg>");
+//
+//
+//        var width = getOption('widthPx');
+//        var height = getOption('heightPx');
+//
+//        element.find("svg").width(width);
+//        element.find("svg").height(height);
+//
+//        var margins = getOption('margins');
+//
+//        var leftMargin = margins.left;
+//
+//        if (getOption('autoMargin')) {
+//          leftMargin = leftMargin + _.max(_.map(_.pluck(data, 'key'), function(key) {
+//            var size = measure(key, "y axis").width;
+//            return size;
+//          })) || leftMargin;
+//          leftMargin = leftMargin === -Infinity ? 0 : leftMargin;
+//        }
+//
+//        var w = width - leftMargin - margins.right;
+//        var h = height - margins.top - margins.bottom;
+//
+//        var bars = getOption('bars') || data.length;
+//        var barPadding = getOption('padding');
+//
+//        var barWidth = (h/bars) - barPadding;
+//
+//        var y;
+//        var x;
+//
+//        var d = _.pluck(data, 'key');
+//        var r = getOption('range');
+//
+////        if(d === 'auto') {
+////
+////          var xMax = _.max(_.pluck(data, 'key'));
+////          var xMin = _.min(_.pluck(data, 'key'));
+////          x = d3.scale.linear().domain([xMin, xMax]).range([0, w]);
+////        } else {
+////          x = d3.scale.linear().domain(d).range([0, w]);
+////        }
+//        var mergedData = null;
+//        if (data2) {
+//
+//          mergedData = {};
+//
+//          _.each(data, function(d) {
+//            mergedData[d.key] = {key: d.key, values: [d.value]};
+//          });
+//
+//          _.each(data2, function(d) {
+//            if (mergedData[d.key]) {
+//              mergedData[d.key].values[1] = d.value;
+//            } else {
+//              mergedData[d.key] = {key: d.key, values: [null, d.value]};
+//            }
+//          });
+//          d = _.pluck(mergedData, 'key');
+//
+//        }
+//
+//        y = d3.scale.ordinal().domain(d).rangeRoundBands([h, 0],0.1,0);
+//
+//        if (r === 'auto') {
+//          var xMax;
+//          if (mergedData) {
+//            var xMaxObj = _.max(mergedData, function(d) {
+//              return (d.values[0] || 0) + (d.values[1] || 0);
+//            });
+//            xMax = (xMaxObj.values && (xMaxObj.values[0] || 0) + (xMaxObj.values[1] || 0)) || 1;
+//          } else {
+//            xMax = data.length > 0 ? data[0].value : 1;
+//          }
+//
+//
+//          x = d3.scale.linear().domain([0, xMax]).range([0, w]);
+//        } else {
+//          x = d3.scale.linear().domain(r).range([0, w]);
+//        }
+//
+//
+////              scope.brush.x(x);
+//
+//        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
+//        var yAxis = d3.svg.axis().scale(y).orient("left");
+//
+//        var svg = d3.select(element[0]).select('svg');
+//
+//
+//        svg.append("g")
+//            .attr("class", "grid")
+//            .attr("transform", "translate(" + leftMargin + ", " + (margins.top + h) + ")")
+//            .call(d3.svg.axis().scale(x).orient("bottom")
+//                .tickSize(-height, 0, 0)
+//                .tickFormat("")
+//            );
+//
+//        var g = svg.append('g')
+//            .attr('width', w)
+//            .attr('height', h)
+//            .attr('transform', 'translate(' + leftMargin + ', ' + margins.top + ')');
+//
+//        function setSelectedLabels(filter, labels) {
+//          var args = [0, filter.length].concat(labels);
+//          scope.$apply(function() {
+//            Array.prototype.splice.apply(filter, args);
+//          });
+//        }
+//
+//        function clickFn(d) {
+//          var filter = scope.params.filterNum ? scope.filter2 : scope.params.filter;
+//          var selClass = scope.params.filterNum ? 'selected2' : 'selected';
+//
+//          if( _.contains(filter, d.key) ) {
+//            if(scope.shifted) {
+//              setSelectedLabels(filter, _.without(filter, d.key));
+//            } else {
+//              g.selectAll('rect.' + selClass).classed(selClass, false);
+//              setSelectedLabels(filter, []);
+//            }
+//            d3.select(this).classed(selClass, false);
+//          } else {
+//            if(scope.shifted) {
+//              filter.push(d.key);
+//              setSelectedLabels(filter, filter);
+//            } else {
+//              g.selectAll('rect.' + selClass).classed(selClass, false);
+//              g.selectAll('g.' + selClass).classed(selClass, false);
+//              setSelectedLabels(filter, [d.key]);
+//            }
+//            d3.select(this).classed(selClass, true);
+//          }
+//        }
+//
+//        if (data2) {
+//
+//         var rectHolder = g.selectAll('g').data(_.values(mergedData)).enter().append('g')
+//            .classed('bar-holder', true)
+//            .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")";})
+//            .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0) + (d.values[1] ? x(d.values[1]) : 0);})
+//            .attr('height', Math.abs(y.rangeBand()))
+//            .classed('selected', function(d, i) {
+//              return _.contains(scope.params.filter, d.key);
+//            })
+//           .classed('selected2', function(d, i) {
+//             return _.contains(scope.filter2, d.key);
+//           })
+//            .on('click', function(d, i) {
+//              clickFn.call(this, d);
+//            });
+//
+//          rectHolder.selectAll('rect.d1').data(function(d) { console.log(d); return [d];}).enter().append('rect')
+//              .classed('bar d1', true)
+//              .attr('y', function(d, i) {
+//                return y(d.key);
+//              })
+//              .attr('x', 0)
+//              .attr('width', function(d, i) { return  (d.values[0] ? x(d.values[0]) : 0);})
+//              .attr('height', Math.abs(y.rangeBand()))
+//              .attr('stroke-width', getOption('padding')+'px');
+//          rectHolder.selectAll('rect.d2').data(function(d) { return [d];}).enter().append('rect')
+//              .classed('bar d2', true)
+//              .attr('y', function(d, i) { return y(d.key);})
+//              .attr('x', function(d) { return (d.values[0] ? x(d.values[0]) : 0);})
+//              .attr('width', function(d, i) { return  (d.values[1] ? x(d.values[1]) : 0);})
+//              .attr('height', Math.abs(y.rangeBand()))
+//              .attr('stroke-width', getOption('padding')+'px');
+//
+//        } else {
+//
+//        g.selectAll('rect').data(data).enter().append('rect')
+//            .classed('bar', true)
+//            .attr('y', function(d, i) { return y(d.key);})
+//            .attr('x', 0)
+//            .attr('width', function(d, i) { return  x(d.value);})
+//            .attr('height', Math.abs(y.rangeBand()))
+//            .attr('stroke-width', getOption('padding')+'px')
+//            .classed('selected', function(d, i) {
+//              return _.contains(scope.params.filter, d.key);
+//            })
+//            .on('click', function(d, i) {
+//              clickFn.call(this, d);
+//            });
+//
+//        }
+//
+//        if (scope.filter2 && getOption('filterSelector')) {
+//          g.selectAll('rect.compare').data([0,1]).enter().append('rect')
+//              .attr('x', function(d) {return w - (12 * d) + 2;})
+//              .attr('y', -8)
+//              .attr('width', 10)
+//              .attr('height', 10)
+//              .attr('stroke-width', 2)
+//              .classed('compare', true)
+//              .classed('d1', function(d) {return d;})
+//              .classed('d2', function(d) {return !d;})
+//              .on('click', function(d) {
+//                scope.params.filterNum = d;
+//              });
+//        }
+//
+//
+//        var xaxis =   svg.append("g")
+//            .attr("class", "x axis")
+//            .attr("transform", "translate(" + leftMargin + ", " + (h + margins.top) + ")")
+//            .call(xAxis);
+//
+//        var yaxis =   svg.append("g")
+//            .attr("class", "y axis")
+//            .attr("transform", "translate(" + leftMargin + ", " + (margins.top) + ")")
+//            .call(yAxis);
+//
+//
+//
+////        var brush = g.append("g")
+////            .attr("class", "x brush")
+////            .call(scope.brush)
+////            .selectAll("rect")
+////            .attr("y", -6)
+////            .attr("height", h+8);
+//
+//      }
+//
+//      scope.$watch('data',function(counts) {
+//        if(counts!==undefined && counts!==null) {
+//          drawChart(counts, scope.data2);
+//        }
+//      }, true);
+//
+//      scope.$watch('data2',function() {
+//        if(scope.data!==undefined && scope.data!==null) {
+//          drawChart(scope.data, scope.data2);
+//        }
+//      }, true);
+//
+////            scope.$watch('params.filter', function(f) {
+////              if (f) {
+////                console.log('setting brush');
+////                setBrush(f[0]);
+////              }
+////            }, true);
+//
+//      scope.$watch('params.options', function() {
+//        if (scope.data) {
+//          drawChart(scope.data, scope.data2);
+//        }
+//      }, true);
+//
+//      scope.$watch('params.filter', function() {
+//        if (scope.data) {
+//          drawChart(scope.data, scope.data2);
+//        }
+//      }, true);
+//
+//      scope.$watch('filter2', function() {
+//        if (scope.data) {
+//          drawChart(scope.data, scope.data2);
+//        }
+//      }, true);
+//
+//    }
+//  };
+//}]);
 
 (function() {
   'use strict';
@@ -5021,41 +5070,76 @@ angular.module('dataviz.rewrite')
 
     return new ChartFactory.Component({
       template: '<g ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
+      scope: {
+        direction: '=',
+        title: '=?',
+        orderBy: '=?'
+      },
       link: function(scope, iElem, iAttrs, controllers) {
-        // force lowercase
-        var graphCtrl = controllers[0];
-        var direction = iAttrs.direction.toLowerCase();
-        var axisType = iAttrs.direction + 'Axis';
+        // Ensure that the direction is passed in as lowercase
+        if (scope.direction !== scope.direction.toLowerCase()) {
+          throw new Error('The axis direction must be lowercase or very little will work.');
+        }
 
-        console.log('Link function for %s', axisType);
+        var graphCtrl = controllers[0];
+        var axisType = scope.direction + 'Axis';
 
         var axisContainer = d3.select(iElem[0])
-          .attr('class', 'bl-axis ' + direction);
+          .attr('class', 'bl-axis ' + scope.direction);
 
         scope.layout = graphCtrl.layout[axisType];
-        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
+        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
 
-        graphCtrl.components.register(axisType, LayoutDefaults.components[axisType]);
+        graphCtrl.components.register(axisType, {
+          direction: scope.direction,
+          field: scope.field
+        });
 
         scope.$on(Layout.DRAW, function() {
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
-          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, direction);
-          drawAxis(graphCtrl.scale[direction], direction, axisContainer);
+          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
+          drawAxis(graphCtrl.scale[scope.direction], scope.direction, axisContainer);
         });
       }
     });
   });
 angular.module('dataviz.rewrite')
-  .directive('blGraph', function(Layout, $timeout) {
-    var setScale = function(metadata, xRange, yRange) {
-      return {
-        x: d3.scale.linear()
-          .domain(metadata.domain)
-          .range(xRange),
-        y: d3.scale.linear()
+  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults) {
+    var setScale = function(metadata, xRange, yRange, chartType) {
+      var scales = {};
+
+      // All charts use a linear scale on x. I doubt this is actually true.
+      scales.x = d3.scale.linear()
+        .domain(metadata.domain)
+        .range(xRange);
+
+      // Define the Y scale based on whether the chart type is ordinal or linear
+      if (!ChartHelper.isOrdinal(chartType)) {
+        scales.y = d3.scale.linear()
           .domain(metadata.range)
-          .range(yRange)
+          .range(yRange);
+      } else {
+       scales.y = d3.scale.ordinal()
+         .domain(metadata.range)
+         .rangeRoundBands(yRange, 0.1, 0);
+      }
+
+      return scales;
+    };
+
+    var isChart = function(componentType) {
+      return _.contains(chartTypes, componentType);
+    };
+
+    var isAxis = function(componentType) {
+      return _.contains(componentType.toLowerCase(), componentTypes.axis);
+    };
+
+    var getScaleDims = function(graphLayout) {
+      return {
+        x: [0, graphLayout.width - LayoutDefaults.padding.graph.right],
+        y: [graphLayout.height - 10, 0]
       };
     };
 
@@ -5065,10 +5149,9 @@ angular.module('dataviz.rewrite')
       transclude: true,
       template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></div>',
       scope: {
-        data: '=?',
+        resource: '=?',
         containerHeight: '=',
-        containerWidth: '=',
-        resource: '=?'
+        containerWidth: '='
       },
       compile: function() {
         return {
@@ -5087,41 +5170,32 @@ angular.module('dataviz.rewrite')
         this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
         $scope.layout = this.layout.container;
 
-        this.data = [ { key: 1,   value: 5},  { key: 20,  value: 20},
-          { key: 40,  value: 10}, { key: 60,  value: 40},
-          { key: 80,  value: 5},  { key: 300, value: 300}];
-        _.each(this.data, function(v) {
-          v.key = parseFloat(v.key);
-        });
+        console.log('blGraph controller live.');
 
-        var getMinMax = function(data, key) {
-          return [_.min(data, key)[key], _.max(data,key)[key]];
-        };
-
-        $scope.metadata = {
-          total: _.reduce(ctrl.data, function(sum, num) {
-            return sum + num.y;
-          }, 0),
-          domain: getMinMax(ctrl.data, 'key'),
-          range: getMinMax(ctrl.data, 'value'),
-          count: ctrl.data.length
-        };
-
-        $scope.metadata.avg = $scope.metadata.total/$scope.metadata.count;
+        this.data = $scope.resource.data;
 
         this._id = _.uniq();
-        this.scale = setScale($scope.metadata, [0, this.layout.graph.width - 10], [this.layout.graph.height - 10, 0]);
+        this.scale = {};
+        this.fields = {};
         this.components = {
           registered: [],
-          register: function(componentType) {
+          register: function(componentType, params) {
             this.registered.push(componentType);
             var self = this;
-            console.log('Registering %s', componentType);
+
+            if (isChart(componentType)) {
+              ctrl.chartType = componentType;
+              $scope.metadata = RangeFunctions.getMetadata(ctrl.data, componentType);
+            } else if (isAxis(componentType)) {
+              ctrl.fields[params.direction] = params.field;
+            }
 
             $timeout(function() {
               if (self.registered.length === $scope.componentCount) {
-                ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
                 ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
+
+                var scaleDims = getScaleDims(ctrl.layout.graph);
+                ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
                 $scope.$broadcast(Layout.DRAW);
               }
             });
@@ -5134,28 +5208,62 @@ angular.module('dataviz.rewrite')
           var height = nv[0];
           var width = nv[1];
 
-          ctrl.layout = Layout.getDefaultLayout(height, width);
-          ctrl.layout = Layout.updateLayout(ctrl.components.registered, ctrl.layout);
+          ctrl.layout = Layout.updateLayout(ctrl.components.registered, Layout.getDefaultLayout(height, width));
           $scope.layout = ctrl.layout.container;
-          //console.log('ctrl.layout.graph.width is: ', ctrl.layout.graph.width);
-          //ctrl.layout.graph.height
-          ctrl.scale = setScale($scope.metadata, [0, ctrl.layout.graph.width - 10], [ctrl.layout.graph.height - 10, 0]);
+          var scaleDims = getScaleDims(ctrl.layout.graph);
+          ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
           $scope.$broadcast(Layout.DRAW);
         });
 
       }
     };
   })
+
+  .factory('RangeFunctions', function(ChartHelper) {
+    var getMinMax = function(data, key) {
+      return [_.min(data, key)[key], _.max(data,key)[key]];
+    };
+
+    var getMetadata = function(data, chartType) {
+      var metadata = {
+        total: _.reduce(data, function(sum, o) {
+          return sum + o.value;
+        }, 0),
+        count: data.length
+      };
+
+      metadata.avg = metadata.total / metadata.count;
+
+      if (!ChartHelper.isOrdinal(chartType)) {
+        metadata.range = getMinMax(data, 'value');
+        metadata.domain = getMinMax(data, 'key');
+      } else {
+        metadata.range = _.pluck(data, 'key');
+        metadata.domain = getMinMax(data, 'value');
+      }
+
+      console.log('metadata is: ', metadata);
+
+      return metadata;
+    };
+
+
+
+    return {
+      getMinMax: getMinMax,
+      getMetadata: getMetadata
+    };
+  })
 ;
 
 angular.module('dataviz.rewrite')
-  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, components) {
+  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
     return new ChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
-        var COMPONENT_TYPE = 'legend';
+        var COMPONENT_TYPE = componentTypes.legend;
         var seriesData = ['Series1'];
         graphCtrl.components.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;
@@ -5218,7 +5326,7 @@ angular.module('dataviz.rewrite')
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate, Layout, components) {
+  .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -5238,7 +5346,7 @@ angular.module('dataviz.rewrite')
         fieldY: '='
       },
       link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = components.graph;
+        var COMPONENT_TYPE = chartTypes.linechart;
         var graphCtrl = controllers[0];
         graphCtrl.components.register(COMPONENT_TYPE);
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
@@ -5259,17 +5367,15 @@ angular.module('dataviz.rewrite')
 ;
 
 angular.module('dataviz.rewrite')
-  .directive('blNumber', function(ChartFactory, components, Layout, FormatUtils) {
+  .directive('blNumber', function(ChartFactory, chartTypes, Layout, FormatUtils) {
     return new ChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
-      scope: {
-        content: '='
-      },
       link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = components.graph;
+        var COMPONENT_TYPE = chartTypes.number;
         var graphCtrl = controllers[0];
-        var format = FormatUtils.getFormatFunction(scope.content, 'plain');
+        var data = graphCtrl.data;
+        var format = FormatUtils.getFormatFunction(data, 'plain');
         graphCtrl.components.register(COMPONENT_TYPE);
 
         scope.layout = graphCtrl.layout.graph;
@@ -5278,20 +5384,19 @@ angular.module('dataviz.rewrite')
         w = scope.layout.height;
         h = scope.layout.width;
 
-
         var text = d3.select(iElem[0])
           .attr('font-family', 'Verdana')
-          .text(function() { return format(scope.content); })
+          .text(function() { return format(data); })
           .call(FormatUtils.resizeText);
 
         // If the content unit changes, update the formatting function
         scope.$watch('content', function() {
-          format = FormatUtils.getFormatFunction(scope.content);
+          format = FormatUtils.getFormatFunction(graphCtrl.data);
         });
 
         scope.$on(Layout.DRAW, function() {
           text.call(FormatUtils.resizeText);
-        })
+        });
       }
     });
   })
@@ -5317,7 +5422,7 @@ angular.module('dataviz.rewrite')
         while (firstElBigger(iEl, parent) && maxTries) {
           maxTries -= 1;
           fs = getFontSize(iEl);
-          iEl.attr('font-size', fs - 1)
+          iEl.attr('font-size', fs - 1);
         }
       } else {
         // If number is too small for the box, make it progressively bigger
@@ -5328,7 +5433,10 @@ angular.module('dataviz.rewrite')
         }
       }
 
-      iEl.attr('y', function() { return fs });
+      iEl.attr('y', function() {
+        var heightDiff = parent.height() - iEl.height();
+        return heightDiff / 2 + fs;
+      });
       iEl.attr('x', function() {
         return (iEl.width() / w) + ((parent.width() - iEl.width()) / 2);
       });
@@ -5378,12 +5486,12 @@ angular.module('dataviz.rewrite')
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
-    .directive('blPie', function(ChartFactory) {
+    .directive('blPie', function(ChartFactory, chartTypes) {
       return new ChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
         link: function(scope, iElem, iAttrs, controllers) {
           var graphCtrl = controllers[0];
-          var COMPONENT_TYPE = 'graph';
+          var COMPONENT_TYPE = charts.pie;
 
           graphCtrl.components.register(COMPONENT_TYPE);
 
@@ -5462,7 +5570,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults, Layout, components) {
+  .factory('Translate', function(LayoutDefaults, Layout, componentTypes) {
     var axis = function(layout, registered, direction) {
       var layoutHas = Layout.makeLayoutHas(registered);
       var translateObj;
@@ -5470,11 +5578,11 @@ angular.module('dataviz.rewrite.services', [])
       if (direction === 'x') {
         translateObj = {
           y: layout.container.height - LayoutDefaults.components.xAxis.height,
-          x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
+          x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         translateObj = {
-          y: layout.container.height - layout.yAxis.height - (layoutHas(components.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
+          y: layout.container.height - layout.yAxis.height - (layoutHas(componentTypes.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -5489,7 +5597,7 @@ angular.module('dataviz.rewrite.services', [])
       var layoutHas = Layout.makeLayoutHas(registered);
 
       return {
-        x: (layoutHas(components.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
+        x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
         y: 10 // why?
       };
     };
@@ -5508,7 +5616,7 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, components) {
+  .factory('Layout', function(LayoutDefaults, $log, componentTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
         return _.contains(registeredComponents, componentName);
@@ -5519,16 +5627,16 @@ angular.module('dataviz.rewrite.services', [])
       var layoutHas = makeLayoutHas(registered);
 
       // Handle graph width
-      if (layoutHas(components.legend) && layoutHas(components.yAxis)) {
+      if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
         layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
-      } else if (layoutHas(components.legend)) {
+      } else if (layoutHas(componentTypes.legend)) {
         layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right);
-      } else if (layoutHas(components.yAxis)) {
+      } else if (layoutHas(componentTypes.yAxis)) {
         layout.graph.width = layout.container.width - LayoutDefaults.components.yAxis.width;
       }
 
       // Handle graph height
-      if (layoutHas(components.xAxis)) {
+      if (layoutHas(componentTypes.xAxis)) {
         layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
       }
 
@@ -5577,11 +5685,31 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .constant('components', {
+  .constant('componentTypes', {
     xAxis: 'xAxis',
     yAxis: 'yAxis',
-    graph: 'graph',
-    legend: 'legend'
+    legend: 'legend',
+    axis: 'axis'
+  })
+
+  .constant('chartTypes', {
+    barchart: 'barchart',
+    linechart: 'linechart',
+    pie: 'pie',
+    number: 'number',
+    histogram: 'histogram'
+  })
+
+  .factory('ChartHelper', function(chartTypes) {
+    var ordinalCharts = [chartTypes.barchart, chartTypes.histogram];
+
+    var isOrdinal = function(chartType) {
+      return _.contains(ordinalCharts, chartType);
+    };
+
+    return {
+      isOrdinal: isOrdinal
+    };
   })
 
   .factory('LayoutDefaults', function() {
@@ -5611,7 +5739,7 @@ angular.module('dataviz.rewrite.services', [])
           height: 20
         },
         yAxis: {
-          width: 30
+          width: 50
         },
         legend: {
           width: 150

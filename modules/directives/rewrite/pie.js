@@ -21,12 +21,12 @@
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz.rewrite')
-    .directive('blPie', function(ChartFactory) {
+    .directive('blPie', function(ChartFactory, chartTypes) {
       return new ChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
         link: function(scope, iElem, iAttrs, controllers) {
           var graphCtrl = controllers[0];
-          var COMPONENT_TYPE = 'graph';
+          var COMPONENT_TYPE = charts.pie;
 
           graphCtrl.components.register(COMPONENT_TYPE);
 

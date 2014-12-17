@@ -1,11 +1,11 @@
 angular.module('dataviz.rewrite')
-  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, components) {
+  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
     return new ChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
-        var COMPONENT_TYPE = 'legend';
+        var COMPONENT_TYPE = componentTypes.legend;
         var seriesData = ['Series1'];
         graphCtrl.components.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;

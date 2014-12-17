@@ -8,20 +8,38 @@
  * Creates a line chart.
  *
  * @example
- <example module="dataviz.rewrite">
+ <example module="test">
  <file name="index.html">
+ <div ng-controller="dataController">
  <div>
-  Height: <input type="number" ng-model="height"><br />
-  Width: <input type="number" ng-model="width">
+ Data: {{data}}<br />
+ Height: <input type="number" ng-model="height"><br />
+ Width: <input type="number" ng-model="width">
  </div>
- <div class="graph-wrapper" ng-init="width = 500; height = 200;">
-   <bl-graph container-height="height" container-width="width">
-      <bl-line field-x="'key'" field-y="'value'"></bl-line>
-      <bl-axis direction="x"></bl-axis>
-      <bl-axis direction="y"></bl-axis>
-      <bl-legend></bl-legend>
-   </bl-graph>
+ <div class="graph-wrapper">
+ <bl-graph container-height="height" container-width="width" resource="resource">
+   <bl-line field-x="'key'" field-y="'value'"></bl-line>
+   <bl-axis direction="'x'"></bl-axis>
+   <bl-axis direction="'y'"></bl-axis>
+   <bl-legend></bl-legend>
+ </bl-graph>
  </div>
+ </div>
+ </file>
+ <file name="script.js">
+ angular.module('test', ['dataviz.rewrite'])
+ .controller('dataController', function($scope) {
+      $scope.resource = {
+        data: [
+          { key: 1,   value: 5},  { key: 20,  value: 20},
+          { key: 40,  value: 10}, { key: 60,  value: 40},
+          { key: 80,  value: 5},  { key: 300, value: 300}
+        ]
+      };
+
+      $scope.width = 500;
+      $scope.height = 300;
+    });
  </file>
  </example>
  */
@@ -30,7 +48,7 @@
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz.rewrite')
-  .directive('blLine', function(ChartFactory, Translate, Layout, components) {
+  .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -50,7 +68,7 @@ angular.module('dataviz.rewrite')
         fieldY: '='
       },
       link: function(scope, iElem, iAttrs, controllers) {
-        var COMPONENT_TYPE = components.graph;
+        var COMPONENT_TYPE = chartTypes.linechart;
         var graphCtrl = controllers[0];
         graphCtrl.components.register(COMPONENT_TYPE);
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
