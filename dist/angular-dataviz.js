@@ -3166,7 +3166,7 @@ angular.module('dataviz.rewrite')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
     var clickFn = function(d, addFilter) {
-      addFilter('include', d.value);
+      addFilter('include', d.key);
     };
 
     return new ChartFactory.Component({
@@ -5156,7 +5156,8 @@ angular.module('dataviz.rewrite')
       scope: {
         resource: '=?',
         containerHeight: '=',
-        containerWidth: '='
+        containerWidth: '=',
+        filters: '='
       },
       compile: function() {
         return {

@@ -19,7 +19,7 @@
      Width: <input type="number" ng-model="width">
    </div>
    <div class="graph-wrapper">
-     <bl-graph container-height="height" container-width="width" resource="resource">
+     <bl-graph container-height="height" container-width="width" resource="resource" filters="filters">
        <bl-barchart field="'key'"></bl-barchart>
        <bl-axis direction="'x'"></bl-axis>
        <bl-axis direction="'y'"></bl-axis>
@@ -30,15 +30,37 @@
  <file name="script.js">
   angular.module('test', ['dataviz.rewrite'])
     .controller('dataController', function($scope) {
+      var query = new AQL.SelectQuery();  //always selects activities
+
+      query
+          .termGroup('source')
+          .sumAggregation('power');
+
       $scope.resource = {
-        data: [
-          { key: 'Ian', value: 500},
-          { key: 'Max',  value: 1000},
-          { key: 'Eugene', value: 0}
-        ]
+        data: _.take(_.sortBy(AQL.translate(query, AQL.demoConfig).result,'value'), 5)
       };
+
       $scope.width = 500;
       $scope.height = 300;
+
+      $scope.$watch('filters', function(newF, oldF) {
+        console.log("WAT", newF);
+        if (newF === oldF) return;
+
+        _.each(newF.include, function(v) {
+          query.termFilter('source', v);
+        });
+
+        $scope.resource = {
+          data: _.take(_.sortBy(AQL.translate(query, AQL.demoConfig).result,'value'), 5)
+        };
+
+        console.log(query.serialize());
+
+        console.log($scope.resource.data);
+
+      },
+      true);
     });
  </file>
  </example>
@@ -48,7 +70,7 @@ angular.module('dataviz.rewrite')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
     var clickFn = function(d, addFilter) {
-      addFilter('include', d.value);
+      addFilter('include', d.key);
     };
 
     return new ChartFactory.Component({
