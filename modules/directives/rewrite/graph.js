@@ -41,7 +41,7 @@ angular.module('dataviz.rewrite')
       restrict: 'E',
       replace: true,
       transclude: true,
-      template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></div>',
+      template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></svg>',
       scope: {
         resource: '=?',
         containerHeight: '=',
@@ -71,6 +71,19 @@ angular.module('dataviz.rewrite')
         this._id = _.uniq();
         this.scale = {};
         this.fields = {};
+        $scope.filters = this.filters = {
+          include: [],
+          exclude: [],
+          addFilter: function(type, term) {
+            if (!this[type]) {
+              throw new Error('Can\'t add filter of that type.');
+            }
+
+            this[type].push(term);
+            console.log($scope.filters);
+          }
+        };
+
         this.components = {
           registered: [],
           register: function(componentType, params) {

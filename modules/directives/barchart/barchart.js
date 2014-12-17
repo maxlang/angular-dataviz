@@ -47,6 +47,10 @@
 angular.module('dataviz.rewrite')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
+    var clickFn = function(d, addFilter) {
+      addFilter('include', d.value);
+    };
+
     return new ChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {
@@ -76,7 +80,8 @@ angular.module('dataviz.rewrite')
               //return _.contains(scope.params.filter, d.key);
             })
             .on('click', function(d, i) {
-              //clickFn.call(this, d);
+              var boundAddFilter = graphCtrl.filters.addFilter.bind(graphCtrl.filters);
+              clickFn.call(this, d, boundAddFilter);
             });
 
           bars

@@ -3165,6 +3165,10 @@ angular.module('dataviz.directives').service('VizUtils',function() {
 angular.module('dataviz.rewrite')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
+    var clickFn = function(d, addFilter) {
+      addFilter('include', d.value);
+    };
+
     return new ChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {
@@ -3194,7 +3198,8 @@ angular.module('dataviz.rewrite')
               //return _.contains(scope.params.filter, d.key);
             })
             .on('click', function(d, i) {
-              //clickFn.call(this, d);
+              var boundAddFilter = graphCtrl.filters.addFilter.bind(graphCtrl.filters);
+              clickFn.call(this, d, boundAddFilter);
             });
 
           bars
@@ -5147,7 +5152,7 @@ angular.module('dataviz.rewrite')
       restrict: 'E',
       replace: true,
       transclude: true,
-      template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></div>',
+      template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></svg>',
       scope: {
         resource: '=?',
         containerHeight: '=',
@@ -5177,6 +5182,19 @@ angular.module('dataviz.rewrite')
         this._id = _.uniq();
         this.scale = {};
         this.fields = {};
+        $scope.filters = this.filters = {
+          include: [],
+          exclude: [],
+          addFilter: function(type, term) {
+            if (!this[type]) {
+              throw new Error('Can\'t add filter of that type.');
+            }
+
+            this[type].push(term);
+            console.log($scope.filters);
+          }
+        };
+
         this.components = {
           registered: [],
           register: function(componentType, params) {
