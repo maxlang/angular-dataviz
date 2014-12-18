@@ -3166,7 +3166,7 @@ angular.module('dataviz.rewrite')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
     var clickFn = function(d, addFilter) {
-      addFilter('include', d.key);
+      addFilter('includes', d.key);
     };
 
     return new ChartFactory.Component({
@@ -3175,7 +3175,6 @@ angular.module('dataviz.rewrite')
         field: '='
       },
       link: function(scope, iElem, iAttrs, controllers) {
-        console.log('Link function!!');
         var graphCtrl = controllers[0];
         var COMPONENT_TYPE = chartTypes.barchart;
         var g = d3.select(iElem[0]);
@@ -3186,7 +3185,7 @@ angular.module('dataviz.rewrite')
           scope.layout = graphCtrl.layout.chart;
           scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
 
-          var bars = g.selectAll('rect').data(graphCtrl.data);
+          var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
 
           // Do this for all the
           bars.enter().append('rect')
@@ -3206,10 +3205,13 @@ angular.module('dataviz.rewrite')
             .attr('y', function(d) { return graphCtrl.scale.y(d.key); })
             .attr('width', function(d) { return graphCtrl.scale.x(d.value); })
             .attr('height', Math.abs(graphCtrl.scale.y.rangeBand()));
+
+          bars
+            .exit()
+            .remove();
         }
 
         scope.$on(Layout.DRAW, drawChart);
-
       }
     });
   });
@@ -5090,7 +5092,8 @@ angular.module('dataviz.rewrite')
         var axisType = scope.direction + 'Axis';
 
         var axisContainer = d3.select(iElem[0])
-          .attr('class', 'bl-axis ' + scope.direction);
+          .attr('class', 'bl-axis ' + scope.direction)
+          .attr('width', LayoutDefaults.components.yAxis.width);
 
         scope.layout = graphCtrl.layout[axisType];
         scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
@@ -5110,7 +5113,9 @@ angular.module('dataviz.rewrite')
     });
   });
 angular.module('dataviz.rewrite')
-  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults) {
+  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService) {
+    var groupCtrl;
+
     var setScale = function(metadata, xRange, yRange, chartType) {
       var scales = {};
 
@@ -5150,23 +5155,28 @@ angular.module('dataviz.rewrite')
 
     return {
       restrict: 'E',
+      require: ['^blGroup'],
       replace: true,
       transclude: true,
       template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></svg>',
       scope: {
-        resource: '=?',
+        resource: '@',
         containerHeight: '=',
         containerWidth: '=',
-        filters: '='
+        interval: '=?',
+        aggregateBy: '@',
+        field: '@',
+        aggFunction: '@'
       },
       compile: function() {
         return {
-          pre: function(scope, iElem, iAttrs, ctrl, transclude) {
+          pre: function(scope, iElem, iAttrs, ctrls, transclude) {
             transclude(scope, function(clone) {
               iElem.append(clone);
              });
+            groupCtrl = ctrls[0];
           },
-          post: function(scope, iElem, iAttrs) {
+          post: function(scope, iElem) {
             scope.componentCount = iElem.children().length;
           }
         };
@@ -5176,23 +5186,28 @@ angular.module('dataviz.rewrite')
         this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
         $scope.layout = this.layout.container;
 
-        console.log('blGraph controller live.');
-
-        this.data = $scope.resource.data;
+        var query = new AQL.SelectQuery('resourceId');  //always selects activities
 
         this._id = _.uniq();
+        this.data = {};
         this.scale = {};
         this.fields = {};
-        $scope.filters = this.filters = {
-          include: [],
-          exclude: [],
+        this.filters = {
+          includes: [],
+          excludes: [],
           addFilter: function(type, term) {
-            if (!this[type]) {
-              throw new Error('Can\'t add filter of that type.');
-            }
+            this.toggleTerm(type, term);
+            var filter = new AQL.TermFilter($scope.field, this[type]);
+            groupCtrl.filters.registerFilter(filter);
+          },
+          toggleTerm: function(type, term) {
+            var termIndex = _.findIndex(this[type], term);
 
-            this[type].push(term);
-            console.log($scope.filters);
+            if (termIndex < 0) {
+              this[type].push(term);
+            } else {
+              this[type].splice(termIndex, 1);
+            }
           }
         };
 
@@ -5203,14 +5218,42 @@ angular.module('dataviz.rewrite')
             var self = this;
 
             if (isChart(componentType)) {
+              var group;
               ctrl.chartType = componentType;
-              $scope.metadata = RangeFunctions.getMetadata(ctrl.data, componentType);
+
+              if (ChartHelper.isOrdinal(componentType)) {
+                // It's ordinal, set an interval and use intervalGroup
+                group = query.termGroup($scope.field);
+              } else {
+                // Use termGroup
+                group = query.intervalGroup($scope.field, $scope.interval);
+              }
+
+              group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+
+              ctrl.data.grouped = AQL.translate(query, AQL.demoConfig).result;
+
+              if (!ChartHelper.isOrdinal(componentType)) {
+                ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
+                  v.key = parseInt(v.key);
+                });
+              }
+
+              var sortByKey = ChartHelper.isOrdinal(componentType) ? 'value' : 'key';
+
+              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
+
+              ctrl.data.grouped = _.take(_.sortBy(ctrl.data.grouped, sortByKey), 5);
+
+              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
+
             } else if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
             }
 
             $timeout(function() {
               if (self.registered.length === $scope.componentCount) {
+                $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
                 ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
 
                 var scaleDims = getScaleDims(ctrl.layout.graph);
@@ -5234,8 +5277,32 @@ angular.module('dataviz.rewrite')
           $scope.$broadcast(Layout.DRAW);
         });
 
+        $scope.$on(FilterService.FILTER_CHANGED, function() {
+          // Clear existing filters
+          query.filters = [];
+          $scope.filters = groupCtrl.filters.getAllFilters();
+
+          // Add all filters except for the current field's
+          query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
+
+          // Repull the data
+          ctrl.data.grouped = _.take(_.sortBy(AQL.translate(query, AQL.demoConfig).result,'value'), 5);
+
+          $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
+          console.log('$scope.metadata is: ', $scope.metadata);
+          console.log('ctrl.data is: ', ctrl.data);
+          var scaleDims = getScaleDims(ctrl.layout.graph);
+          ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
+
+          $scope.$broadcast(Layout.DRAW);
+        });
+
       }
     };
+  })
+
+  .service('AQLQueryRunner', function() {
+
   })
 
   .factory('RangeFunctions', function(ChartHelper) {
@@ -5273,6 +5340,93 @@ angular.module('dataviz.rewrite')
       getMetadata: getMetadata
     };
   })
+
+/**
+ * @ngdoc directive
+ * @name dataviz.rewrite:blGroup
+ * @param {String} field The field to be used
+ * @restrict E
+ * @element bl-group
+ * @scope
+ *
+ * @description
+ * Creates a visualization group.
+ *
+ * @example
+ <example module="test">
+ <file name="index.html">
+ <div ng-controller="dataController">
+ <div>
+ Data: {{resource.data}}<br />
+ Filters: {{filters}}<br />
+ Height: <input type="number" ng-model="height"><br />
+ Width: <input type="number" ng-model="width">
+ </div>
+ <div class="graph-wrapper">
+   <bl-group>
+     <bl-graph container-height="height" container-width="width" resource="resource" field="source" aggregate-by="power" agg-function="sum">
+       <bl-barchart field="'key'"></bl-barchart>
+       <bl-axis direction="'x'"></bl-axis>
+       <bl-axis direction="'y'"></bl-axis>
+     </bl-graph>
+     <bl-graph container-height="height" container-width="width" resource="resource" field="target" aggregate-by="power" agg-function="sum">
+       <bl-barchart field="'key'"></bl-barchart>
+       <bl-axis direction="'x'"></bl-axis>
+       <bl-axis direction="'y'"></bl-axis>
+     </bl-graph>
+   </bl-group>
+ </div>
+ </div>
+ </file>
+ <file name="script.js">
+ angular.module('test', ['dataviz.rewrite'])
+ .controller('dataController', function($scope, $rootScope, FilterService) {
+      $scope.width = 500;
+      $scope.height = 300;
+    });
+ </file>
+ </example>
+ */
+
+  .directive('blGroup', function(FilterService) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      replace: true,
+      scope: {},
+      template: '<div class="bl-group" ng-transclude></div>',
+      controller: function($scope) {
+        this.filters = {
+          filterStore: {},
+          registerFilter: function(aqlFilterObj) {
+            this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+            $scope.$broadcast(FilterService.FILTER_CHANGED);
+          },
+          getAllFilters: function() {
+            return this.filterStore;
+          }
+        };
+
+      }
+    };
+  })
+  .service('FilterService', function() {
+    var groupFiltersExcept = function(exprs, filterGroup) {
+      var resFilter = new AQL.AndFilter();
+
+      _.each(filterGroup, function(f) {
+        if (_.contains(exprs, f.expr)) { return; }
+        resFilter.addFilter(f);
+      });
+
+      return resFilter;
+    };
+
+    return {
+      groupFiltersExcept: groupFiltersExcept,
+      FILTER_CHANGED: 'filters.filterChanged'
+    };
+  });
 ;
 
 angular.module('dataviz.rewrite')
@@ -5373,13 +5527,11 @@ angular.module('dataviz.rewrite')
         function drawLine() {
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
           scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          path.attr('d', scope.line(graphCtrl.data));
+          path.attr('d', scope.line(graphCtrl.data.grouped));
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
         }
 
-        scope.$on(Layout.DRAW, function() {
-          drawLine();
-        });
+        scope.$on(Layout.DRAW, drawLine);
       }
     });
   })
@@ -5758,7 +5910,7 @@ angular.module('dataviz.rewrite.services', [])
           height: 20
         },
         yAxis: {
-          width: 50
+          width: 100
         },
         legend: {
           width: 150
@@ -5767,8 +5919,16 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .service('ThemeService', function() {
+  .service('VizFilters', function() {
+    var filters = {};
 
+    var setFilter = function() {
+
+    };
+
+    return {
+
+    };
   })
 ;
 

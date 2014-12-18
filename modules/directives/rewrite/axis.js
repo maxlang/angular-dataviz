@@ -25,7 +25,8 @@ angular.module('dataviz.rewrite')
         var axisType = scope.direction + 'Axis';
 
         var axisContainer = d3.select(iElem[0])
-          .attr('class', 'bl-axis ' + scope.direction);
+          .attr('class', 'bl-axis ' + scope.direction)
+          .attr('width', LayoutDefaults.components.yAxis.width);
 
         scope.layout = graphCtrl.layout[axisType];
         scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);

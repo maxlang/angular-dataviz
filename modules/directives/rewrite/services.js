@@ -194,7 +194,7 @@ angular.module('dataviz.rewrite.services', [])
           height: 20
         },
         yAxis: {
-          width: 50
+          width: 100
         },
         legend: {
           width: 150
@@ -203,7 +203,15 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .service('ThemeService', function() {
+  .service('VizFilters', function() {
+    var filters = {};
 
+    var setFilter = function() {
+
+    };
+
+    return {
+
+    };
   })
 ;

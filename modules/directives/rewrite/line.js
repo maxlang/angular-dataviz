@@ -17,12 +17,14 @@
  Width: <input type="number" ng-model="width">
  </div>
  <div class="graph-wrapper">
- <bl-graph container-height="height" container-width="width" resource="resource">
-   <bl-line field-x="'key'" field-y="'value'"></bl-line>
-   <bl-axis direction="'x'"></bl-axis>
-   <bl-axis direction="'y'"></bl-axis>
-   <bl-legend></bl-legend>
- </bl-graph>
+ <bl-group>
+   <bl-graph container-height="height" container-width="width" field="power" interval="200" aggregate-by="power" agg-function="sum">
+     <bl-line field-x="'key'" field-y="'value'"></bl-line>
+     <bl-axis direction="'x'"></bl-axis>
+     <bl-axis direction="'y'"></bl-axis>
+     <bl-legend></bl-legend>
+   </bl-graph>
+ </bl-group>
  </div>
  </div>
  </file>
@@ -76,13 +78,11 @@ angular.module('dataviz.rewrite')
         function drawLine() {
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
           scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          path.attr('d', scope.line(graphCtrl.data));
+          path.attr('d', scope.line(graphCtrl.data.grouped));
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
         }
 
-        scope.$on(Layout.DRAW, function() {
-          drawLine();
-        });
+        scope.$on(Layout.DRAW, drawLine);
       }
     });
   })

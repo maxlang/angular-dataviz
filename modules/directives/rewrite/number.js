@@ -17,9 +17,11 @@
  Width: <input type="number" ng-model="width">
  </div>
  <div class="graph-wrapper">
- <bl-graph container-height="height" container-width="width" resource="resource">
-  <bl-number></bl-axis>
- </bl-graph>
+ <bl-group>
+   <bl-graph container-height="height" container-width="width" resource="resource">
+    <bl-number></bl-number>
+  </bl-graph>
+ </bl-group>
  </div>
  </div>
  </file>
