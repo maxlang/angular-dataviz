@@ -1,8 +1,10 @@
 angular.module('dataviz.rewrite')
   .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
-    var DISTANCE_FROM_AXIS = -12;
+    var getOffsetX = function(direction) {
+      return direction === 'x' ? 0 : -12;
+    };
 
-    var wrap = function(text, maxTextWidth) {
+    var wrap = function(text, maxTextWidth, xOffset) {
       text.each(function() {
         var text = d3.select(this);
         var words = text.text().split(/\s+/).reverse();
@@ -12,7 +14,7 @@ angular.module('dataviz.rewrite')
         var lineHeight = 1.1; // ems
         var y = text.attr("y");
         var dy = parseFloat(text.attr("dy"));
-        var tspan = text.text(null).append("tspan").attr("x", DISTANCE_FROM_AXIS).attr("y", y).attr("dy", dy + "em");
+        var tspan = text.text(null).append("tspan").attr("x", xOffset).attr("y", y).attr("dy", dy + "em");
 
         while (word = words.pop()) {
           line.push(word);
@@ -21,7 +23,7 @@ angular.module('dataviz.rewrite')
             line.pop();
             tspan.text(line.join(" "));
             line = [word];
-            tspan = text.append("tspan").attr("x", DISTANCE_FROM_AXIS).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+            tspan = text.append("tspan").attr("x", xOffset).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
           }
         }
       });
@@ -34,11 +36,10 @@ angular.module('dataviz.rewrite')
 
       axisContainer.call(axis);
 
-      var maxTextWidth = direction === 'y' ? layout.width - 12 : 100;
-
-      console.log('maxTextWidth is: ', maxTextWidth);
+      var xOffset = getOffsetX(direction);
+      var maxTextWidth = direction === 'y' ? layout.width + xOffset : 100;
       axisContainer.selectAll('.tick text')
-        .call(wrap, maxTextWidth);
+        .call(wrap, maxTextWidth, xOffset);
     };
 
     return new ChartFactory.Component({
