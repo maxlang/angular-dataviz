@@ -5067,12 +5067,45 @@ angular.module('dataviz.directives').directive('nvBarchart', [function() {
 
 angular.module('dataviz.rewrite')
   .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
-    var drawAxis = function(scale, direction, axisContainer) {
+    var DISTANCE_FROM_AXIS = -12;
+
+    var wrap = function(text, maxTextWidth) {
+      text.each(function() {
+        var text = d3.select(this);
+        var words = text.text().split(/\s+/).reverse();
+        var word;
+        var line = [];
+        var lineNumber = 0;
+        var lineHeight = 1.1; // ems
+        var y = text.attr("y");
+        var dy = parseFloat(text.attr("dy"));
+        var tspan = text.text(null).append("tspan").attr("x", DISTANCE_FROM_AXIS).attr("y", y).attr("dy", dy + "em");
+
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > maxTextWidth) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", DISTANCE_FROM_AXIS).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          }
+        }
+      });
+    };
+
+    var drawAxis = function(scale, direction, axisContainer, layout) {
       var axis = d3.svg.axis()
         .scale(scale)
         .orient(direction === 'y' ? 'left' : 'bottom');
 
       axisContainer.call(axis);
+
+      var maxTextWidth = direction === 'y' ? layout.width - 12 : 100;
+
+      console.log('maxTextWidth is: ', maxTextWidth);
+      axisContainer.selectAll('.tick text')
+        .call(wrap, maxTextWidth);
     };
 
     return new ChartFactory.Component({
@@ -5107,7 +5140,7 @@ angular.module('dataviz.rewrite')
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
           scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-          drawAxis(graphCtrl.scale[scope.direction], scope.direction, axisContainer);
+          drawAxis(graphCtrl.scale[scope.direction], scope.direction, axisContainer, scope.layout);
         });
       }
     });
