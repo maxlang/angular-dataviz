@@ -135,7 +135,7 @@ angular.module('dataviz.rewrite')
 
               if (!ChartHelper.isOrdinal(componentType)) {
                 ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
-                  v.key = parseInt(v.key);
+                  v.key = (parseIntv.key, 10);
                 });
               }
 
@@ -332,5 +332,5 @@ angular.module('dataviz.rewrite')
       groupFiltersExcept: groupFiltersExcept,
       FILTER_CHANGED: 'filters.filterChanged'
     };
-  });
+  })
 ;

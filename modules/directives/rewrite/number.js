@@ -126,7 +126,7 @@ angular.module('dataviz.rewrite')
       if (forcedType === 'plain') {
         return function(value) {
           return value;
-        }
+        };
       }
 
       if (moment(numToParse).isValid()) {
