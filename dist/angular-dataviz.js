@@ -5152,8 +5152,22 @@ angular.module('dataviz.rewrite')
 
     var setScale = function(metadata, xRange, yRange, chartType) {
       var scales = {};
+      var getXScale = function(metadata, xRange) {
+        // check to see if the data is linear or time-based
+        if (!metadata.isTime) {
+          return d3.scale.linear()
+            .domain(metadata.range)
+            .range(xRange);
+        } else {
+          return d3.time.scale()
+            .domain(metadata.range)
+            .range(xRange);
+        }
+      };
 
       // All charts use a linear scale on x. I doubt this is actually true.
+      scales.x = getXScale(metadata, xRange);
+
       scales.x = d3.scale.linear()
         .domain(metadata.domain)
         .range(xRange);
@@ -5340,6 +5354,14 @@ angular.module('dataviz.rewrite')
   })
 
   .factory('RangeFunctions', function(ChartHelper) {
+    /**
+     * Returns an object with the following parameters:
+     * total - the sum of the values of all the elements in the dataset
+     * count - the total number of elements in the dataset
+     * range - the range of the VALUES of the dataset
+     * domain - the range of the KEYS of the dataset
+     */
+
     var getMinMax = function(data, key) {
       return [_.min(data, key)[key], _.max(data,key)[key]];
     };
@@ -5361,8 +5383,6 @@ angular.module('dataviz.rewrite')
         metadata.range = _.pluck(data, 'key');
         metadata.domain = getMinMax(data, 'value');
       }
-
-      console.log('metadata is: ', metadata);
 
       return metadata;
     };
