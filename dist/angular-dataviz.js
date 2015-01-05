@@ -5283,7 +5283,7 @@ angular.module('dataviz.rewrite')
 
               if (!ChartHelper.isOrdinal(componentType)) {
                 ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
-                  v.key = (parseIntv.key, 10);
+                  v.key = parseInt(v.key, 10);
                 });
               }
 
