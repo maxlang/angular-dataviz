@@ -131,7 +131,7 @@ angular.module('dataviz.rewrite')
 
               group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
 
-              ctrl.data.grouped = AQL.translate(query, AQL.demoConfig).result;
+              ctrl.data.grouped = AQL.walker.translate(query, AQL.demoConfig).result;
 
               if (!ChartHelper.isOrdinal(componentType)) {
                 ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
@@ -186,7 +186,7 @@ angular.module('dataviz.rewrite')
           query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
 
           // Repull the data
-          ctrl.data.grouped = _.take(_.sortBy(AQL.translate(query, AQL.demoConfig).result,'value'), 5);
+          ctrl.data.grouped = _.take(_.sortBy(AQL.walker.translate(query, AQL.demoConfig).result,'value'), 5);
 
           $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
           console.log('$scope.metadata is: ', $scope.metadata);
