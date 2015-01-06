@@ -5279,7 +5279,7 @@ angular.module('dataviz.rewrite')
 
               group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
 
-              ctrl.data.grouped = AQL.walker.translate(query, AQL.demoConfig).result;
+              ctrl.data.grouped = AQL.walker.translate(query, AQL.translators.demoConfig).result;
 
               if (!ChartHelper.isOrdinal(componentType)) {
                 ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
@@ -5288,12 +5288,7 @@ angular.module('dataviz.rewrite')
               }
 
               var sortByKey = ChartHelper.isOrdinal(componentType) ? 'value' : 'key';
-
-              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
-
               ctrl.data.grouped = _.take(_.sortBy(ctrl.data.grouped, sortByKey), 5);
-
-              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
 
             } else if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
@@ -5563,6 +5558,10 @@ angular.module('dataviz.rewrite')
         .interpolate('linear');
     };
 
+    var lineConfig = {
+      circleRadius: 3
+    };
+
     return new ChartFactory.Component({
       template:
       '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
@@ -5577,12 +5576,31 @@ angular.module('dataviz.rewrite')
         var graphCtrl = controllers[0];
         graphCtrl.components.register(COMPONENT_TYPE);
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
+        var groupEl = d3.select(iElem[0]); // get the group element to append dots to
 
         function drawLine() {
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
           scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path.attr('d', scope.line(graphCtrl.data.grouped));
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+
+          var dots = groupEl.selectAll('g.dot')
+            .data(graphCtrl.data.grouped)
+            .enter().append('g')
+            .attr('class', 'dot')
+            .selectAll('circle')
+            .data(graphCtrl.data.grouped)
+            .enter().append('circle')
+            .attr('r', lineConfig.circleRadius);
+
+          groupEl.selectAll('g.dot circle')
+            .attr('cx', function(d) { return graphCtrl.scale.x(d[scope.fieldX]); })
+            .attr('cy', function(d) { return graphCtrl.scale.y(d[scope.fieldY]); })
+            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')' });
+
+          dots
+            .data(graphCtrl.data.grouped)
+            .exit().remove();
         }
 
         scope.$on(Layout.DRAW, drawLine);
