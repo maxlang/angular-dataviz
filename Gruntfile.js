@@ -94,6 +94,7 @@ module.exports = function (grunt) {
           'components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js',
           'components/angular-ui-map/src/map.js',
           'components/abstractquerylanguage/dist/aql.js',
+          'components/d3-tip/index.js',
           'dist/angular-dataviz.js'],
         styles: [
           'dist/angular-dataviz.css'

@@ -12,7 +12,7 @@
 
     path, line {
       shape-rendering: crispEdges;
-      stroke: grey;
+      stroke: none;
     }
 
     path.domain {
@@ -23,17 +23,29 @@
       font-size: 12px;
     }
 
-    &[direction="x"] {
+    &.x {
     }
 
-    &[direction="y"] {
+    &.y {
+      .tick {
+        line {
+          stroke: grey;
+        }
+      }
     }
   }
 
   .bl-line {
     path {
       fill: none;
-      stroke: black;
+      stroke: steelblue;
+      stroke-width: 2px;
+    }
+
+    circle {
+      fill: white;
+      stroke: steelblue;
+      stroke-width: 2px;
     }
   }
 
@@ -49,6 +61,18 @@
 
   // This class is generic and applies to all chart types
   .chart {
+    display: block;
+  }
+}
+
+.viz-tooltip {
+  background: white;
+  border: solid grey 1px;
+  box-shadow: 1px 1px 2px grey;
+  padding: 5px;
+  border-radius: 3px;
+
+  .tip-text {
     display: block;
   }
 }

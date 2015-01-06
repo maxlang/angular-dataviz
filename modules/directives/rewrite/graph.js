@@ -26,13 +26,14 @@ angular.module('dataviz.rewrite')
 
       // Define the Y scale based on whether the chart type is ordinal or linear
       if (!ChartHelper.isOrdinal(chartType)) {
+        console.log('metadata is: ', metadata);
         scales.y = d3.scale.linear()
           .domain(metadata.range)
           .range(yRange);
       } else {
-       scales.y = d3.scale.ordinal()
-         .domain(metadata.range)
-         .rangeRoundBands(yRange, 0.1, 0);
+        scales.y = d3.scale.ordinal()
+          .domain(metadata.range)
+          .rangeRoundBands(yRange, 0.1, 0);
       }
 
       return scales;
@@ -209,8 +210,15 @@ angular.module('dataviz.rewrite')
      * domain - the range of the KEYS of the dataset
      */
 
-    var getMinMax = function(data, key) {
-      return [_.min(data, key)[key], _.max(data,key)[key]];
+    var getMinMax = function(data, key, startFromZero) {
+      var max = _.max(data,key)[key];
+
+      if (startFromZero) {
+        return [0, max];
+      } else {
+        var min = _.min(data, key)[key];
+        return [min, max];
+      }
     };
 
     var getMetadata = function(data, chartType) {
@@ -224,7 +232,7 @@ angular.module('dataviz.rewrite')
       metadata.avg = metadata.total / metadata.count;
 
       if (!ChartHelper.isOrdinal(chartType)) {
-        metadata.range = getMinMax(data, 'value');
+        metadata.range = getMinMax(data, 'value', true);
         metadata.domain = getMinMax(data, 'key');
       } else {
         metadata.range = _.pluck(data, 'key');

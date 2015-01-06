@@ -5079,7 +5079,7 @@ angular.module('dataviz.rewrite')
         var line = [];
         var lineNumber = 0;
         var lineHeight = 1.1; // ems
-        var y = text.attr("y");
+        var y = 0;
         var dy = parseFloat(text.attr("dy"));
         var tspan = text.text(null).append("tspan").attr("x", xOffset).attr("y", y).attr("dy", dy + "em");
 
@@ -5096,16 +5096,30 @@ angular.module('dataviz.rewrite')
       });
     };
 
-    var drawAxis = function(scale, direction, axisContainer, layout) {
+    var drawAxis = function(scales, direction, axisContainer, layout) {
       var axis = d3.svg.axis()
-        .scale(scale)
+        .scale(scales[direction])
         .orient(direction === 'y' ? 'left' : 'bottom');
 
       axisContainer.call(axis);
 
       var xOffset = getOffsetX(direction);
       var maxTextWidth = direction === 'y' ? layout.width + xOffset : 100;
+
+      // We want lines to span the graph for only the y axis
+      if (direction === 'y') {
+        console.log('scales.x.range()[1] is: ', scales.x.range()[1]);
+        axisContainer.selectAll('.tick line')
+          .attr('x2', scales.x.range()[1]);
+      }
+
       axisContainer.selectAll('.tick text')
+        .attr('transform', function() {
+          return 'rotate(' + (direction === 'x' ? -90 : 0) + ')';
+        })
+        .style('text-anchor', function() {
+          return (direction === 'x' ? 'end' : 'end');
+        })
         .call(wrap, maxTextWidth, xOffset);
     };
 
@@ -5141,7 +5155,7 @@ angular.module('dataviz.rewrite')
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
           scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-          drawAxis(graphCtrl.scale[scope.direction], scope.direction, axisContainer, scope.layout);
+          drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
         });
       }
     });
@@ -5174,13 +5188,14 @@ angular.module('dataviz.rewrite')
 
       // Define the Y scale based on whether the chart type is ordinal or linear
       if (!ChartHelper.isOrdinal(chartType)) {
+        console.log('metadata is: ', metadata);
         scales.y = d3.scale.linear()
           .domain(metadata.range)
           .range(yRange);
       } else {
-       scales.y = d3.scale.ordinal()
-         .domain(metadata.range)
-         .rangeRoundBands(yRange, 0.1, 0);
+        scales.y = d3.scale.ordinal()
+          .domain(metadata.range)
+          .rangeRoundBands(yRange, 0.1, 0);
       }
 
       return scales;
@@ -5357,8 +5372,15 @@ angular.module('dataviz.rewrite')
      * domain - the range of the KEYS of the dataset
      */
 
-    var getMinMax = function(data, key) {
-      return [_.min(data, key)[key], _.max(data,key)[key]];
+    var getMinMax = function(data, key, startFromZero) {
+      var max = _.max(data,key)[key];
+
+      if (startFromZero) {
+        return [0, max];
+      } else {
+        var min = _.min(data, key)[key];
+        return [min, max];
+      }
     };
 
     var getMetadata = function(data, chartType) {
@@ -5372,7 +5394,7 @@ angular.module('dataviz.rewrite')
       metadata.avg = metadata.total / metadata.count;
 
       if (!ChartHelper.isOrdinal(chartType)) {
-        metadata.range = getMinMax(data, 'value');
+        metadata.range = getMinMax(data, 'value', true);
         metadata.domain = getMinMax(data, 'key');
       } else {
         metadata.range = _.pluck(data, 'key');
@@ -5486,7 +5508,7 @@ angular.module('dataviz.rewrite')
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
         var COMPONENT_TYPE = componentTypes.legend;
-        var seriesData = ['Series1'];
+        var seriesData = ['Loans'];
         graphCtrl.components.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;
 
@@ -5516,7 +5538,7 @@ angular.module('dataviz.rewrite')
         series.append('rect')
           .attr('width', RECT_SIZE)
           .attr('height', RECT_SIZE)
-          .attr('fill', 'red')
+          .attr('fill', 'steelblue')
           .attr('stroke', 'none');
 
         series.append('text')
@@ -5583,6 +5605,13 @@ angular.module('dataviz.rewrite')
           scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path.attr('d', scope.line(graphCtrl.data.grouped));
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+          var tip = d3.tip()
+            .attr('class', 'viz-tooltip')
+            .offset([-30, 0])
+            .html(function(d) {
+              return '<span class="tip-text">' + d[scope.fieldX] + '</span>' +
+                '<span class="tip-text">' + d[scope.fieldY] + '</span>';
+            });
 
           var dots = groupEl.selectAll('g.dot')
             .data(graphCtrl.data.grouped)
@@ -5593,10 +5622,14 @@ angular.module('dataviz.rewrite')
             .enter().append('circle')
             .attr('r', lineConfig.circleRadius);
 
+          groupEl.call(tip);
+
           groupEl.selectAll('g.dot circle')
             .attr('cx', function(d) { return graphCtrl.scale.x(d[scope.fieldX]); })
             .attr('cy', function(d) { return graphCtrl.scale.y(d[scope.fieldY]); })
-            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')' });
+            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')' })
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
 
           dots
             .data(graphCtrl.data.grouped)
@@ -5820,7 +5853,7 @@ angular.module('dataviz.rewrite.services', [])
 
       if (direction === 'x') {
         translateObj = {
-          y: layout.container.height - LayoutDefaults.components.xAxis.height,
+          y: layout.container.height - LayoutDefaults.components.xAxis.height + LayoutDefaults.padding.graph.bottom,
           x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
@@ -5841,7 +5874,7 @@ angular.module('dataviz.rewrite.services', [])
 
       return {
         x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: 10 // why?
+        y: 15 // why?
       };
     };
 
@@ -5903,7 +5936,7 @@ angular.module('dataviz.rewrite.services', [])
           width: attrWidth
         },
         graph: {
-          height: attrHeight,
+          height: withoutPadding(attrHeight, 'v'),
           width: attrWidth
         },
         xAxis: {
@@ -5959,7 +5992,7 @@ angular.module('dataviz.rewrite.services', [])
     return {
       padding: {
         graph: {
-          bottom: 0,
+          bottom: 10,
           top: 0,
           right: 15,
           left: 0
@@ -5979,7 +6012,7 @@ angular.module('dataviz.rewrite.services', [])
       },
       components: {
         xAxis: {
-          height: 20
+          height: 50
         },
         yAxis: {
           width: 100

@@ -32,7 +32,7 @@ angular.module('dataviz.rewrite.services', [])
 
       if (direction === 'x') {
         translateObj = {
-          y: layout.container.height - LayoutDefaults.components.xAxis.height,
+          y: layout.container.height - LayoutDefaults.components.xAxis.height + LayoutDefaults.padding.graph.bottom,
           x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
@@ -53,7 +53,7 @@ angular.module('dataviz.rewrite.services', [])
 
       return {
         x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: 10 // why?
+        y: 15 // why?
       };
     };
 
@@ -115,7 +115,7 @@ angular.module('dataviz.rewrite.services', [])
           width: attrWidth
         },
         graph: {
-          height: attrHeight,
+          height: withoutPadding(attrHeight, 'v'),
           width: attrWidth
         },
         xAxis: {
@@ -171,7 +171,7 @@ angular.module('dataviz.rewrite.services', [])
     return {
       padding: {
         graph: {
-          bottom: 0,
+          bottom: 10,
           top: 0,
           right: 15,
           left: 0
@@ -191,7 +191,7 @@ angular.module('dataviz.rewrite.services', [])
       },
       components: {
         xAxis: {
-          height: 20
+          height: 50
         },
         yAxis: {
           width: 100

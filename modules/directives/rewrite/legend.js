@@ -6,7 +6,7 @@ angular.module('dataviz.rewrite')
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
         var graphCtrl = controllers[0];
         var COMPONENT_TYPE = componentTypes.legend;
-        var seriesData = ['Series1'];
+        var seriesData = ['Loans'];
         graphCtrl.components.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;
 
@@ -36,7 +36,7 @@ angular.module('dataviz.rewrite')
         series.append('rect')
           .attr('width', RECT_SIZE)
           .attr('height', RECT_SIZE)
-          .attr('fill', 'red')
+          .attr('fill', 'steelblue')
           .attr('stroke', 'none');
 
         series.append('text')

@@ -85,6 +85,13 @@ angular.module('dataviz.rewrite')
           scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path.attr('d', scope.line(graphCtrl.data.grouped));
           scope.layout = graphCtrl.layout[COMPONENT_TYPE];
+          var tip = d3.tip()
+            .attr('class', 'viz-tooltip')
+            .offset([-30, 0])
+            .html(function(d) {
+              return '<span class="tip-text">' + d[scope.fieldX] + '</span>' +
+                '<span class="tip-text">' + d[scope.fieldY] + '</span>';
+            });
 
           var dots = groupEl.selectAll('g.dot')
             .data(graphCtrl.data.grouped)
@@ -95,10 +102,14 @@ angular.module('dataviz.rewrite')
             .enter().append('circle')
             .attr('r', lineConfig.circleRadius);
 
+          groupEl.call(tip);
+
           groupEl.selectAll('g.dot circle')
             .attr('cx', function(d) { return graphCtrl.scale.x(d[scope.fieldX]); })
             .attr('cy', function(d) { return graphCtrl.scale.y(d[scope.fieldY]); })
-            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')' });
+            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')' })
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
 
           dots
             .data(graphCtrl.data.grouped)

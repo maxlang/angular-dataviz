@@ -2033,7 +2033,7 @@ nv-barchart * {
 .bl-graph .bl-axis path,
 .bl-graph .bl-axis line {
   shape-rendering: crispEdges;
-  stroke: grey;
+  stroke: none;
 }
 .bl-graph .bl-axis path.domain {
   fill: none;
@@ -2041,9 +2041,18 @@ nv-barchart * {
 .bl-graph .bl-axis text {
   font-size: 12px;
 }
+.bl-graph .bl-axis.y .tick line {
+  stroke: grey;
+}
 .bl-graph .bl-line path {
   fill: none;
-  stroke: black;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+.bl-graph .bl-line circle {
+  fill: white;
+  stroke: steelblue;
+  stroke-width: 2px;
 }
 .bl-graph .bl-legend {
   fill: transparent;
@@ -2054,6 +2063,16 @@ nv-barchart * {
   fill: black;
 }
 .bl-graph .chart {
+  display: block;
+}
+.viz-tooltip {
+  background: white;
+  border: solid grey 1px;
+  box-shadow: 1px 1px 2px grey;
+  padding: 5px;
+  border-radius: 3px;
+}
+.viz-tooltip .tip-text {
   display: block;
 }
 

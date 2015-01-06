@@ -12,7 +12,7 @@ angular.module('dataviz.rewrite')
         var line = [];
         var lineNumber = 0;
         var lineHeight = 1.1; // ems
-        var y = text.attr("y");
+        var y = 0;
         var dy = parseFloat(text.attr("dy"));
         var tspan = text.text(null).append("tspan").attr("x", xOffset).attr("y", y).attr("dy", dy + "em");
 
@@ -29,16 +29,30 @@ angular.module('dataviz.rewrite')
       });
     };
 
-    var drawAxis = function(scale, direction, axisContainer, layout) {
+    var drawAxis = function(scales, direction, axisContainer, layout) {
       var axis = d3.svg.axis()
-        .scale(scale)
+        .scale(scales[direction])
         .orient(direction === 'y' ? 'left' : 'bottom');
 
       axisContainer.call(axis);
 
       var xOffset = getOffsetX(direction);
       var maxTextWidth = direction === 'y' ? layout.width + xOffset : 100;
+
+      // We want lines to span the graph for only the y axis
+      if (direction === 'y') {
+        console.log('scales.x.range()[1] is: ', scales.x.range()[1]);
+        axisContainer.selectAll('.tick line')
+          .attr('x2', scales.x.range()[1]);
+      }
+
       axisContainer.selectAll('.tick text')
+        .attr('transform', function() {
+          return 'rotate(' + (direction === 'x' ? -90 : 0) + ')';
+        })
+        .style('text-anchor', function() {
+          return (direction === 'x' ? 'end' : 'end');
+        })
         .call(wrap, maxTextWidth, xOffset);
     };
 
@@ -74,7 +88,7 @@ angular.module('dataviz.rewrite')
           console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
           scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-          drawAxis(graphCtrl.scale[scope.direction], scope.direction, axisContainer, scope.layout);
+          drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
         });
       }
     });
