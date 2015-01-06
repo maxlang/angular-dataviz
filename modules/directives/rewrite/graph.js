@@ -131,7 +131,7 @@ angular.module('dataviz.rewrite')
 
               group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
 
-              ctrl.data.grouped = AQL.walker.translate(query, AQL.demoConfig).result;
+              ctrl.data.grouped = AQL.walker.translate(query, AQL.translators.demoConfig).result;
 
               if (!ChartHelper.isOrdinal(componentType)) {
                 ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
@@ -140,12 +140,7 @@ angular.module('dataviz.rewrite')
               }
 
               var sortByKey = ChartHelper.isOrdinal(componentType) ? 'value' : 'key';
-
-              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
-
               ctrl.data.grouped = _.take(_.sortBy(ctrl.data.grouped, sortByKey), 5);
-
-              console.log(JSON.stringify(ctrl.data.grouped, undefined, 2));
 
             } else if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
