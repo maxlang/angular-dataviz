@@ -202,4 +202,102 @@ angular.module('dataviz.rewrite.services', [])
       }
     };
   })
+  .service('FilterService', function() {
+    var groupFiltersExcept = function(exprs, filterGroup) {
+      var resFilter = new AQL.AndFilter();
+
+      _.each(filterGroup, function(f) {
+        if (_.contains(exprs, f.expr)) { return; }
+        resFilter.addFilter(f);
+      });
+
+      return resFilter;
+    };
+
+    return {
+      groupFiltersExcept: groupFiltersExcept,
+      FILTER_CHANGED: 'filters.filterChanged'
+    };
+  })
+  .provider('AQLRunner', function() {
+    var resources = [];
+
+    var getResourceConfig = function(resourceStr) {
+      return _.find(resources, function(rs) {
+        return rs.matcher.test(resourceStr);
+      });
+    };
+
+    this.resource = function(pattern, configObj) {
+      var getFields = function(pattern) {
+        return _.map(_.filter(pattern.split('/'), function(segment) { return segment[0] === ':'; }), function(token) { return token.slice(1); });
+      };
+
+      var makeMatcher = function(pattern) {
+        // TODO: Potential issue if someone passes in .* (or any other regex chars)
+        return new RegExp('^' + _.map(pattern.split('/'), function(v) { return v[0] === ':' ? '([^/]*)' : v;}).join('/') + '$');
+      };
+
+      resources.push({
+        matcher: makeMatcher(pattern),
+        config: configObj,
+        fields: getFields(pattern)
+      });
+
+      return this;
+    };
+
+    this.$get = function($http) { // AQLRunner(query).success)func
+      return function(query) {
+        var resource = getResourceConfig(query.resourceId);
+        var queryFields = query.resourceId.match(resource.matcher).slice(1);
+
+        return $http.post(resource.config.url, {
+          params: _.zipObject(resource.fields, queryFields),
+          query: query
+        });
+      };
+    };
+  })
+
+  .factory('RangeFunctions', function(ChartHelper) {
+    /**
+     * Returns an object with the following parameters:
+     * count - the total number of elements in the dataset
+     * range - the range of the VALUES of the dataset
+     * domain - the range of the KEYS of the dataset
+     */
+
+    var getMinMax = function(data, key, startFromZero) {
+      var max = _.max(data,key)[key];
+
+      if (startFromZero) {
+        return [0, max];
+      } else {
+        var min = _.min(data, key)[key];
+        return [min, max];
+      }
+    };
+
+    var getMetadata = function(data, chartType) {
+      var metadata = {
+        count: data.length
+      };
+
+      if (!ChartHelper.isOrdinal(chartType)) {
+        metadata.range = getMinMax(data, 'value', true);
+        metadata.domain = getMinMax(data, 'key');
+      } else {
+        metadata.range = _.pluck(data, 'key');
+        metadata.domain = getMinMax(data, 'value');
+      }
+
+      return metadata;
+    };
+
+    return {
+      getMinMax: getMinMax,
+      getMetadata: getMetadata
+    };
+  })
 ;
