@@ -32,7 +32,8 @@ angular.module('dataviz.rewrite')
     var drawAxis = function(scales, direction, axisContainer, layout) {
       var axis = d3.svg.axis()
         .scale(scales[direction])
-        .orient(direction === 'y' ? 'left' : 'bottom');
+        .orient(direction === 'y' ? 'left' : 'bottom')
+        .tickFormat(d3.format("s"));
 
       axisContainer.call(axis);
 

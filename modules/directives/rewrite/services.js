@@ -36,8 +36,19 @@ angular.module('dataviz.rewrite.services', [])
           x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
+        var yTranslate = layout.container.height - layout.yAxis.height;
+
+        if (layoutHas(componentTypes.xAxis)) {
+          yTranslate -= LayoutDefaults.components.xAxis.height;
+        }
+
+        if (layoutHas(componentTypes.title)) {
+          var titlePadding = LayoutDefaults.padding.title;
+          yTranslate += (LayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
+        }
+
         translateObj = {
-          y: layout.container.height - layout.yAxis.height - (layoutHas(componentTypes.xAxis) ? LayoutDefaults.components.xAxis.height : 0) + 10, // why?
+          y: yTranslate + 10, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -50,10 +61,11 @@ angular.module('dataviz.rewrite.services', [])
 
     var graph = function(layout, registered, graphType) {
       var layoutHas = Layout.makeLayoutHas(registered);
+      var titlePadding = LayoutDefaults.padding.title;
 
       return {
         x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: 10 // why?
+        y: (layoutHas(componentTypes.title) ? (LayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 10) // why?
       };
     };
 
@@ -78,6 +90,19 @@ angular.module('dataviz.rewrite.services', [])
       };
     };
 
+    var layoutIsValid = function(layout) {
+      var keys = ['height', 'width'];
+      var isValidLayoutValue = function(input) {
+        return !_.isString(input) && (_.isUndefined(input) || !isNaN(input));
+      };
+
+      return _.every(layout, function(layoutItem) {
+        return _.every(keys, function(key) {
+          return isValidLayoutValue(layoutItem[key]);
+        });
+      });
+    };
+
     var updateLayout = function(registered, layout) {
       var layoutHas = makeLayoutHas(registered);
 
@@ -91,8 +116,12 @@ angular.module('dataviz.rewrite.services', [])
       }
 
       // Handle graph height
-      if (layoutHas(componentTypes.xAxis)) {
+      if (layoutHas(componentTypes.xAxis) && layoutHas(componentTypes.title)) {
+        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height - (LayoutDefaults.components.title.height + LayoutDefaults.padding.title.top + LayoutDefaults.padding.title.bottom);
+      } else if (layoutHas(componentTypes.xAxis)) {
         layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
+      } else if (layoutHas(componentTypes.title)) {
+        layout.graph.height = layout.container.height - LayoutDefaults.components.title.height;
       }
 
       return layout;
@@ -128,6 +157,9 @@ angular.module('dataviz.rewrite.services', [])
         },
         legend: {
           width: LayoutDefaults.components.legend.width
+        },
+        title: {
+          height: LayoutDefaults.components.title.height
         }
       };
     };
@@ -136,6 +168,7 @@ angular.module('dataviz.rewrite.services', [])
       updateLayout: updateLayout,
       getDefaultLayout: getDefaultLayout,
       makeLayoutHas: makeLayoutHas,
+      layoutIsValid: layoutIsValid,
       DRAW: 'layout.draw'
     };
   })
@@ -144,7 +177,8 @@ angular.module('dataviz.rewrite.services', [])
     xAxis: 'xAxis',
     yAxis: 'yAxis',
     legend: 'legend',
-    axis: 'axis'
+    axis: 'axis',
+    title: 'title'
   })
 
   .constant('chartTypes', {
@@ -187,17 +221,24 @@ angular.module('dataviz.rewrite.services', [])
             left: 0,
             right: 0
           }
+        },
+        title: {
+          top: 10,
+          bottom: 10
         }
       },
       components: {
         xAxis: {
-          height: 80
+          height: 70
         },
         yAxis: {
-          width: 100
+          width: 60
         },
         legend: {
           width: 150
+        },
+        title: {
+          height: 20
         }
       }
     };

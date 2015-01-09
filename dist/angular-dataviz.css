@@ -2044,6 +2044,11 @@ nv-barchart * {
 .bl-graph .bl-axis.y .tick line {
   stroke: grey;
 }
+.bl-graph .bl-title {
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
 .bl-graph .bl-line path {
   fill: none;
   stroke: steelblue;

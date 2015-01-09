@@ -51,10 +51,10 @@ angular.module('dataviz.rewrite')
             })
             .attr('width', function(d) { return barWidth; })
             .attr('height', function(d) {
-              return graphCtrl.scale.y(d.value);
+              return scope.layout.height - graphCtrl.scale.y(d.value);
             })
             .attr('transform', function(d) {
-              return 'translate(0,'+ (scope.layout.height - graphCtrl.scale.y(d.value) - 10)  +')';
+              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
             });
 
 

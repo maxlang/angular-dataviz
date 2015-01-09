@@ -44,6 +44,17 @@
  </file>
  </example>
  */
+
+/*
+ WIDTH AUTOFILL SPEC
+ Should really only apply if none of the visualizations have their width and height set as non-percent integers
+ Steps:
+ blGroup should measure its own bounding box and determine the width.
+ blGroup should get one of its children and get its calc’d CSS margins
+ blGroup should check to see if its childrens' widths are percentages
+ if percentages, take its current available width and multiple by each percentage
+ if not percentages, divide the current available width by the number of children
+ */
 angular.module('dataviz.rewrite')
   .directive('blGroup', function(FilterService) {
     return {

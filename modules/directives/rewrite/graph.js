@@ -50,7 +50,7 @@ angular.module('dataviz.rewrite')
     var getScaleDims = function(graphLayout) {
       return {
         x: [0, graphLayout.width - LayoutDefaults.padding.graph.right],
-        y: [graphLayout.height - 10, 0]
+        y: [graphLayout.height, 0]
       };
     };
 
@@ -90,7 +90,6 @@ angular.module('dataviz.rewrite')
         $scope.layout = this.layout.container;
         this.interval = $scope.interval;
         this.query = new AQL.SelectQuery($scope.resource);
-        this._id = _.uniq();
         this.data = {};
         this.scale = {};
         this.fields = {};
@@ -148,21 +147,18 @@ angular.module('dataviz.rewrite')
                 AQLRunner(ctrl.query)
                   .success(function(data) {
                     ctrl.data.grouped = data;
-                    //if (!ChartHelper.isOrdinal(componentType)) {
-                    //  ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
-                    //    v.key = parseInt(v.key, 10);
-                    //  });
-                    //}
-
-                    $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
+                    $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
                     ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
 
                     var scaleDims = getScaleDims(ctrl.layout.graph);
                     ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-                    $scope.$broadcast(Layout.DRAW);
+
+                    if (Layout.layoutIsValid(ctrl.layout)) {
+                      $scope.$broadcast(Layout.DRAW);
+                    }
                   })
                   .error(function(err) {
-                    console.error('error pulling data: ', err);
+                    console.error('Error pulling data: ', err);
                   });
               }
             });
@@ -217,5 +213,31 @@ angular.module('dataviz.rewrite')
 
       }
     };
+  })
+
+  .directive('blTitle', function(ChartFactory, componentTypes, LayoutDefaults, Layout) {
+    return new ChartFactory.Component({
+      template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
+      scope: {
+        title: '@'
+      },
+      require: '^blGraph',
+      link: function(scope, iElem, iAttrs, graphCtrl) {
+        graphCtrl.components.register(componentTypes.title);
+
+        // The text needs to be centered and positioned at the top
+        function drawTitle(){
+          var containerWidth = graphCtrl.layout.container.width;
+          var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
+
+          scope.translate = {
+            x: Math.floor((containerWidth - elemWidth) / 2),
+            y: LayoutDefaults.padding.title.top
+          };
+        }
+
+        scope.$on(Layout.DRAW, drawTitle);
+      }
+    });
   })
 ;
