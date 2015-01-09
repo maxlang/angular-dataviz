@@ -53,7 +53,7 @@ angular.module('dataviz.rewrite.services', [])
 
       return {
         x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: 15 // why?
+        y: 10 // why?
       };
     };
 
@@ -156,7 +156,7 @@ angular.module('dataviz.rewrite.services', [])
   })
 
   .factory('ChartHelper', function(chartTypes) {
-    var ordinalCharts = [chartTypes.barchart, chartTypes.histogram];
+    var ordinalCharts = [chartTypes.barchart];
 
     var isOrdinal = function(chartType) {
       return _.contains(ordinalCharts, chartType);
@@ -191,7 +191,7 @@ angular.module('dataviz.rewrite.services', [])
       },
       components: {
         xAxis: {
-          height: 50
+          height: 80
         },
         yAxis: {
           width: 100
@@ -200,18 +200,6 @@ angular.module('dataviz.rewrite.services', [])
           width: 150
         }
       }
-    };
-  })
-
-  .service('VizFilters', function() {
-    var filters = {};
-
-    var setFilter = function() {
-
-    };
-
-    return {
-
     };
   })
 ;

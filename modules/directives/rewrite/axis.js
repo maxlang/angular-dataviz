@@ -41,7 +41,6 @@ angular.module('dataviz.rewrite')
 
       // We want lines to span the graph for only the y axis
       if (direction === 'y') {
-        console.log('scales.x.range()[1] is: ', scales.x.range()[1]);
         axisContainer.selectAll('.tick line')
           .attr('x2', scales.x.range()[1]);
       }

@@ -1,5 +1,5 @@
 angular.module('dataviz.rewrite')
-  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService) {
+  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner) {
     var groupCtrl;
 
     var setScale = function(metadata, xRange, yRange, chartType) {
@@ -62,6 +62,7 @@ angular.module('dataviz.rewrite')
       template:'<svg class="bl-graph" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}"></svg>',
       scope: {
         resource: '@',
+        refresh: '@?',
         containerHeight: '=',
         containerWidth: '=',
         interval: '=?',
@@ -84,11 +85,11 @@ angular.module('dataviz.rewrite')
       },
       controller: function($scope, $element, $attrs) {
         var ctrl = this;
+        var hasRun = false;
         this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
         $scope.layout = this.layout.container;
-
-        var query = new AQL.SelectQuery('resourceId');  //always selects activities
-
+        this.interval = $scope.interval;
+        this.query = new AQL.SelectQuery($scope.resource);
         this._id = _.uniq();
         this.data = {};
         this.scale = {};
@@ -97,6 +98,8 @@ angular.module('dataviz.rewrite')
           includes: [],
           excludes: [],
           addFilter: function(type, term) {
+            // To be clear, 'type' here is going to be either 'includes' or 'excludes'
+            // So we're adding inclusion/exclusion filters
             this.toggleTerm(type, term);
             var filter = new AQL.TermFilter($scope.field, this[type]);
             groupCtrl.filters.registerFilter(filter);
@@ -124,37 +127,47 @@ angular.module('dataviz.rewrite')
 
               if (ChartHelper.isOrdinal(componentType)) {
                 // It's ordinal, set an interval and use intervalGroup
-                group = query.termGroup($scope.field);
+                group = ctrl.query.termGroup($scope.field);
               } else {
                 // Use termGroup
-                group = query.intervalGroup($scope.field, $scope.interval);
+                group = ctrl.query.intervalGroup($scope.field, $scope.interval);
               }
 
-              group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
-
-              ctrl.data.grouped = AQL.walker.translate(query, AQL.translators.demoConfig).result;
-
-              if (!ChartHelper.isOrdinal(componentType)) {
-                ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
-                  v.key = parseInt(v.key, 10);
-                });
+              if ($scope.aggFunction && $scope.aggregateBy) {
+                group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
               }
 
-              var sortByKey = ChartHelper.isOrdinal(componentType) ? 'value' : 'key';
-              ctrl.data.grouped = _.take(_.sortBy(ctrl.data.grouped, sortByKey), 5);
 
             } else if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
             }
 
             $timeout(function() {
-              if (self.registered.length === $scope.componentCount) {
-                $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
-                ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
+              if (self.registered.length === $scope.componentCount && !hasRun) {
+                hasRun = true;
+                AQLRunner(ctrl.query)
+                  .success(function(data) {
+                    console.log('got data: ', data);
+                    ctrl.data.grouped = data;
+                    if (!ChartHelper.isOrdinal(componentType)) {
+                      ctrl.data.grouped = _.each(ctrl.data.grouped, function(v) {
+                        v.key = parseInt(v.key, 10);
+                      });
+                    }
 
-                var scaleDims = getScaleDims(ctrl.layout.graph);
-                ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-                $scope.$broadcast(Layout.DRAW);
+                    var sortByKey = ChartHelper.isOrdinal(componentType) ? 'value' : 'key';
+                    ctrl.data.grouped = _.take(_.sortBy(ctrl.data.grouped, sortByKey), 5);
+
+                    $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
+                    ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
+
+                    var scaleDims = getScaleDims(ctrl.layout.graph);
+                    ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
+                    $scope.$broadcast(Layout.DRAW);
+                  })
+                  .error(function(err) {
+                    console.error('error pulling data: ', err);
+                  });
               }
             });
           }
@@ -175,30 +188,39 @@ angular.module('dataviz.rewrite')
 
         $scope.$on(FilterService.FILTER_CHANGED, function() {
           // Clear existing filters
-          query.filters = [];
+          ctrl.query.filters = [];
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
-          query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
+          var newFilterSet = FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
+          console.log('newFilterSet is: ', newFilterSet);
+
+          if (!newFilterSet.value) {
+            ctrl.query.filters = [];
+          } else {
+            ctrl.query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
+          }
+
 
           // Repull the data
-          ctrl.data.grouped = _.take(_.sortBy(AQL.walker.translate(query, AQL.demoConfig).result,'value'), 5);
+          AQLRunner(ctrl.query)
+            .success(function(data) {
+              ctrl.data.grouped = data;
+              $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
 
-          $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
-          console.log('$scope.metadata is: ', $scope.metadata);
-          console.log('ctrl.data is: ', ctrl.data);
-          var scaleDims = getScaleDims(ctrl.layout.graph);
-          ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
+              var scaleDims = getScaleDims(ctrl.layout.graph);
+              ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
 
-          $scope.$broadcast(Layout.DRAW);
+              $scope.$broadcast(Layout.DRAW);
+
+            })
+            .error(function(err) {
+              console.error('Error running AQL query: ', err);
+            });
         });
 
       }
     };
-  })
-
-  .service('AQLQueryRunner', function() {
-
   })
 
   .factory('RangeFunctions', function(ChartHelper) {
@@ -302,10 +324,12 @@ angular.module('dataviz.rewrite')
       restrict: 'E',
       transclude: true,
       replace: true,
-      scope: {},
+      scope: {
+        filters: '='
+      },
       template: '<div class="bl-group" ng-transclude></div>',
       controller: function($scope) {
-        this.filters = {
+        $scope.filters = this.filters = {
           filterStore: {},
           registerFilter: function(aqlFilterObj) {
             this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
@@ -334,6 +358,49 @@ angular.module('dataviz.rewrite')
     return {
       groupFiltersExcept: groupFiltersExcept,
       FILTER_CHANGED: 'filters.filterChanged'
+    };
+  })
+  .provider('AQLRunner', function() {
+    var resources = [];
+
+    var getResourceConfig = function(resourceStr) {
+      return _.find(resources, function(rs) {
+        return rs.matcher.test(resourceStr);
+      });
+    };
+
+    this.resource = function(pattern, configObj) {
+      var getFields = function(pattern) {
+        return _.map(_.filter(pattern.split('/'), function(segment) { return segment[0] === ':'; }), function(token) { return token.slice(1); });
+      };
+
+      var makeMatcher = function(pattern) {
+        // TODO: Potential issue if someone passes in .* (or any other regex chars)
+        return new RegExp('^' + _.map(pattern.split('/'), function(v) { return v[0] === ':' ? '([^/]*)' : v;}).join('/') + '$');
+      };
+
+      resources.push({
+        matcher: makeMatcher(pattern),
+        config: configObj,
+        fields: getFields(pattern)
+      });
+
+      console.log('resources is: ', resources);
+
+      return this;
+    };
+
+    this.$get = function($http) { // AQLRunner(query).success)func
+      return function(query) {
+
+        var resource = getResourceConfig(query.resourceId);
+        var queryFields = query.resourceId.match(resource.matcher).slice(1);
+
+        return $http.post(resource.config.url, {
+          params: _.zipObject(resource.fields, queryFields),
+          query: query
+        });
+      };
     };
   })
 ;
