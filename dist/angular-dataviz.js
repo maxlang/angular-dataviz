@@ -476,16 +476,16 @@ angular.module('dataviz.rewrite')
             });
 
           bars
-            .transition().duration(300)
+            .attr('transform', function(d) {
+              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
+            })
             .attr('x', function(d, i) {
               return graphCtrl.scale.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
+            .transition().duration(300)
             .attr('height', function(d) {
               return scope.layout.height - graphCtrl.scale.y(d.value);
-            })
-            .attr('transform', function(d) {
-              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
             });
 
 
@@ -898,7 +898,7 @@ angular.module('dataviz.rewrite.services', [])
         }
 
         translateObj = {
-          y: yTranslate + 10, // why?
+          y: yTranslate, // why?
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
@@ -915,7 +915,7 @@ angular.module('dataviz.rewrite.services', [])
 
       return {
         x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: (layoutHas(componentTypes.title) ? (LayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 10) // why?
+        y: (layoutHas(componentTypes.title) ? (LayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
       };
     };
 
@@ -955,47 +955,48 @@ angular.module('dataviz.rewrite.services', [])
 
     var updateLayout = function(registered, layout) {
       var layoutHas = makeLayoutHas(registered);
+      var withoutPadding = function(num, orientation, component) {
+        var trimmed;
+        if (orientation === 'h') {
+          trimmed = num - (LayoutDefaults.padding[component].left + LayoutDefaults.padding[component].right);
+        } else if (orientation === 'v') {
+          trimmed = num - (LayoutDefaults.padding[component].top + LayoutDefaults.padding[component].bottom);
+        }
+        return trimmed;
+      };
 
       // Handle graph width
+      var paddedWidth = withoutPadding(layout.container.width, 'h', 'graph');
+      var paddedHeight = withoutPadding(layout.container.width, 'h', 'graph');
       if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
+        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
       } else if (layoutHas(componentTypes.legend)) {
-        layout.graph.width = layout.container.width - (layout.legend.width + LayoutDefaults.padding.legend.right);
+        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right);
       } else if (layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = layout.container.width - LayoutDefaults.components.yAxis.width;
+        layout.graph.width = paddedWidth - LayoutDefaults.components.yAxis.width;
       }
 
       // Handle graph height
       if (layoutHas(componentTypes.xAxis) && layoutHas(componentTypes.title)) {
-        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height - (LayoutDefaults.components.title.height + LayoutDefaults.padding.title.top + LayoutDefaults.padding.title.bottom);
+        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height - (LayoutDefaults.components.title.height + LayoutDefaults.padding.title.top + LayoutDefaults.padding.title.bottom);
       } else if (layoutHas(componentTypes.xAxis)) {
-        layout.graph.height = layout.container.height - LayoutDefaults.components.xAxis.height;
+        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height;
       } else if (layoutHas(componentTypes.title)) {
-        layout.graph.height = layout.container.height - LayoutDefaults.components.title.height;
+        layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
       }
 
       return layout;
     };
 
     var getDefaultLayout = function(attrHeight, attrWidth) {
-      var withoutPadding = function(num, orientation) {
-        var trimmed;
-        if (orientation === 'h') {
-          trimmed = num - (LayoutDefaults.padding.left + LayoutDefaults.padding.right);
-        } else if (orientation === 'v') {
-          trimmed = num - (LayoutDefaults.padding.top + LayoutDefaults.padding.bottom);
-        }
-        return trimmed;
-      };
-
       return {
         container: {
           height: attrHeight,
           width: attrWidth
         },
         graph: {
-          height: withoutPadding(attrHeight, 'v'),
-          width: attrWidth
+          height: attrHeight,
+          width: attrWidth,
         },
         xAxis: {
           width: attrWidth - LayoutDefaults.components.yAxis.width,

@@ -45,16 +45,16 @@ angular.module('dataviz.rewrite')
             });
 
           bars
-            .transition().duration(300)
+            .attr('transform', function(d) {
+              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
+            })
             .attr('x', function(d, i) {
               return graphCtrl.scale.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
+            .transition().duration(300)
             .attr('height', function(d) {
               return scope.layout.height - graphCtrl.scale.y(d.value);
-            })
-            .attr('transform', function(d) {
-              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
             });
 
 
