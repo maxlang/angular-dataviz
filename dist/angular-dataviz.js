@@ -205,7 +205,20 @@ angular.module('dataviz.rewrite')
     };
 
     var getChartType = function(registeredComponents) {
-      return _.find(registeredComponents, function(c) { return isChart(c); });
+      return _.find(registeredComponents, function(c) { return isChart(c.type); }).type;
+    };
+
+    var getChartParams = function(registeredComponents, componentType) {
+      var chartObj = _.find(registeredComponents, {type: componentType});
+
+      return chartObj ? chartObj.params : {};
+    };
+
+    var addAggregate = function(query, aggFunction, field) {
+      // aggFunction is going to be: 'count' or 'min'
+      if (!_.contains(field, '.num')) { console.warn('Stats aggs only currently work on numeric fields.'); }
+      query[aggFunction + 'Aggregation'](field);
+      return query;
     };
 
     return {
@@ -270,9 +283,15 @@ angular.module('dataviz.rewrite')
 
         this.components = {
           registered: [],
+          update: function(componentType, params) {
+            var registeredIndex = _.findIndex(registered, {type: componentType});
+            if (index < 0) { return console.warn('Can\'t update component type as it wasn\'t found.'); }
+            registered[registeredIndex].params = params;
+          },
           register: function(componentType, params) {
-            this.registered.push(componentType);
             var self = this;
+            this.registered.push({type: componentType, params: params || {}});
+            ctrl.layout = Layout.updateLayout(this.registered, ctrl.layout);
 
             if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
@@ -303,6 +322,11 @@ angular.module('dataviz.rewrite')
 
                 if ($scope.aggFunction && $scope.aggregateBy) {
                   group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+                }
+
+                if (ctrl.chartType === chartTypes.number) {
+                  var chartParams = getChartParams(self.registered, ctrl.chartType);
+                  ctrl.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
                 }
 
                 hasRun = true;
@@ -344,12 +368,11 @@ angular.module('dataviz.rewrite')
 
         $scope.$on(FilterService.FILTER_CHANGED, function() {
           // Clear existing filters
-          ctrl.query.filters = [];
+          ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
           var newFilterSet = FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
-          console.log('newFilterSet is: ', newFilterSet);
 
           if (!newFilterSet.value) {
             ctrl.query.filters = [];
@@ -700,37 +723,38 @@ angular.module('dataviz.rewrite')
     return new ChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
+      scope: {
+        aggregate: '=?' // TODO: This should eventually look like: aggFunc(aggField); e.g. count('_id').
+      },
       link: function(scope, iElem, iAttrs, controllers) {
         var COMPONENT_TYPE = chartTypes.number;
         var graphCtrl = controllers[0];
-        var data = graphCtrl.data;
-        var format = FormatUtils.getFormatFunction(data, 'plain');
-        graphCtrl.components.register(COMPONENT_TYPE);
 
+        // If this is an agg, data will look like an object with count, min, max, avg, and sum attributes
+        var format = FormatUtils.getFormatFunction(graphCtrl.data.grouped, 'plain');
+        graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
         scope.layout = graphCtrl.layout.graph;
+        var text = d3.select(iElem[0]);
         //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
-        w = scope.layout.height;
-        h = scope.layout.width;
+        function drawNumber() {
+          text
+            .attr('font-family', 'Verdana')
+            .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
+            .call(FormatUtils.resizeText, scope.layout.width);
+        }
 
-        var text = d3.select(iElem[0])
-          .attr('font-family', 'Verdana')
-          .text(function() { return format(data); })
-          .call(FormatUtils.resizeText);
-
-        // If the content unit changes, update the formatting function
-        scope.$watch('content', function() {
-          format = FormatUtils.getFormatFunction(graphCtrl.data);
+        scope.$watch('aggregate', function(nv, ov) {
+          if (nv === ov) { return; }
+          graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(Layout.DRAW, function() {
-          text.call(FormatUtils.resizeText);
-        });
+        scope.$on(Layout.DRAW, drawNumber);
       }
     });
   })
   .factory('FormatUtils', function() {
-    var resizeText = function(d, i) {
+    var resizeText = function(elem, w) {
       var iEl = angular.element(this[0]);
       var parent = iEl.closest('svg');
       var maxTries = 100;
@@ -957,10 +981,10 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, componentTypes) {
+  .factory('Layout', function(LayoutDefaults, $log, componentTypes, chartTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
-        return _.contains(registeredComponents, componentName);
+        return (_.findIndex(registeredComponents, {type: componentName}) > -1);
       };
     };
 
@@ -991,7 +1015,7 @@ angular.module('dataviz.rewrite.services', [])
 
       // Handle graph width
       var paddedWidth = withoutPadding(layout.container.width, 'h', 'graph');
-      var paddedHeight = withoutPadding(layout.container.width, 'h', 'graph');
+      var paddedHeight = withoutPadding(layout.container.height, 'h', 'graph');
       if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
         layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
       } else if (layoutHas(componentTypes.legend)) {
@@ -1009,6 +1033,10 @@ angular.module('dataviz.rewrite.services', [])
         layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
       }
 
+      if (layoutHas(chartTypes.number)) {
+        layout.graph.width = withoutPadding(layout.container.width, 'h', 'number');
+      }
+
       return layout;
     };
 
@@ -1020,7 +1048,7 @@ angular.module('dataviz.rewrite.services', [])
         },
         graph: {
           height: attrHeight,
-          width: attrWidth,
+          width: attrWidth
         },
         xAxis: {
           width: attrWidth - LayoutDefaults.components.yAxis.width,
@@ -1100,6 +1128,10 @@ angular.module('dataviz.rewrite.services', [])
         title: {
           top: 10,
           bottom: 10
+        },
+        number: {
+          left: 20,
+          right: 20
         }
       },
       components: {

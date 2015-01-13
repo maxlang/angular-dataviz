@@ -83,10 +83,10 @@ angular.module('dataviz.rewrite.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, componentTypes) {
+  .factory('Layout', function(LayoutDefaults, $log, componentTypes, chartTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
-        return _.contains(registeredComponents, componentName);
+        return (_.findIndex(registeredComponents, {type: componentName}) > -1);
       };
     };
 
@@ -135,6 +135,10 @@ angular.module('dataviz.rewrite.services', [])
         layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
       }
 
+      if (layoutHas(chartTypes.number)) {
+        layout.graph.width = withoutPadding(layout.container.width, 'h', 'number');
+      }
+
       return layout;
     };
 
@@ -146,7 +150,7 @@ angular.module('dataviz.rewrite.services', [])
         },
         graph: {
           height: attrHeight,
-          width: attrWidth,
+          width: attrWidth
         },
         xAxis: {
           width: attrWidth - LayoutDefaults.components.yAxis.width,
@@ -226,6 +230,10 @@ angular.module('dataviz.rewrite.services', [])
         title: {
           top: 10,
           bottom: 10
+        },
+        number: {
+          left: 20,
+          right: 20
         }
       },
       components: {

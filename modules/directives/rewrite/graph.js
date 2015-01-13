@@ -55,7 +55,20 @@ angular.module('dataviz.rewrite')
     };
 
     var getChartType = function(registeredComponents) {
-      return _.find(registeredComponents, function(c) { return isChart(c); });
+      return _.find(registeredComponents, function(c) { return isChart(c.type); }).type;
+    };
+
+    var getChartParams = function(registeredComponents, componentType) {
+      var chartObj = _.find(registeredComponents, {type: componentType});
+
+      return chartObj ? chartObj.params : {};
+    };
+
+    var addAggregate = function(query, aggFunction, field) {
+      // aggFunction is going to be: 'count' or 'min'
+      if (!_.contains(field, '.num')) { console.warn('Stats aggs only currently work on numeric fields.'); }
+      query[aggFunction + 'Aggregation'](field);
+      return query;
     };
 
     return {
@@ -120,9 +133,14 @@ angular.module('dataviz.rewrite')
 
         this.components = {
           registered: [],
+          update: function(componentType, params) {
+            var registeredIndex = _.findIndex(registered, {type: componentType});
+            if (index < 0) { return console.warn('Can\'t update component type as it wasn\'t found.'); }
+            registered[registeredIndex].params = params;
+          },
           register: function(componentType, params) {
             var self = this;
-            this.registered.push(componentType);
+            this.registered.push({type: componentType, params: params || {}});
             ctrl.layout = Layout.updateLayout(this.registered, ctrl.layout);
 
             if (isAxis(componentType)) {
@@ -154,6 +172,11 @@ angular.module('dataviz.rewrite')
 
                 if ($scope.aggFunction && $scope.aggregateBy) {
                   group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+                }
+
+                if (ctrl.chartType === chartTypes.number) {
+                  var chartParams = getChartParams(self.registered, ctrl.chartType);
+                  ctrl.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
                 }
 
                 hasRun = true;
@@ -195,12 +218,11 @@ angular.module('dataviz.rewrite')
 
         $scope.$on(FilterService.FILTER_CHANGED, function() {
           // Clear existing filters
-          ctrl.query.filters = [];
+          ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
           var newFilterSet = FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
-          console.log('newFilterSet is: ', newFilterSet);
 
           if (!newFilterSet.value) {
             ctrl.query.filters = [];

@@ -42,37 +42,38 @@ angular.module('dataviz.rewrite')
     return new ChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
+      scope: {
+        aggregate: '=?' // TODO: This should eventually look like: aggFunc(aggField); e.g. count('_id').
+      },
       link: function(scope, iElem, iAttrs, controllers) {
         var COMPONENT_TYPE = chartTypes.number;
         var graphCtrl = controllers[0];
-        var data = graphCtrl.data;
-        var format = FormatUtils.getFormatFunction(data, 'plain');
-        graphCtrl.components.register(COMPONENT_TYPE);
 
+        // If this is an agg, data will look like an object with count, min, max, avg, and sum attributes
+        var format = FormatUtils.getFormatFunction(graphCtrl.data.grouped, 'plain');
+        graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
         scope.layout = graphCtrl.layout.graph;
+        var text = d3.select(iElem[0]);
         //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
-        w = scope.layout.height;
-        h = scope.layout.width;
+        function drawNumber() {
+          text
+            .attr('font-family', 'Verdana')
+            .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
+            .call(FormatUtils.resizeText, scope.layout.width);
+        }
 
-        var text = d3.select(iElem[0])
-          .attr('font-family', 'Verdana')
-          .text(function() { return format(data); })
-          .call(FormatUtils.resizeText);
-
-        // If the content unit changes, update the formatting function
-        scope.$watch('content', function() {
-          format = FormatUtils.getFormatFunction(graphCtrl.data);
+        scope.$watch('aggregate', function(nv, ov) {
+          if (nv === ov) { return; }
+          graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(Layout.DRAW, function() {
-          text.call(FormatUtils.resizeText);
-        });
+        scope.$on(Layout.DRAW, drawNumber);
       }
     });
   })
   .factory('FormatUtils', function() {
-    var resizeText = function(d, i) {
+    var resizeText = function(elem, w) {
       var iEl = angular.element(this[0]);
       var parent = iEl.closest('svg');
       var maxTries = 100;
