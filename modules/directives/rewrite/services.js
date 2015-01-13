@@ -328,10 +328,10 @@ angular.module('dataviz.rewrite.services', [])
 
       if (!ChartHelper.isOrdinal(chartType)) {
         metadata.range = getMinMax(data, 'value', true);
-        metadata.domain = getMinMax(data, 'key');
+        metadata.domain = getMinMax(data, 'key', true);
       } else {
         metadata.range = _.pluck(data, 'key');
-        metadata.domain = getMinMax(data, 'value');
+        metadata.domain = getMinMax(data, 'value', true);
       }
 
       return metadata;

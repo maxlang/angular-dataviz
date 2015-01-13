@@ -204,6 +204,10 @@ angular.module('dataviz.rewrite')
       };
     };
 
+    var getChartType = function(registeredComponents) {
+      return _.find(registeredComponents, function(c) { return isChart(c); });
+    };
+
     return {
       restrict: 'E',
       require: ['^blGroup'],
@@ -270,33 +274,43 @@ angular.module('dataviz.rewrite')
             this.registered.push(componentType);
             var self = this;
 
-            if (isChart(componentType)) {
-              var group;
-              ctrl.chartType = componentType;
-
-              if (ChartHelper.isOrdinal(componentType)) {
-                // It's ordinal, set an interval and use intervalGroup
-                group = ctrl.query.termGroup($scope.field);
-              } else {
-                // Use termGroup
-                group = ctrl.query.intervalGroup($scope.field, $scope.interval);
-              }
-
-              if ($scope.aggFunction && $scope.aggregateBy) {
-                group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
-              }
-
-
-            } else if (isAxis(componentType)) {
+            if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
             }
 
             $timeout(function() {
+              // If everything is registered and we haven't yet run the initial query
               if (self.registered.length === $scope.componentCount && !hasRun) {
+
+                // First, update the query
+                var group;
+                ctrl.chartType = getChartType(self.registered);
+                if (!ctrl.chartType) {
+                  console.warn('No chart type registered.');
+                }
+
+                if (ChartHelper.isOrdinal(ctrl.chartType)) {
+                  // It's ordinal, set an interval and use intervalGroup
+                  group = ctrl.query.termGroup($scope.field);
+                } else if ($scope.interval) {
+                  // Use termGroup
+                  group = ctrl.query.intervalGroup($scope.field, $scope.interval);
+                } else if (ctrl.numBuckets) {
+                  group = ctrl.query.intervalGroup($scope.field, null, {buckets: ctrl.numBuckets});
+                } else {
+                  console.warn('There was no interval set and no buckets registered.');
+                }
+
+                if ($scope.aggFunction && $scope.aggregateBy) {
+                  group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+                }
+
                 hasRun = true;
                 AQLRunner(ctrl.query)
                   .success(function(data) {
                     ctrl.data.grouped = data;
+                    // This is really just to reset the linear or ordinal scale on the x/y axes --
+                    // graph dimensions should really already be set at this point.
                     $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
                     ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
 
@@ -433,7 +447,7 @@ angular.module('dataviz.rewrite')
   .directive('blHistogram', function(ChartFactory, Translate, Layout, chartTypes, HistogramHelpers) {
     var histConfig = {
       bars: {
-        minWidth: 1,
+        minWidth: 4,
         padding: 1
       }
     };
@@ -451,6 +465,8 @@ angular.module('dataviz.rewrite')
         var COMPONENT_TYPE = chartTypes.histogram;
         var graphCtrl = controllers[0];
         graphCtrl.components.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.numBuckets = HistogramHelpers.getBucketsForWidth(scope.numBars, scope.layout.width, histConfig);
         var g = d3.select(iElem[0]);
 
         function drawHist() {
@@ -508,6 +524,13 @@ angular.module('dataviz.rewrite')
       return (idealWidth > histConfig.bars.minWidth) ? idealWidth : histConfig.bars.minWidth;
     };
 
+    var getBucketsForWidth = function(barOverride, graphWidth, histConfig) {
+      // Expect barOverride to be an integer describing the number of bars desired in the graph
+      if (barOverride) { return barOverride; }
+
+      return graphWidth / (histConfig.bars.minWidth + histConfig.bars.padding);
+    };
+
     var getNumBars = function(barOverride, data, interval) {
       if (barOverride) { return barOverride || data.length; }
 
@@ -520,7 +543,8 @@ angular.module('dataviz.rewrite')
 
     return {
       getBarWidth: getBarWidth,
-      getNumBars: getNumBars
+      getNumBars: getNumBars,
+      getBucketsForWidth: getBucketsForWidth
     };
   })
 ;
@@ -1178,10 +1202,10 @@ angular.module('dataviz.rewrite.services', [])
 
       if (!ChartHelper.isOrdinal(chartType)) {
         metadata.range = getMinMax(data, 'value', true);
-        metadata.domain = getMinMax(data, 'key');
+        metadata.domain = getMinMax(data, 'key', true);
       } else {
         metadata.range = _.pluck(data, 'key');
-        metadata.domain = getMinMax(data, 'value');
+        metadata.domain = getMinMax(data, 'value', true);
       }
 
       return metadata;

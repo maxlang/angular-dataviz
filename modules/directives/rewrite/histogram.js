@@ -2,7 +2,7 @@ angular.module('dataviz.rewrite')
   .directive('blHistogram', function(ChartFactory, Translate, Layout, chartTypes, HistogramHelpers) {
     var histConfig = {
       bars: {
-        minWidth: 1,
+        minWidth: 4,
         padding: 1
       }
     };
@@ -20,6 +20,8 @@ angular.module('dataviz.rewrite')
         var COMPONENT_TYPE = chartTypes.histogram;
         var graphCtrl = controllers[0];
         graphCtrl.components.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.numBuckets = HistogramHelpers.getBucketsForWidth(scope.numBars, scope.layout.width, histConfig);
         var g = d3.select(iElem[0]);
 
         function drawHist() {
@@ -77,6 +79,13 @@ angular.module('dataviz.rewrite')
       return (idealWidth > histConfig.bars.minWidth) ? idealWidth : histConfig.bars.minWidth;
     };
 
+    var getBucketsForWidth = function(barOverride, graphWidth, histConfig) {
+      // Expect barOverride to be an integer describing the number of bars desired in the graph
+      if (barOverride) { return barOverride; }
+
+      return graphWidth / (histConfig.bars.minWidth + histConfig.bars.padding);
+    };
+
     var getNumBars = function(barOverride, data, interval) {
       if (barOverride) { return barOverride || data.length; }
 
@@ -89,7 +98,8 @@ angular.module('dataviz.rewrite')
 
     return {
       getBarWidth: getBarWidth,
-      getNumBars: getNumBars
+      getNumBars: getNumBars,
+      getBucketsForWidth: getBucketsForWidth
     };
   })
 ;

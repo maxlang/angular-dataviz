@@ -54,6 +54,10 @@ angular.module('dataviz.rewrite')
       };
     };
 
+    var getChartType = function(registeredComponents) {
+      return _.find(registeredComponents, function(c) { return isChart(c); });
+    };
+
     return {
       restrict: 'E',
       require: ['^blGroup'],
@@ -117,36 +121,47 @@ angular.module('dataviz.rewrite')
         this.components = {
           registered: [],
           register: function(componentType, params) {
-            this.registered.push(componentType);
             var self = this;
+            this.registered.push(componentType);
+            ctrl.layout = Layout.updateLayout(this.registered, ctrl.layout);
 
-            if (isChart(componentType)) {
-              var group;
-              ctrl.chartType = componentType;
-
-              if (ChartHelper.isOrdinal(componentType)) {
-                // It's ordinal, set an interval and use intervalGroup
-                group = ctrl.query.termGroup($scope.field);
-              } else {
-                // Use termGroup
-                group = ctrl.query.intervalGroup($scope.field, $scope.interval);
-              }
-
-              if ($scope.aggFunction && $scope.aggregateBy) {
-                group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
-              }
-
-
-            } else if (isAxis(componentType)) {
+            if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
             }
 
             $timeout(function() {
+              // If everything is registered and we haven't yet run the initial query
               if (self.registered.length === $scope.componentCount && !hasRun) {
+
+                // First, update the query
+                var group;
+                ctrl.chartType = getChartType(self.registered);
+                if (!ctrl.chartType) {
+                  console.warn('No chart type registered.');
+                }
+
+                if (ChartHelper.isOrdinal(ctrl.chartType)) {
+                  // It's ordinal, set an interval and use intervalGroup
+                  group = ctrl.query.termGroup($scope.field);
+                } else if ($scope.interval) {
+                  // Use termGroup
+                  group = ctrl.query.intervalGroup($scope.field, $scope.interval);
+                } else if (ctrl.numBuckets) {
+                  group = ctrl.query.intervalGroup($scope.field, null, {buckets: ctrl.numBuckets});
+                } else {
+                  console.warn('There was no interval set and no buckets registered.');
+                }
+
+                if ($scope.aggFunction && $scope.aggregateBy) {
+                  group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+                }
+
                 hasRun = true;
                 AQLRunner(ctrl.query)
                   .success(function(data) {
                     ctrl.data.grouped = data;
+                    // This is really just to reset the linear or ordinal scale on the x/y axes --
+                    // graph dimensions should really already be set at this point.
                     $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
                     ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
 
