@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner) {
+  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner, $log) {
     var groupCtrl;
 
     var setScale = function(metadata, xRange, yRange, chartType) {
@@ -65,7 +65,7 @@ angular.module('dataviz')
 
     var addAggregate = function(query, aggFunction, field) {
       // aggFunction is going to be: 'count' or 'min'
-      if (!_.contains(field, '.num')) { console.warn('Stats aggs only currently work on numeric fields.'); }
+      if (!_.contains(field, '.num')) { $log.warn('Stats aggs only currently work on numeric fields.'); }
       query[aggFunction + 'Aggregation'](field);
       return query;
     };
@@ -134,7 +134,7 @@ angular.module('dataviz')
           registered: [],
           update: function(componentType, params) {
             var registeredIndex = _.findIndex(registered, {type: componentType});
-            if (index < 0) { return console.warn('Can\'t update component type as it wasn\'t found.'); }
+            if (index < 0) { return $log.warn('Can\'t update component type as it wasn\'t found.'); }
             registered[registeredIndex].params = params;
           },
           register: function(componentType, params) {
@@ -154,7 +154,7 @@ angular.module('dataviz')
                 var group;
                 ctrl.chartType = getChartType(self.registered);
                 if (!ctrl.chartType) {
-                  console.warn('No chart type registered.');
+                  $log.warn('No chart type registered.');
                 }
 
                 if (ChartHelper.isOrdinal(ctrl.chartType)) {
@@ -166,7 +166,7 @@ angular.module('dataviz')
                 } else if (ctrl.numBuckets) {
                   group = ctrl.query.intervalGroup($scope.field, null, {buckets: ctrl.numBuckets});
                 } else {
-                  console.warn('There was no interval set and no buckets registered.');
+                  $log.warn('There was no interval set and no buckets registered.');
                 }
 
                 if ($scope.aggFunction && $scope.aggregateBy) {
@@ -195,7 +195,7 @@ angular.module('dataviz')
                     }
                   })
                   .error(function(err) {
-                    console.error('Error pulling data: ', err);
+                    $log.error('Error pulling data: ', err);
                   });
               }
             });
@@ -243,7 +243,7 @@ angular.module('dataviz')
 
             })
             .error(function(err) {
-              console.error('Error running AQL query: ', err);
+              $log.error('Error running AQL query: ', err);
             });
         });
 

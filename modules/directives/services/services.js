@@ -25,7 +25,7 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults, Layout, componentTypes) {
+  .factory('Translate', function(LayoutDefaults, Layout, componentTypes, $log) {
     var axis = function(layout, registered, direction) {
       var layoutHas = Layout.makeLayoutHas(registered);
       var translateObj;
@@ -52,7 +52,7 @@ angular.module('dataviz.services', [])
           x: LayoutDefaults.components.yAxis.width
         };
       } else {
-        console.warn('Choose a direction of x or y.');
+        $log.warn('Choose a direction of x or y.');
         return {};
       }
 
