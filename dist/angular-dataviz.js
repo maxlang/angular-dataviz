@@ -719,11 +719,12 @@ angular.module('dataviz')
       return parseInt(iEl.attr('font-size'), 10);
     };
 
-    var resizeText = function(elem, layoutDims) {
+    var resizeText = function(elem, layout) {
       // Note (il via ml): Get the non-jQuery'd/d3'd element because getBBox (native SVG method) is way more
       // accurate than jQuery's .width() in this case.
       var e = this.node();
       if (!e) { return; }
+      var layoutDims = layout.graph;
 
       var iEl = angular.element(e);
       var svg = iEl.closest('svg')[0];
@@ -748,14 +749,10 @@ angular.module('dataviz')
       }
 
       iEl.attr('y', function() {
-        var totalSVGSpace = svg.getBBox().height;
-        var layoutHeight = layoutDims.height;
-        var canvasYOffset = totalSVGSpace - layoutHeight;
-        var eHeight = e.getBBox().height;
-        // Note (il): The strange thing here is that it's the line height of the numbers that requires dividing the
-        // canvas offset by two. It's unclear how to modify the line height of SVG text.
-        return eHeight + canvasYOffset;
+        var heightOffset = layout.container.height - layoutDims.height; // should be ~30px for the title in most cases
+        return fs + heightOffset;
       });
+
       iEl.attr('x', function() {
         var eWidth = e.getBBox().width;
         var widthDiff = layoutDims.width - eWidth;
