@@ -424,7 +424,20 @@ angular.module('dataviz')
         $scope.filters = this.filters = {
           filterStore: {},
           registerFilter: function(aqlFilterObj) {
-            this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+            var doBroadcast = false;
+            var currentFilterOfType = this.filterStore[aqlFilterObj.expr];
+
+            // If there's already a filter at this.filterStore[blah], register & broadcast only if the value is different
+            if (currentFilterOfType && !angular.equals(currentFilterOfType, aqlFilterObj.value)) {
+              doBroadcast = true;
+              this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+
+              // if it's not, or if it's the first filter of its kind and its value is null, set it but don't broadcast
+            } else if (!currentFilterOfType && !aqlFilterObj.value) {
+              this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+            }
+
+            if (!doBroadcast) { return; }
             $scope.$broadcast(BlFilterService.FILTER_CHANGED);
           },
           getAllFilters: function() {
@@ -490,7 +503,6 @@ angular.module('dataviz')
               return graphCtrl.scale.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
-            .transition().duration(300)
             .attr('height', function(d) {
               return scope.layout.height - graphCtrl.scale.y(d.value);
             });
@@ -498,7 +510,6 @@ angular.module('dataviz')
 
           bars
             .exit()
-            .transition().duration(300)
             .attr('height', 0)
             .remove();
         }
@@ -635,7 +646,6 @@ angular.module('dataviz')
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
           scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path
-            .transition().duration(300)
             .attr('d', scope.line(graphCtrl.data.grouped));
 
           var tip = d3.tip()
