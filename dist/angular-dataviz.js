@@ -698,7 +698,7 @@ angular.module('dataviz')
           text
             .attr('font-family', 'Verdana')
             .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
-            .call(FormatUtils.resizeText, scope.layout);
+            .call(FormatUtils.resizeText, graphCtrl.layout);
         }
 
         scope.$watch('aggregate', function(nv, ov) {
