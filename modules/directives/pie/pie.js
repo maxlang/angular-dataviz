@@ -19,6 +19,8 @@
  </example>
  */
 
+// NOTE (il): This bar chart is a work in progress
+
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
     .directive('blPie', function(ChartFactory, chartTypes) {
@@ -42,8 +44,6 @@ angular.module('dataviz')
             x: scope.layout.radius,
             y: scope.layout.radius
           };
-
-          console.log('scope is: ', scope);
 
           var color = d3.scale.category20c();
 

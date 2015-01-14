@@ -43,7 +43,7 @@ angular.module('dataviz')
           .attr('x', RECT_SIZE + 5)
           .attr('font-size', 14)
           .attr('y', 14)
-          .text(function(d) { console.log(d); return d; });
+          .text(_.identity);
 
         scope.$on(Layout.DRAW, drawLegend);
       }

@@ -1,7 +1,7 @@
 angular.module('dataviz', ['dataviz.services']);
 
 angular.module('dataviz')
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
+  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -80,16 +80,12 @@ angular.module('dataviz')
           .attr('class', 'bl-axis ' + scope.direction)
           .attr('width', LayoutDefaults.components.yAxis.width);
 
-        scope.layout = graphCtrl.layout[axisType];
-        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-
         graphCtrl.components.register(axisType, {
           direction: scope.direction,
           field: scope.field
         });
 
         scope.$on(Layout.DRAW, function() {
-          console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
           scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
           drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
@@ -176,7 +172,6 @@ angular.module('dataviz')
 
       // Define the Y scale based on whether the chart type is ordinal or linear
       if (!ChartHelper.isOrdinal(chartType)) {
-        console.log('metadata is: ', metadata);
         scales.y = d3.scale.linear()
           .domain(metadata.range)
           .range(yRange);
@@ -591,7 +586,7 @@ angular.module('dataviz')
           .attr('x', RECT_SIZE + 5)
           .attr('font-size', 14)
           .attr('y', 14)
-          .text(function(d) { console.log(d); return d; });
+          .text(_.identity);
 
         scope.$on(Layout.DRAW, drawLegend);
       }
@@ -771,7 +766,7 @@ angular.module('dataviz')
         var eHeight = e.getBBox().height;
         // Note (il): The strange thing here is that it's the line height of the numbers that requires dividing the
         // canvas offset by two. It's unclear how to modify the line height of SVG text.
-        return eHeight + (canvasYOffset / 2);
+        return eHeight + canvasYOffset;
       });
       iEl.attr('x', function() {
         var eWidth = e.getBBox().width;
@@ -822,6 +817,8 @@ angular.module('dataviz')
   })
 ;
 
+// NOTE (il): This bar chart is a work in progress
+
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
     .directive('blPie', function(ChartFactory, chartTypes) {
@@ -845,8 +842,6 @@ angular.module('dataviz')
             x: scope.layout.radius,
             y: scope.layout.radius
           };
-
-          console.log('scope is: ', scope);
 
           var color = d3.scale.category20c();
 

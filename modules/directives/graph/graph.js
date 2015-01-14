@@ -26,7 +26,6 @@ angular.module('dataviz')
 
       // Define the Y scale based on whether the chart type is ordinal or linear
       if (!ChartHelper.isOrdinal(chartType)) {
-        console.log('metadata is: ', metadata);
         scales.y = d3.scale.linear()
           .domain(metadata.range)
           .range(yRange);

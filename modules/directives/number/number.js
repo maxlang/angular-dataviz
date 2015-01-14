@@ -116,7 +116,7 @@ angular.module('dataviz')
         var eHeight = e.getBBox().height;
         // Note (il): The strange thing here is that it's the line height of the numbers that requires dividing the
         // canvas offset by two. It's unclear how to modify the line height of SVG text.
-        return eHeight + (canvasYOffset / 2);
+        return eHeight + canvasYOffset;
       });
       iEl.attr('x', function() {
         var eWidth = e.getBBox().width;

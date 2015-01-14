@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
+  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -78,16 +78,12 @@ angular.module('dataviz')
           .attr('class', 'bl-axis ' + scope.direction)
           .attr('width', LayoutDefaults.components.yAxis.width);
 
-        scope.layout = graphCtrl.layout[axisType];
-        scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-
         graphCtrl.components.register(axisType, {
           direction: scope.direction,
           field: scope.field
         });
 
         scope.$on(Layout.DRAW, function() {
-          console.log('Heard layout.draw');
           scope.layout = graphCtrl.layout[axisType];
           scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
           drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
