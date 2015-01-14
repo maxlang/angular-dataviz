@@ -73,17 +73,6 @@ angular.module('dataviz')
     });
   })
   .factory('FormatUtils', function(LayoutDefaults) {
-    var getRawElement = function(wrappedEl) {
-      if (_.isArray(wrappedEl) && wrappedEl.size() > 0) {
-        e = wrappedEl[0][0];
-      } else if (!_.isArray(wrappedEl)) {
-        e = wrappedEl;
-      } else {
-        return;
-      }
-      return e;
-    };
-
     var biggerThanBoundingBox = function(el, layoutDims) {
       return el.getBBox().width > layoutDims.width || el.getBBox().height > layoutDims.height;
     };
@@ -95,10 +84,10 @@ angular.module('dataviz')
     var resizeText = function(elem, layoutDims) {
       // Note (il via ml): Get the non-jQuery'd/d3'd element because getBBox (native SVG method) is way more
       // accurate than jQuery's .width() in this case.
-      var e = getRawElement(this);
+      var e = this.node();
       if (!e) { return; }
 
-      var iEl = angular.element(this[0]);
+      var iEl = angular.element(e);
       var svg = iEl.closest('svg')[0];
       var maxTries = 100;
       var numPadding = LayoutDefaults.padding.number;
