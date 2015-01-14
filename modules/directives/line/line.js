@@ -97,7 +97,6 @@ angular.module('dataviz')
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
           scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path
-            .transition().duration(300)
             .attr('d', scope.line(graphCtrl.data.grouped));
 
           var tip = d3.tip()

@@ -51,7 +51,6 @@ angular.module('dataviz')
               return graphCtrl.scale.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
-            .transition().duration(300)
             .attr('height', function(d) {
               return scope.layout.height - graphCtrl.scale.y(d.value);
             });
@@ -59,7 +58,6 @@ angular.module('dataviz')
 
           bars
             .exit()
-            .transition().duration(300)
             .attr('height', 0)
             .remove();
         }
