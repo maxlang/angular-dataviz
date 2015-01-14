@@ -60,7 +60,7 @@ angular.module('dataviz.rewrite')
           text
             .attr('font-family', 'Verdana')
             .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
-            .call(FormatUtils.resizeText, scope.layout.width);
+            .call(FormatUtils.resizeText, scope.layout);
         }
 
         scope.$watch('aggregate', function(nv, ov) {
@@ -72,33 +72,48 @@ angular.module('dataviz.rewrite')
       }
     });
   })
-  .factory('FormatUtils', function() {
-    var resizeText = function(elem, w) {
+  .factory('FormatUtils', function(LayoutDefaults) {
+    var getRawElement = function(wrappedEl) {
+      if (_.isArray(wrappedEl) && wrappedEl.size() > 0) {
+        e = wrappedEl[0][0];
+      } else if (!_.isArray(wrappedEl)) {
+        e = wrappedEl;
+      } else {
+        return;
+      }
+      return e;
+    };
+
+    var biggerThanBoundingBox = function(el, layoutDims) {
+      return el.getBBox().width > layoutDims.width || el.getBBox().height > layoutDims.height;
+    };
+
+    var getFontSize = function(iEl) {
+      return parseInt(iEl.attr('font-size'), 10);
+    };
+
+    var resizeText = function(elem, layoutDims) {
+      // Note (il via ml): Get the non-jQuery'd/d3'd element because getBBox (native SVG method) is way more
+      // accurate than jQuery's .width() in this case.
+      var e = getRawElement(this);
+      if (!e) { return; }
+
       var iEl = angular.element(this[0]);
-      var parent = iEl.closest('svg');
+      var svg = iEl.closest('svg')[0];
       var maxTries = 100;
-
-      var firstElBigger = function(el1, el2) {
-        return el1.width() > el2.width() || el1.height() > el2.height();
-      };
-
-      var getFontSize = function(el) {
-        return parseInt(el.attr('font-size'), 10);
-      };
-
+      var numPadding = LayoutDefaults.padding.number;
       var fs = getFontSize(iEl);
 
-
-      if (firstElBigger(iEl, parent)) {
+      if (biggerThanBoundingBox(e, layoutDims)) {
         // If number is too big for the box, make it progressively smaller
-        while (firstElBigger(iEl, parent) && maxTries) {
+        while (biggerThanBoundingBox(e, layoutDims) && maxTries) {
           maxTries -= 1;
           fs = getFontSize(iEl);
           iEl.attr('font-size', fs - 1);
         }
       } else {
         // If number is too small for the box, make it progressively bigger
-        while(!firstElBigger(iEl, parent) && maxTries) {
+        while(!biggerThanBoundingBox(e, layoutDims) && maxTries) {
           maxTries -= 1;
           fs = getFontSize(iEl);
           iEl.attr('font-size', fs + 1);
@@ -106,11 +121,18 @@ angular.module('dataviz.rewrite')
       }
 
       iEl.attr('y', function() {
-        var heightDiff = parent.height() - iEl.height();
-        return heightDiff / 2 + fs;
+        var totalSVGSpace = svg.getBBox().height;
+        var layoutHeight = layoutDims.height;
+        var canvasYOffset = totalSVGSpace - layoutHeight;
+        var eHeight = e.getBBox().height;
+        // Note (il): The strange thing here is that it's the line height of the numbers that requires dividing the
+        // canvas offset by two. It's unclear how to modify the line height of SVG text.
+        return eHeight + (canvasYOffset / 2);
       });
       iEl.attr('x', function() {
-        return (iEl.width() / w) + ((parent.width() - iEl.width()) / 2);
+        var eWidth = e.getBBox().width;
+        var widthDiff = layoutDims.width - eWidth;
+        return widthDiff / 2 + numPadding.left;
       });
     };
 

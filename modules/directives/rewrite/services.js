@@ -115,15 +115,18 @@ angular.module('dataviz.rewrite.services', [])
         return trimmed;
       };
 
-      // Handle graph width
       var paddedWidth = withoutPadding(layout.container.width, 'h', 'graph');
-      var paddedHeight = withoutPadding(layout.container.width, 'h', 'graph');
+      var paddedHeight = withoutPadding(layout.container.height, 'v', 'graph');
+
+      // Handle graph width
       if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
         layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
       } else if (layoutHas(componentTypes.legend)) {
         layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right);
       } else if (layoutHas(componentTypes.yAxis)) {
         layout.graph.width = paddedWidth - LayoutDefaults.components.yAxis.width;
+      } else {
+        layout.graph.width = paddedWidth;
       }
 
       // Handle graph height
@@ -133,6 +136,8 @@ angular.module('dataviz.rewrite.services', [])
         layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height;
       } else if (layoutHas(componentTypes.title)) {
         layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
+      } else {
+        layout.graph.height = paddedHeight;
       }
 
       if (layoutHas(chartTypes.number)) {
