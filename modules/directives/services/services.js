@@ -48,7 +48,7 @@ angular.module('dataviz.services', [])
         }
 
         translateObj = {
-          y: yTranslate, // why?
+          y: yTranslate,
           x: LayoutDefaults.components.yAxis.width
         };
       } else {

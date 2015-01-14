@@ -37,10 +37,7 @@ angular.module('dataviz')
             .attr('y', 0)
             .attr('stroke-width', '0px')
             .attr('fill', 'steelblue')
-            .classed('selected', function(d, i) {
-              return true;
-              //return _.contains(scope.params.filter, d.key);
-            })
+            //.classed('selected', function(d, i) { return true; }) // TODO (il): Add this back in
             .on('click', function(d, i) {
               var boundAddFilter = graphCtrl.filters.addFilter.bind(graphCtrl.filters);
               clickFn.call(this, d, boundAddFilter);
@@ -86,19 +83,8 @@ angular.module('dataviz')
       return graphWidth / (histConfig.bars.minWidth + histConfig.bars.padding);
     };
 
-    var getNumBars = function(barOverride, data, interval) {
-      if (barOverride) { return barOverride || data.length; }
-
-      interval = interval || 1;
-      var keys = _.pluck(data, 'key');
-      var maxKey = _.max(keys);
-      var minKey = _.min(keys);
-      return Math.ceil((maxKey - minKey) / interval) + 1;
-    };
-
     return {
       getBarWidth: getBarWidth,
-      getNumBars: getNumBars,
       getBucketsForWidth: getBucketsForWidth
     };
   })

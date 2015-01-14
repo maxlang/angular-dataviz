@@ -39,6 +39,12 @@
  </example>
  */
 
+/**
+ * TODO:
+ * - Selection brush
+ * - Update to match new library structure
+ */
+
 angular.module('dataviz')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
@@ -62,15 +68,11 @@ angular.module('dataviz')
 
           var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
 
-          // Do this for all the
           bars.enter().append('rect')
             .classed('bar', true)
             .attr('x', 0)
             .attr('stroke-width', '0px')
-            .classed('selected', function(d, i) {
-              return true;
-              //return _.contains(scope.params.filter, d.key);
-            })
+            //.classed('selected', function(d, i) { return false; }) // add selection logic back in
             .on('click', function(d, i) {
               var boundAddFilter = graphCtrl.filters.addFilter.bind(graphCtrl.filters);
               clickFn.call(this, d, boundAddFilter);
