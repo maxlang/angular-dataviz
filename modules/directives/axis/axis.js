@@ -4,6 +4,8 @@ angular.module('dataviz')
       return direction === 'x' ? 0 : -12;
     };
 
+
+    // Note (il): Took this wrap function wholesale from Mike Bostock: http://bl.ocks.org/mbostock/7555321
     var wrap = function(text, maxTextWidth, xOffset) {
       text.each(function() {
         var text = d3.select(this);
