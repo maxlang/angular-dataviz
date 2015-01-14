@@ -61,7 +61,7 @@
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz')
-  .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
+  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -75,7 +75,7 @@ angular.module('dataviz')
       circleRadius: 3
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template:
       '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
         '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></path>' +
@@ -95,7 +95,7 @@ angular.module('dataviz')
         function drawLine() {
           scope.layout = graphCtrl.layout.graph;
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
-          scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path
             .transition().duration(300)
             .attr('d', scope.line(graphCtrl.data.grouped));
@@ -131,7 +131,7 @@ angular.module('dataviz')
             .exit().remove();
         }
 
-        scope.$on(Layout.DRAW, drawLine);
+        scope.$on(BlLayout.DRAW, drawLine);
       }
     });
   })

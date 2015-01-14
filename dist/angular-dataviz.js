@@ -1,7 +1,7 @@
 angular.module('dataviz', ['dataviz.services']);
 
 angular.module('dataviz')
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout, $log) {
+  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, BlLayout, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -60,7 +60,7 @@ angular.module('dataviz')
         .call(wrap, maxTextWidth, xOffset);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       scope: {
         direction: '=',
@@ -78,16 +78,16 @@ angular.module('dataviz')
 
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + scope.direction)
-          .attr('width', LayoutDefaults.components.yAxis.width);
+          .attr('width', BlLayoutDefaults.components.yAxis.width);
 
         graphCtrl.components.register(axisType, {
           direction: scope.direction,
           field: scope.field
         });
 
-        scope.$on(Layout.DRAW, function() {
+        scope.$on(BlLayout.DRAW, function() {
           scope.layout = graphCtrl.layout[axisType];
-          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
+          scope.translate = BlTranslate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
           drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
         });
       }
@@ -100,13 +100,13 @@ angular.module('dataviz')
  */
 
 angular.module('dataviz')
-  .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
+  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate) {
 
     var clickFn = function(d, addFilter) {
       addFilter('includes', d.key);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {},
       link: function(scope, iElem, iAttrs, controllers) {
@@ -118,7 +118,7 @@ angular.module('dataviz')
 
         function drawChart() {
           scope.layout = graphCtrl.layout.chart;
-          scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
 
           var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
 
@@ -142,12 +142,12 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(Layout.DRAW, drawChart);
+        scope.$on(BlLayout.DRAW, drawChart);
       }
     });
   });
 angular.module('dataviz')
-  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner, $log) {
+  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, AQLRunner, $log) {
     var groupCtrl;
 
     var setScale = function(metadata, xRange, yRange, chartType) {
@@ -196,7 +196,7 @@ angular.module('dataviz')
 
     var getScaleDims = function(graphLayout) {
       return {
-        x: [0, graphLayout.width - LayoutDefaults.padding.graph.right],
+        x: [0, graphLayout.width - BlLayoutDefaults.padding.graph.right],
         y: [graphLayout.height, 0]
       };
     };
@@ -250,7 +250,7 @@ angular.module('dataviz')
       controller: function($scope, $element, $attrs) {
         var ctrl = this;
         var hasRun = false;
-        this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
+        this.layout = BlLayout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
         $scope.layout = this.layout.container;
         this.interval = $scope.interval;
         this.query = new AQL.SelectQuery($scope.resource);
@@ -288,7 +288,7 @@ angular.module('dataviz')
           register: function(componentType, params) {
             var self = this;
             this.registered.push({type: componentType, params: params || {}});
-            ctrl.layout = Layout.updateLayout(this.registered, ctrl.layout);
+            ctrl.layout = BlLayout.updateLayout(this.registered, ctrl.layout);
 
             if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
@@ -333,13 +333,13 @@ angular.module('dataviz')
                     // This is really just to reset the linear or ordinal scale on the x/y axes --
                     // graph dimensions should really already be set at this point.
                     $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
-                    ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
+                    ctrl.layout = BlLayout.updateLayout(self.registered, ctrl.layout);
 
                     var scaleDims = getScaleDims(ctrl.layout.graph);
                     ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
 
-                    if (Layout.layoutIsValid(ctrl.layout)) {
-                      $scope.$broadcast(Layout.DRAW);
+                    if (BlLayout.layoutIsValid(ctrl.layout)) {
+                      $scope.$broadcast(BlLayout.DRAW);
                     }
                   })
                   .error(function(err) {
@@ -356,25 +356,25 @@ angular.module('dataviz')
           var height = nv[0];
           var width = nv[1];
 
-          ctrl.layout = Layout.updateLayout(ctrl.components.registered, Layout.getDefaultLayout(height, width));
+          ctrl.layout = BlLayout.updateLayout(ctrl.components.registered, BlLayout.getDefaultLayout(height, width));
           $scope.layout = ctrl.layout.container;
           var scaleDims = getScaleDims(ctrl.layout.graph);
           ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-          $scope.$broadcast(Layout.DRAW);
+          $scope.$broadcast(BlLayout.DRAW);
         });
 
-        $scope.$on(FilterService.FILTER_CHANGED, function() {
+        $scope.$on(BlFilterService.FILTER_CHANGED, function() {
           // Clear existing filters
           ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
-          var newFilterSet = FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
+          var newFilterSet = BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
 
           if (!newFilterSet.value) {
             ctrl.query.filters = [];
           } else {
-            ctrl.query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
+            ctrl.query.addFilter(BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
           }
 
 
@@ -387,7 +387,7 @@ angular.module('dataviz')
               var scaleDims = getScaleDims(ctrl.layout.graph);
               ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
 
-              $scope.$broadcast(Layout.DRAW);
+              $scope.$broadcast(BlLayout.DRAW);
 
             })
             .error(function(err) {
@@ -411,7 +411,7 @@ angular.module('dataviz')
  if not percentages, divide the current available width by the number of children
  */
 angular.module('dataviz')
-  .directive('blGroup', function(FilterService) {
+  .directive('blGroup', function(BlFilterService) {
     return {
       restrict: 'E',
       transclude: true,
@@ -425,7 +425,7 @@ angular.module('dataviz')
           filterStore: {},
           registerFilter: function(aqlFilterObj) {
             this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
-            $scope.$broadcast(FilterService.FILTER_CHANGED);
+            $scope.$broadcast(BlFilterService.FILTER_CHANGED);
           },
           getAllFilters: function() {
             return this.filterStore;
@@ -438,7 +438,7 @@ angular.module('dataviz')
 ;
 
 angular.module('dataviz')
-  .directive('blHistogram', function(ChartFactory, Translate, Layout, chartTypes, HistogramHelpers) {
+  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers) {
     var histConfig = {
       bars: {
         minWidth: 4,
@@ -450,7 +450,7 @@ angular.module('dataviz')
       addFilter('includes', d.key);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g class="bl-histogram chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {
         numBars: '@?'
@@ -465,7 +465,7 @@ angular.module('dataviz')
 
         function drawHist() {
           scope.layout = graphCtrl.layout.graph;
-          scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           var barWidth = HistogramHelpers.getBarWidth(graphCtrl.data.grouped, scope.layout, histConfig);
 
           var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
@@ -503,7 +503,7 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(Layout.DRAW, drawHist);
+        scope.$on(BlLayout.DRAW, drawHist);
 
       }
     });
@@ -530,8 +530,8 @@ angular.module('dataviz')
 ;
 
 angular.module('dataviz')
-  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
-    return new ChartFactory.Component({
+  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes) {
+    return new BlChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
@@ -543,7 +543,7 @@ angular.module('dataviz')
 
         function drawLegend() {
           scope.layout = graphCtrl.layout.legend;
-          scope.translate = Translate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
         }
 
         var legend = d3.select(iElem[0])
@@ -555,10 +555,10 @@ angular.module('dataviz')
           .enter()
           .append('g')
           .attr('class', 'series')
-          .attr('height', function(d) { return RECT_SIZE + LayoutDefaults.padding.legend.series.bottom; })
+          .attr('height', function(d) { return RECT_SIZE + BlLayoutDefaults.padding.legend.series.bottom; })
           .attr('width', '100%')
           .attr('transform', function(d, i) {
-            var height = RECT_SIZE + LayoutDefaults.padding.legend.series.bottom;
+            var height = RECT_SIZE + BlLayoutDefaults.padding.legend.series.bottom;
             var horz = 0;
             var vert = i * height;
             return 'translate(' + horz + ',' + vert + ')';
@@ -576,7 +576,7 @@ angular.module('dataviz')
           .attr('y', 14)
           .text(_.identity);
 
-        scope.$on(Layout.DRAW, drawLegend);
+        scope.$on(BlLayout.DRAW, drawLegend);
       }
     });
   })
@@ -599,7 +599,7 @@ angular.module('dataviz')
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz')
-  .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
+  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -613,7 +613,7 @@ angular.module('dataviz')
       circleRadius: 3
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template:
       '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
         '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></path>' +
@@ -633,7 +633,7 @@ angular.module('dataviz')
         function drawLine() {
           scope.layout = graphCtrl.layout.graph;
           scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
-          scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           path
             .transition().duration(300)
             .attr('d', scope.line(graphCtrl.data.grouped));
@@ -669,15 +669,15 @@ angular.module('dataviz')
             .exit().remove();
         }
 
-        scope.$on(Layout.DRAW, drawLine);
+        scope.$on(BlLayout.DRAW, drawLine);
       }
     });
   })
 ;
 
 angular.module('dataviz')
-  .directive('blNumber', function(ChartFactory, chartTypes, Layout, FormatUtils) {
-    return new ChartFactory.Component({
+  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils) {
+    return new BlChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
       scope: {
@@ -692,7 +692,7 @@ angular.module('dataviz')
         graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
         scope.layout = graphCtrl.layout.graph;
         var text = d3.select(iElem[0]);
-        //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
+        //scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
         function drawNumber() {
           text
@@ -706,11 +706,11 @@ angular.module('dataviz')
           graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(Layout.DRAW, drawNumber);
+        scope.$on(BlLayout.DRAW, drawNumber);
       }
     });
   })
-  .factory('FormatUtils', function(LayoutDefaults) {
+  .factory('FormatUtils', function(BlLayoutDefaults) {
     var biggerThanBoundingBox = function(el, layoutDims) {
       return el.getBBox().width > layoutDims.width || el.getBBox().height > layoutDims.height;
     };
@@ -728,7 +728,7 @@ angular.module('dataviz')
       var iEl = angular.element(e);
       var svg = iEl.closest('svg')[0];
       var maxTries = 100;
-      var numPadding = LayoutDefaults.padding.number;
+      var numPadding = BlLayoutDefaults.padding.number;
       var fs = getFontSize(iEl);
 
       if (biggerThanBoundingBox(e, layoutDims)) {
@@ -809,8 +809,8 @@ angular.module('dataviz')
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
-    .directive('blPie', function(ChartFactory, chartTypes) {
-      return new ChartFactory.Component({
+    .directive('blPie', function(BlChartFactory, chartTypes) {
+      return new BlChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
         link: function(scope, iElem, iAttrs, controllers) {
           var graphCtrl = controllers[0];
@@ -874,8 +874,36 @@ angular.module('dataviz')
 
 
 
+angular.module('dataviz')
+  .directive('blTitle', function(BlChartFactory, componentTypes, BlLayoutDefaults, BlLayout) {
+    return new BlChartFactory.Component({
+      template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
+      scope: {
+        title: '@'
+      },
+      require: '^blGraph',
+      link: function(scope, iElem, iAttrs, graphCtrl) {
+        graphCtrl.components.register(componentTypes.title);
+
+        // The text needs to be centered and positioned at the top
+        function drawTitle(){
+          var containerWidth = graphCtrl.layout.container.width;
+          var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
+
+          scope.translate = {
+            x: Math.floor((containerWidth - elemWidth) / 2),
+            y: BlLayoutDefaults.padding.title.top
+          };
+        }
+
+        scope.$on(BlLayout.DRAW, drawTitle);
+      }
+    });
+  })
+;
+
 angular.module('dataviz.services', [])
-  .factory('ChartFactory', function() {
+  .factory('BlChartFactory', function() {
     var Component = function(config) {
       return _.defaults(config, {
         restrict: 'E',
@@ -891,31 +919,31 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults, Layout, componentTypes, $log) {
+  .factory('BlTranslate', function(BlLayoutDefaults, BlLayout, componentTypes, $log) {
     var axis = function(layout, registered, direction) {
-      var layoutHas = Layout.makeLayoutHas(registered);
+      var layoutHas = BlLayout.makeLayoutHas(registered);
       var translateObj;
 
       if (direction === 'x') {
         translateObj = {
-          y: layout.container.height - LayoutDefaults.components.xAxis.height + LayoutDefaults.padding.graph.bottom,
-          x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
+          y: layout.container.height - BlLayoutDefaults.components.xAxis.height + BlLayoutDefaults.padding.graph.bottom,
+          x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         var yTranslate = layout.container.height - layout.yAxis.height;
 
         if (layoutHas(componentTypes.xAxis)) {
-          yTranslate -= LayoutDefaults.components.xAxis.height;
+          yTranslate -= BlLayoutDefaults.components.xAxis.height;
         }
 
         if (layoutHas(componentTypes.title)) {
-          var titlePadding = LayoutDefaults.padding.title;
-          yTranslate += (LayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
+          var titlePadding = BlLayoutDefaults.padding.title;
+          yTranslate += (BlLayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
         }
 
         translateObj = {
           y: yTranslate,
-          x: LayoutDefaults.components.yAxis.width
+          x: BlLayoutDefaults.components.yAxis.width
         };
       } else {
         $log.warn('Choose a direction of x or y.');
@@ -926,12 +954,12 @@ angular.module('dataviz.services', [])
     };
 
     var graph = function(layout, registered, graphType) {
-      var layoutHas = Layout.makeLayoutHas(registered);
-      var titlePadding = LayoutDefaults.padding.title;
+      var layoutHas = BlLayout.makeLayoutHas(registered);
+      var titlePadding = BlLayoutDefaults.padding.title;
 
       return {
-        x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: (layoutHas(componentTypes.title) ? (LayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
+        x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0),
+        y: (layoutHas(componentTypes.title) ? (BlLayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
       };
     };
 
@@ -949,7 +977,7 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, componentTypes, chartTypes) {
+  .factory('BlLayout', function(BlLayoutDefaults, $log, componentTypes, chartTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
         return (_.findIndex(registeredComponents, {type: componentName}) > -1);
@@ -974,9 +1002,9 @@ angular.module('dataviz.services', [])
       var withoutPadding = function(num, orientation, component) {
         var trimmed;
         if (orientation === 'h') {
-          trimmed = num - (LayoutDefaults.padding[component].left + LayoutDefaults.padding[component].right);
+          trimmed = num - (BlLayoutDefaults.padding[component].left + BlLayoutDefaults.padding[component].right);
         } else if (orientation === 'v') {
-          trimmed = num - (LayoutDefaults.padding[component].top + LayoutDefaults.padding[component].bottom);
+          trimmed = num - (BlLayoutDefaults.padding[component].top + BlLayoutDefaults.padding[component].bottom);
         }
         return trimmed;
       };
@@ -986,22 +1014,22 @@ angular.module('dataviz.services', [])
 
       // Handle graph width
       if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
+        layout.graph.width = paddedWidth - (layout.legend.width + BlLayoutDefaults.padding.legend.right + BlLayoutDefaults.components.yAxis.width);
       } else if (layoutHas(componentTypes.legend)) {
-        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right);
+        layout.graph.width = paddedWidth - (layout.legend.width + BlLayoutDefaults.padding.legend.right);
       } else if (layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = paddedWidth - LayoutDefaults.components.yAxis.width;
+        layout.graph.width = paddedWidth - BlLayoutDefaults.components.yAxis.width;
       } else {
         layout.graph.width = paddedWidth;
       }
 
       // Handle graph height
       if (layoutHas(componentTypes.xAxis) && layoutHas(componentTypes.title)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height - (LayoutDefaults.components.title.height + LayoutDefaults.padding.title.top + LayoutDefaults.padding.title.bottom);
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.xAxis.height - (BlLayoutDefaults.components.title.height + BlLayoutDefaults.padding.title.top + BlLayoutDefaults.padding.title.bottom);
       } else if (layoutHas(componentTypes.xAxis)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height;
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.xAxis.height;
       } else if (layoutHas(componentTypes.title)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.title.height;
       } else {
         layout.graph.height = paddedHeight;
       }
@@ -1024,18 +1052,18 @@ angular.module('dataviz.services', [])
           width: attrWidth
         },
         xAxis: {
-          width: attrWidth - LayoutDefaults.components.yAxis.width,
-          height: LayoutDefaults.components.xAxis.height
+          width: attrWidth - BlLayoutDefaults.components.yAxis.width,
+          height: BlLayoutDefaults.components.xAxis.height
         },
         yAxis: {
-          height: attrHeight - LayoutDefaults.components.xAxis.height,
-          width: LayoutDefaults.components.yAxis.width
+          height: attrHeight - BlLayoutDefaults.components.xAxis.height,
+          width: BlLayoutDefaults.components.yAxis.width
         },
         legend: {
-          width: LayoutDefaults.components.legend.width
+          width: BlLayoutDefaults.components.legend.width
         },
         title: {
-          height: LayoutDefaults.components.title.height
+          height: BlLayoutDefaults.components.title.height
         }
       };
     };
@@ -1077,7 +1105,7 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('LayoutDefaults', function() {
+  .factory('BlLayoutDefaults', function() {
     return {
       padding: {
         graph: {
@@ -1123,7 +1151,7 @@ angular.module('dataviz.services', [])
       }
     };
   })
-  .service('FilterService', function() {
+  .service('BlFilterService', function() {
     var groupFiltersExcept = function(exprs, filterGroup) {
       var resFilter = new AQL.AndFilter();
 
@@ -1220,33 +1248,5 @@ angular.module('dataviz.services', [])
       getMinMax: getMinMax,
       getMetadata: getMetadata
     };
-  })
-;
-
-angular.module('dataviz')
-  .directive('blTitle', function(ChartFactory, componentTypes, LayoutDefaults, Layout) {
-    return new ChartFactory.Component({
-      template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
-      scope: {
-        title: '@'
-      },
-      require: '^blGraph',
-      link: function(scope, iElem, iAttrs, graphCtrl) {
-        graphCtrl.components.register(componentTypes.title);
-
-        // The text needs to be centered and positioned at the top
-        function drawTitle(){
-          var containerWidth = graphCtrl.layout.container.width;
-          var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
-
-          scope.translate = {
-            x: Math.floor((containerWidth - elemWidth) / 2),
-            y: LayoutDefaults.padding.title.top
-          };
-        }
-
-        scope.$on(Layout.DRAW, drawTitle);
-      }
-    });
   })
 ;

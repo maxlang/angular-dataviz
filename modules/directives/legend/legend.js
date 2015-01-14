@@ -1,6 +1,6 @@
 angular.module('dataviz')
-  .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
-    return new ChartFactory.Component({
+  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes) {
+    return new BlChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       link: function(scope, iElem, iAttrs, controllers) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
@@ -12,7 +12,7 @@ angular.module('dataviz')
 
         function drawLegend() {
           scope.layout = graphCtrl.layout.legend;
-          scope.translate = Translate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
         }
 
         var legend = d3.select(iElem[0])
@@ -24,10 +24,10 @@ angular.module('dataviz')
           .enter()
           .append('g')
           .attr('class', 'series')
-          .attr('height', function(d) { return RECT_SIZE + LayoutDefaults.padding.legend.series.bottom; })
+          .attr('height', function(d) { return RECT_SIZE + BlLayoutDefaults.padding.legend.series.bottom; })
           .attr('width', '100%')
           .attr('transform', function(d, i) {
-            var height = RECT_SIZE + LayoutDefaults.padding.legend.series.bottom;
+            var height = RECT_SIZE + BlLayoutDefaults.padding.legend.series.bottom;
             var horz = 0;
             var vert = i * height;
             return 'translate(' + horz + ',' + vert + ')';
@@ -45,7 +45,7 @@ angular.module('dataviz')
           .attr('y', 14)
           .text(_.identity);
 
-        scope.$on(Layout.DRAW, drawLegend);
+        scope.$on(BlLayout.DRAW, drawLegend);
       }
     });
   })

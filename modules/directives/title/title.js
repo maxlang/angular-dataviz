@@ -1,6 +1,6 @@
 angular.module('dataviz')
-  .directive('blTitle', function(ChartFactory, componentTypes, LayoutDefaults, Layout) {
-    return new ChartFactory.Component({
+  .directive('blTitle', function(BlChartFactory, componentTypes, BlLayoutDefaults, BlLayout) {
+    return new BlChartFactory.Component({
       template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
       scope: {
         title: '@'
@@ -16,11 +16,11 @@ angular.module('dataviz')
 
           scope.translate = {
             x: Math.floor((containerWidth - elemWidth) / 2),
-            y: LayoutDefaults.padding.title.top
+            y: BlLayoutDefaults.padding.title.top
           };
         }
 
-        scope.$on(Layout.DRAW, drawTitle);
+        scope.$on(BlLayout.DRAW, drawTitle);
       }
     });
   })

@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout, $log) {
+  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, BlLayout, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -58,7 +58,7 @@ angular.module('dataviz')
         .call(wrap, maxTextWidth, xOffset);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
       scope: {
         direction: '=',
@@ -76,16 +76,16 @@ angular.module('dataviz')
 
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + scope.direction)
-          .attr('width', LayoutDefaults.components.yAxis.width);
+          .attr('width', BlLayoutDefaults.components.yAxis.width);
 
         graphCtrl.components.register(axisType, {
           direction: scope.direction,
           field: scope.field
         });
 
-        scope.$on(Layout.DRAW, function() {
+        scope.$on(BlLayout.DRAW, function() {
           scope.layout = graphCtrl.layout[axisType];
-          scope.translate = Translate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
+          scope.translate = BlTranslate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
           drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
         });
       }

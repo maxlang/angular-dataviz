@@ -38,8 +38,8 @@
  </example>
  */
 angular.module('dataviz')
-  .directive('blNumber', function(ChartFactory, chartTypes, Layout, FormatUtils) {
-    return new ChartFactory.Component({
+  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils) {
+    return new BlChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
       scope: {
@@ -54,7 +54,7 @@ angular.module('dataviz')
         graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
         scope.layout = graphCtrl.layout.graph;
         var text = d3.select(iElem[0]);
-        //scope.translate = Translate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
+        //scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
         function drawNumber() {
           text
@@ -68,11 +68,11 @@ angular.module('dataviz')
           graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(Layout.DRAW, drawNumber);
+        scope.$on(BlLayout.DRAW, drawNumber);
       }
     });
   })
-  .factory('FormatUtils', function(LayoutDefaults) {
+  .factory('FormatUtils', function(BlLayoutDefaults) {
     var biggerThanBoundingBox = function(el, layoutDims) {
       return el.getBBox().width > layoutDims.width || el.getBBox().height > layoutDims.height;
     };
@@ -90,7 +90,7 @@ angular.module('dataviz')
       var iEl = angular.element(e);
       var svg = iEl.closest('svg')[0];
       var maxTries = 100;
-      var numPadding = LayoutDefaults.padding.number;
+      var numPadding = BlLayoutDefaults.padding.number;
       var fs = getFontSize(iEl);
 
       if (biggerThanBoundingBox(e, layoutDims)) {

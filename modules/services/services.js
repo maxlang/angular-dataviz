@@ -1,7 +1,7 @@
 
 /**
  * @ngdoc service
- * @name dataviz:LayoutService
+ * @name dataviz:BlLayoutService
  *
  * @description
  *
@@ -9,7 +9,7 @@
 
 
 angular.module('dataviz.services', [])
-  .factory('ChartFactory', function() {
+  .factory('BlChartFactory', function() {
     var Component = function(config) {
       return _.defaults(config, {
         restrict: 'E',
@@ -25,31 +25,31 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('Translate', function(LayoutDefaults, Layout, componentTypes, $log) {
+  .factory('BlTranslate', function(BlLayoutDefaults, BlLayout, componentTypes, $log) {
     var axis = function(layout, registered, direction) {
-      var layoutHas = Layout.makeLayoutHas(registered);
+      var layoutHas = BlLayout.makeLayoutHas(registered);
       var translateObj;
 
       if (direction === 'x') {
         translateObj = {
-          y: layout.container.height - LayoutDefaults.components.xAxis.height + LayoutDefaults.padding.graph.bottom,
-          x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0)
+          y: layout.container.height - BlLayoutDefaults.components.xAxis.height + BlLayoutDefaults.padding.graph.bottom,
+          x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0)
         };
       } else if (direction === 'y') {
         var yTranslate = layout.container.height - layout.yAxis.height;
 
         if (layoutHas(componentTypes.xAxis)) {
-          yTranslate -= LayoutDefaults.components.xAxis.height;
+          yTranslate -= BlLayoutDefaults.components.xAxis.height;
         }
 
         if (layoutHas(componentTypes.title)) {
-          var titlePadding = LayoutDefaults.padding.title;
-          yTranslate += (LayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
+          var titlePadding = BlLayoutDefaults.padding.title;
+          yTranslate += (BlLayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
         }
 
         translateObj = {
           y: yTranslate,
-          x: LayoutDefaults.components.yAxis.width
+          x: BlLayoutDefaults.components.yAxis.width
         };
       } else {
         $log.warn('Choose a direction of x or y.');
@@ -60,12 +60,12 @@ angular.module('dataviz.services', [])
     };
 
     var graph = function(layout, registered, graphType) {
-      var layoutHas = Layout.makeLayoutHas(registered);
-      var titlePadding = LayoutDefaults.padding.title;
+      var layoutHas = BlLayout.makeLayoutHas(registered);
+      var titlePadding = BlLayoutDefaults.padding.title;
 
       return {
-        x: (layoutHas(componentTypes.yAxis) ? LayoutDefaults.components.yAxis.width : 0),
-        y: (layoutHas(componentTypes.title) ? (LayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
+        x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0),
+        y: (layoutHas(componentTypes.title) ? (BlLayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
       };
     };
 
@@ -83,7 +83,7 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('Layout', function(LayoutDefaults, $log, componentTypes, chartTypes) {
+  .factory('BlLayout', function(BlLayoutDefaults, $log, componentTypes, chartTypes) {
     var makeLayoutHas = function(registeredComponents) {
       return function(componentName) {
         return (_.findIndex(registeredComponents, {type: componentName}) > -1);
@@ -108,9 +108,9 @@ angular.module('dataviz.services', [])
       var withoutPadding = function(num, orientation, component) {
         var trimmed;
         if (orientation === 'h') {
-          trimmed = num - (LayoutDefaults.padding[component].left + LayoutDefaults.padding[component].right);
+          trimmed = num - (BlLayoutDefaults.padding[component].left + BlLayoutDefaults.padding[component].right);
         } else if (orientation === 'v') {
-          trimmed = num - (LayoutDefaults.padding[component].top + LayoutDefaults.padding[component].bottom);
+          trimmed = num - (BlLayoutDefaults.padding[component].top + BlLayoutDefaults.padding[component].bottom);
         }
         return trimmed;
       };
@@ -120,22 +120,22 @@ angular.module('dataviz.services', [])
 
       // Handle graph width
       if (layoutHas(componentTypes.legend) && layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right + LayoutDefaults.components.yAxis.width);
+        layout.graph.width = paddedWidth - (layout.legend.width + BlLayoutDefaults.padding.legend.right + BlLayoutDefaults.components.yAxis.width);
       } else if (layoutHas(componentTypes.legend)) {
-        layout.graph.width = paddedWidth - (layout.legend.width + LayoutDefaults.padding.legend.right);
+        layout.graph.width = paddedWidth - (layout.legend.width + BlLayoutDefaults.padding.legend.right);
       } else if (layoutHas(componentTypes.yAxis)) {
-        layout.graph.width = paddedWidth - LayoutDefaults.components.yAxis.width;
+        layout.graph.width = paddedWidth - BlLayoutDefaults.components.yAxis.width;
       } else {
         layout.graph.width = paddedWidth;
       }
 
       // Handle graph height
       if (layoutHas(componentTypes.xAxis) && layoutHas(componentTypes.title)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height - (LayoutDefaults.components.title.height + LayoutDefaults.padding.title.top + LayoutDefaults.padding.title.bottom);
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.xAxis.height - (BlLayoutDefaults.components.title.height + BlLayoutDefaults.padding.title.top + BlLayoutDefaults.padding.title.bottom);
       } else if (layoutHas(componentTypes.xAxis)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.xAxis.height;
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.xAxis.height;
       } else if (layoutHas(componentTypes.title)) {
-        layout.graph.height = paddedHeight - LayoutDefaults.components.title.height;
+        layout.graph.height = paddedHeight - BlLayoutDefaults.components.title.height;
       } else {
         layout.graph.height = paddedHeight;
       }
@@ -158,18 +158,18 @@ angular.module('dataviz.services', [])
           width: attrWidth
         },
         xAxis: {
-          width: attrWidth - LayoutDefaults.components.yAxis.width,
-          height: LayoutDefaults.components.xAxis.height
+          width: attrWidth - BlLayoutDefaults.components.yAxis.width,
+          height: BlLayoutDefaults.components.xAxis.height
         },
         yAxis: {
-          height: attrHeight - LayoutDefaults.components.xAxis.height,
-          width: LayoutDefaults.components.yAxis.width
+          height: attrHeight - BlLayoutDefaults.components.xAxis.height,
+          width: BlLayoutDefaults.components.yAxis.width
         },
         legend: {
-          width: LayoutDefaults.components.legend.width
+          width: BlLayoutDefaults.components.legend.width
         },
         title: {
-          height: LayoutDefaults.components.title.height
+          height: BlLayoutDefaults.components.title.height
         }
       };
     };
@@ -211,7 +211,7 @@ angular.module('dataviz.services', [])
     };
   })
 
-  .factory('LayoutDefaults', function() {
+  .factory('BlLayoutDefaults', function() {
     return {
       padding: {
         graph: {
@@ -257,7 +257,7 @@ angular.module('dataviz.services', [])
       }
     };
   })
-  .service('FilterService', function() {
+  .service('BlFilterService', function() {
     var groupFiltersExcept = function(exprs, filterGroup) {
       var resFilter = new AQL.AndFilter();
 

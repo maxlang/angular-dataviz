@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner, $log) {
+  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, AQLRunner, $log) {
     var groupCtrl;
 
     var setScale = function(metadata, xRange, yRange, chartType) {
@@ -48,7 +48,7 @@ angular.module('dataviz')
 
     var getScaleDims = function(graphLayout) {
       return {
-        x: [0, graphLayout.width - LayoutDefaults.padding.graph.right],
+        x: [0, graphLayout.width - BlLayoutDefaults.padding.graph.right],
         y: [graphLayout.height, 0]
       };
     };
@@ -102,7 +102,7 @@ angular.module('dataviz')
       controller: function($scope, $element, $attrs) {
         var ctrl = this;
         var hasRun = false;
-        this.layout = Layout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
+        this.layout = BlLayout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
         $scope.layout = this.layout.container;
         this.interval = $scope.interval;
         this.query = new AQL.SelectQuery($scope.resource);
@@ -140,7 +140,7 @@ angular.module('dataviz')
           register: function(componentType, params) {
             var self = this;
             this.registered.push({type: componentType, params: params || {}});
-            ctrl.layout = Layout.updateLayout(this.registered, ctrl.layout);
+            ctrl.layout = BlLayout.updateLayout(this.registered, ctrl.layout);
 
             if (isAxis(componentType)) {
               ctrl.fields[params.direction] = params.field;
@@ -185,13 +185,13 @@ angular.module('dataviz')
                     // This is really just to reset the linear or ordinal scale on the x/y axes --
                     // graph dimensions should really already be set at this point.
                     $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
-                    ctrl.layout = Layout.updateLayout(self.registered, ctrl.layout);
+                    ctrl.layout = BlLayout.updateLayout(self.registered, ctrl.layout);
 
                     var scaleDims = getScaleDims(ctrl.layout.graph);
                     ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
 
-                    if (Layout.layoutIsValid(ctrl.layout)) {
-                      $scope.$broadcast(Layout.DRAW);
+                    if (BlLayout.layoutIsValid(ctrl.layout)) {
+                      $scope.$broadcast(BlLayout.DRAW);
                     }
                   })
                   .error(function(err) {
@@ -208,25 +208,25 @@ angular.module('dataviz')
           var height = nv[0];
           var width = nv[1];
 
-          ctrl.layout = Layout.updateLayout(ctrl.components.registered, Layout.getDefaultLayout(height, width));
+          ctrl.layout = BlLayout.updateLayout(ctrl.components.registered, BlLayout.getDefaultLayout(height, width));
           $scope.layout = ctrl.layout.container;
           var scaleDims = getScaleDims(ctrl.layout.graph);
           ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-          $scope.$broadcast(Layout.DRAW);
+          $scope.$broadcast(BlLayout.DRAW);
         });
 
-        $scope.$on(FilterService.FILTER_CHANGED, function() {
+        $scope.$on(BlFilterService.FILTER_CHANGED, function() {
           // Clear existing filters
           ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
-          var newFilterSet = FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
+          var newFilterSet = BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
 
           if (!newFilterSet.value) {
             ctrl.query.filters = [];
           } else {
-            ctrl.query.addFilter(FilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
+            ctrl.query.addFilter(BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
           }
 
 
@@ -239,7 +239,7 @@ angular.module('dataviz')
               var scaleDims = getScaleDims(ctrl.layout.graph);
               ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
 
-              $scope.$broadcast(Layout.DRAW);
+              $scope.$broadcast(BlLayout.DRAW);
 
             })
             .error(function(err) {

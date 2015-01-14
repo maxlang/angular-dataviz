@@ -31,7 +31,7 @@
  </file>
  <file name="script.js">
  angular.module('test', ['dataviz'])
- .controller('dataController', function($scope, $rootScope, FilterService) {
+ .controller('dataController', function($scope, $rootScope, BlFilterService) {
       $scope.width = 500;
       $scope.height = 300;
     });
@@ -46,13 +46,13 @@
  */
 
 angular.module('dataviz')
-  .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
+  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate) {
 
     var clickFn = function(d, addFilter) {
       addFilter('includes', d.key);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {},
       link: function(scope, iElem, iAttrs, controllers) {
@@ -64,7 +64,7 @@ angular.module('dataviz')
 
         function drawChart() {
           scope.layout = graphCtrl.layout.chart;
-          scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
 
           var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
 
@@ -88,7 +88,7 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(Layout.DRAW, drawChart);
+        scope.$on(BlLayout.DRAW, drawChart);
       }
     });
   });

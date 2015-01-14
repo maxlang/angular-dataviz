@@ -23,8 +23,8 @@
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
-    .directive('blPie', function(ChartFactory, chartTypes) {
-      return new ChartFactory.Component({
+    .directive('blPie', function(BlChartFactory, chartTypes) {
+      return new BlChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
         link: function(scope, iElem, iAttrs, controllers) {
           var graphCtrl = controllers[0];

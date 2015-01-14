@@ -37,7 +37,7 @@
  </file>
  <file name="script.js">
  angular.module('test', ['dataviz'])
- .controller('dataController', function($scope, $rootScope, FilterService) {
+ .controller('dataController', function($scope, $rootScope, BlFilterService) {
       $scope.width = 500;
       $scope.height = 300;
     });
@@ -56,7 +56,7 @@
  if not percentages, divide the current available width by the number of children
  */
 angular.module('dataviz')
-  .directive('blGroup', function(FilterService) {
+  .directive('blGroup', function(BlFilterService) {
     return {
       restrict: 'E',
       transclude: true,
@@ -70,7 +70,7 @@ angular.module('dataviz')
           filterStore: {},
           registerFilter: function(aqlFilterObj) {
             this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
-            $scope.$broadcast(FilterService.FILTER_CHANGED);
+            $scope.$broadcast(BlFilterService.FILTER_CHANGED);
           },
           getAllFilters: function() {
             return this.filterStore;

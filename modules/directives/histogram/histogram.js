@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blHistogram', function(ChartFactory, Translate, Layout, chartTypes, HistogramHelpers) {
+  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers) {
     var histConfig = {
       bars: {
         minWidth: 4,
@@ -11,7 +11,7 @@ angular.module('dataviz')
       addFilter('includes', d.key);
     };
 
-    return new ChartFactory.Component({
+    return new BlChartFactory.Component({
       template: '<g class="bl-histogram chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {
         numBars: '@?'
@@ -26,7 +26,7 @@ angular.module('dataviz')
 
         function drawHist() {
           scope.layout = graphCtrl.layout.graph;
-          scope.translate = Translate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
           var barWidth = HistogramHelpers.getBarWidth(graphCtrl.data.grouped, scope.layout, histConfig);
 
           var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
@@ -64,7 +64,7 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(Layout.DRAW, drawHist);
+        scope.$on(BlLayout.DRAW, drawHist);
 
       }
     });
