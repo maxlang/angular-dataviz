@@ -69,7 +69,20 @@ angular.module('dataviz')
         $scope.filters = this.filters = {
           filterStore: {},
           registerFilter: function(aqlFilterObj) {
-            this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+            var doBroadcast = false;
+            var currentFilterOfType = this.filterStore[aqlFilterObj.expr];
+
+            // If there's already a filter at this.filterStore[blah], register & broadcast only if the value is different
+            if (currentFilterOfType && !angular.equals(currentFilterOfType, aqlFilterObj.value)) {
+              doBroadcast = true;
+              this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+
+              // if it's not, or if it's the first filter of its kind and its value is null, set it but don't broadcast
+            } else if (!currentFilterOfType && !aqlFilterObj.value) {
+              this.filterStore[aqlFilterObj.expr] = aqlFilterObj;
+            }
+
+            if (!doBroadcast) { return; }
             $scope.$broadcast(BlFilterService.FILTER_CHANGED);
           },
           getAllFilters: function() {
