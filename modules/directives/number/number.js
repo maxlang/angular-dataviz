@@ -1,6 +1,6 @@
 /**
  * @ngdoc directive
- * @name dataviz.rewrite:blNumber
+ * @name dataviz:blNumber
  * @restrict E
  * @element bl-number
  *
@@ -26,7 +26,7 @@
  </div>
  </file>
  <file name="script.js">
- angular.module('test', ['dataviz.rewrite'])
+ angular.module('test', ['dataviz'])
  .controller('dataController', function($scope) {
       $scope.resource = {
         data: 1234
@@ -37,7 +37,7 @@
  </file>
  </example>
  */
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blNumber', function(ChartFactory, chartTypes, Layout, FormatUtils) {
     return new ChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',

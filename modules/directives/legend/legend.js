@@ -1,4 +1,4 @@
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
     return new ChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',

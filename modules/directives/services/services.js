@@ -1,14 +1,14 @@
 
 /**
  * @ngdoc service
- * @name dataviz.rewrite:LayoutService
+ * @name dataviz:LayoutService
  *
  * @description
  *
  */
 
 
-angular.module('dataviz.rewrite.services', [])
+angular.module('dataviz.services', [])
   .factory('ChartFactory', function() {
     var Component = function(config) {
       return _.defaults(config, {

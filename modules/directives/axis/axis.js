@@ -1,4 +1,4 @@
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;

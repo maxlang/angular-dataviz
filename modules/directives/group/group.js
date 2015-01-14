@@ -1,6 +1,6 @@
 /**
  * @ngdoc directive
- * @name dataviz.rewrite:blGroup
+ * @name dataviz:blGroup
  * @param {String} field The field to be used
  * @restrict E
  * @element bl-group
@@ -36,7 +36,7 @@
  </div>
  </file>
  <file name="script.js">
- angular.module('test', ['dataviz.rewrite'])
+ angular.module('test', ['dataviz'])
  .controller('dataController', function($scope, $rootScope, FilterService) {
       $scope.width = 500;
       $scope.height = 300;
@@ -55,7 +55,7 @@
  if percentages, take its current available width and multiple by each percentage
  if not percentages, divide the current available width by the number of children
  */
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blGroup', function(FilterService) {
     return {
       restrict: 'E',

@@ -1,6 +1,6 @@
 /**
  * @ngdoc directive
- * @name dataviz.rewrite:blLine
+ * @name dataviz:blLine
  * @restrict E
  * @element bl-line
  *
@@ -35,7 +35,7 @@
  </div>
  </file>
  <file name="script.js">
- angular.module('test', ['dataviz.rewrite'])
+ angular.module('test', ['dataviz'])
  .config(function(AQLRunnerProvider) {
   AQLRunnerProvider.resource('es/:index/:type', {
     url: 'http://localhost:5000/api/reports'
@@ -60,7 +60,7 @@
   // resource for namespacing all the fields
 // the line is declaratively told which field to aggregate on
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
