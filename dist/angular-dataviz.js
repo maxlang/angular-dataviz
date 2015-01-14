@@ -1,8 +1,6 @@
-angular.module('dataviz.rewrite', ['dataviz.rewrite.services']);
-//angular.module('dataviz.directives', ['ui.map']);
-//angular.module('dataviz', ['dataviz.directives']);
+angular.module('dataviz', ['dataviz.services']);
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blAxis', function(LayoutDefaults, ChartFactory, Translate, Layout) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
@@ -97,7 +95,7 @@ angular.module('dataviz.rewrite')
       }
     });
   });
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blBarchart', function(ChartFactory, Layout, chartTypes, Translate) {
 
     var clickFn = function(d, addFilter) {
@@ -148,7 +146,7 @@ angular.module('dataviz.rewrite')
       }
     });
   });
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blGraph', function(Layout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, LayoutDefaults, FilterService, AQLRunner) {
     var groupCtrl;
 
@@ -401,32 +399,6 @@ angular.module('dataviz.rewrite')
       }
     };
   })
-
-  .directive('blTitle', function(ChartFactory, componentTypes, LayoutDefaults, Layout) {
-    return new ChartFactory.Component({
-      template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
-      scope: {
-        title: '@'
-      },
-      require: '^blGraph',
-      link: function(scope, iElem, iAttrs, graphCtrl) {
-        graphCtrl.components.register(componentTypes.title);
-
-        // The text needs to be centered and positioned at the top
-        function drawTitle(){
-          var containerWidth = graphCtrl.layout.container.width;
-          var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
-
-          scope.translate = {
-            x: Math.floor((containerWidth - elemWidth) / 2),
-            y: LayoutDefaults.padding.title.top
-          };
-        }
-
-        scope.$on(Layout.DRAW, drawTitle);
-      }
-    });
-  })
 ;
 
 /*
@@ -439,7 +411,7 @@ angular.module('dataviz.rewrite')
  if percentages, take its current available width and multiple by each percentage
  if not percentages, divide the current available width by the number of children
  */
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blGroup', function(FilterService) {
     return {
       restrict: 'E',
@@ -466,7 +438,7 @@ angular.module('dataviz.rewrite')
   })
 ;
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blHistogram', function(ChartFactory, Translate, Layout, chartTypes, HistogramHelpers) {
     var histConfig = {
       bars: {
@@ -572,7 +544,7 @@ angular.module('dataviz.rewrite')
   })
 ;
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blLegend', function(ChartFactory, Translate, Layout, LayoutDefaults, componentTypes) {
     return new ChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
@@ -641,7 +613,7 @@ angular.module('dataviz.rewrite')
 // resource for namespacing all the fields
 // the line is declaratively told which field to aggregate on
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blLine', function(ChartFactory, Translate, Layout, chartTypes) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
@@ -718,7 +690,7 @@ angular.module('dataviz.rewrite')
   })
 ;
 
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
   .directive('blNumber', function(ChartFactory, chartTypes, Layout, FormatUtils) {
     return new ChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
@@ -754,17 +726,6 @@ angular.module('dataviz.rewrite')
     });
   })
   .factory('FormatUtils', function(LayoutDefaults) {
-    var getRawElement = function(wrappedEl) {
-      if (_.isArray(wrappedEl) && wrappedEl.size() > 0) {
-        e = wrappedEl[0][0];
-      } else if (!_.isArray(wrappedEl)) {
-        e = wrappedEl;
-      } else {
-        return;
-      }
-      return e;
-    };
-
     var biggerThanBoundingBox = function(el, layoutDims) {
       return el.getBBox().width > layoutDims.width || el.getBBox().height > layoutDims.height;
     };
@@ -776,10 +737,10 @@ angular.module('dataviz.rewrite')
     var resizeText = function(elem, layoutDims) {
       // Note (il via ml): Get the non-jQuery'd/d3'd element because getBBox (native SVG method) is way more
       // accurate than jQuery's .width() in this case.
-      var e = getRawElement(this);
+      var e = this.node();
       if (!e) { return; }
 
-      var iEl = angular.element(this[0]);
+      var iEl = angular.element(e);
       var svg = iEl.closest('svg')[0];
       var maxTries = 100;
       var numPadding = LayoutDefaults.padding.number;
@@ -802,9 +763,9 @@ angular.module('dataviz.rewrite')
       }
 
       iEl.attr('y', function() {
-        var svgHeight = svg.height.baseVal;
+        var totalSVGSpace = svg.getBBox().height;
         var layoutHeight = layoutDims.height;
-        var canvasYOffset = svgHeight - layoutHeight;
+        var canvasYOffset = totalSVGSpace - layoutHeight;
         var eHeight = e.getBBox().height;
         // Note (il): The strange thing here is that it's the line height of the numbers that requires dividing the
         // canvas offset by two. It's unclear how to modify the line height of SVG text.
@@ -860,7 +821,7 @@ angular.module('dataviz.rewrite')
 ;
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
-angular.module('dataviz.rewrite')
+angular.module('dataviz')
     .directive('blPie', function(ChartFactory, chartTypes) {
       return new ChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
@@ -928,7 +889,7 @@ angular.module('dataviz.rewrite')
 
 
 
-angular.module('dataviz.rewrite.services', [])
+angular.module('dataviz.services', [])
   .factory('ChartFactory', function() {
     var Component = function(config) {
       return _.defaults(config, {
@@ -1274,5 +1235,33 @@ angular.module('dataviz.rewrite.services', [])
       getMinMax: getMinMax,
       getMetadata: getMetadata
     };
+  })
+;
+
+angular.module('dataviz')
+  .directive('blTitle', function(ChartFactory, componentTypes, LayoutDefaults, Layout) {
+    return new ChartFactory.Component({
+      template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
+      scope: {
+        title: '@'
+      },
+      require: '^blGraph',
+      link: function(scope, iElem, iAttrs, graphCtrl) {
+        graphCtrl.components.register(componentTypes.title);
+
+        // The text needs to be centered and positioned at the top
+        function drawTitle(){
+          var containerWidth = graphCtrl.layout.container.width;
+          var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
+
+          scope.translate = {
+            x: Math.floor((containerWidth - elemWidth) / 2),
+            y: LayoutDefaults.padding.title.top
+          };
+        }
+
+        scope.$on(Layout.DRAW, drawTitle);
+      }
+    });
   })
 ;

@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         stripBanners: true
       },
       dist: {
-        src: ['common/module.js', 'modules/directives/rewrite/*.js', '!modules/**/test/*.js'],
+        src: ['common/module.js', 'modules/directives/**/*.js', '!modules/**/test/*.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -80,19 +80,12 @@ module.exports = function (grunt) {
         dest: 'ngdocs',
         html5Mode: false,
         scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-          'components/angular/angular.js', 'components/angular-animate/angular-animate.js',
+          'components/angular/angular.js',
           'http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js',
           'components/d3/d3.js',
           'components/d3-plugins/sankey/sankey.js',
-          'components/nvd3/nv.d3.js',
           'components/moment/moment.js',
           'components/lodash/dist/lodash.js',
-          'components/gridster/dist/jquery.gridster.js',
-          'components/angular-ui-utils/ui-utils.js',
-          'http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization',
-          'components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js',
-          'components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js',
-          'components/angular-ui-map/src/map.js',
           'components/abstractquerylanguage/dist/aql.js',
           'components/d3-tip/index.js',
           'dist/angular-dataviz.js'],
