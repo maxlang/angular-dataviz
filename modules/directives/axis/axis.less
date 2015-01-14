@@ -1,0 +1,26 @@
+.bl-axis {
+
+  path, line {
+    shape-rendering: crispEdges;
+    stroke: none;
+  }
+
+  path.domain {
+    fill: none;
+  }
+
+  text {
+    font-size: 12px;
+  }
+
+  &.x {
+  }
+
+  &.y {
+    .tick {
+      line {
+        stroke: grey;
+      }
+    }
+  }
+}

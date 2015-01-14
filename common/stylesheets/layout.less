@@ -6,69 +6,9 @@
 }
 
 .bl-graph {
-
-  .bl-axis {
-
-    path, line {
-      shape-rendering: crispEdges;
-      stroke: none;
-    }
-
-    path.domain {
-      fill: none;
-    }
-
-    text {
-      font-size: 12px;
-    }
-
-    &.x {
-    }
-
-    &.y {
-      .tick {
-        line {
-          stroke: grey;
-        }
-      }
-    }
-  }
-
-  .bl-title {
-    font-size: 16px;
-    font-weight: 500;
-    text-transform: uppercase;
-  }
-
-  .bl-line {
-    path {
-      fill: none;
-      stroke: steelblue;
-      stroke-width: 2px;
-    }
-
-    circle {
-      fill: white;
-      stroke: steelblue;
-      stroke-width: 2px;
-    }
-  }
-
-  .bl-legend {
-    fill: transparent;
-    stroke: grey;
-
-    text {
-      stroke: none;
-      fill: black;
-    }
-  }
-
-  // This class is generic and applies to all chart types
   .chart {
     display: block;
   }
-
 }
 
 .viz-tooltip {
