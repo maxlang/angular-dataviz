@@ -111,8 +111,7 @@ angular.module('dataviz')
       }
 
       iEl.attr('y', function() {
-        var heightOffset = layout.container.height - layoutDims.height; // should be ~30px for the title in most cases
-        return fs + heightOffset;
+        return layoutDims.height - (layoutDims.height - fs)/2;
       });
 
       iEl.attr('x', function() {
