@@ -759,8 +759,7 @@ angular.module('dataviz')
       }
 
       iEl.attr('y', function() {
-        var heightOffset = layout.container.height - layoutDims.height; // should be ~30px for the title in most cases
-        return fs + heightOffset;
+        return layoutDims.height - (layoutDims.height - fs)/2;
       });
 
       iEl.attr('x', function() {
@@ -934,14 +933,10 @@ angular.module('dataviz.services', [])
       if (direction === 'x') {
         translateObj = {
           y: layout.container.height - BlLayoutDefaults.components.xAxis.height + BlLayoutDefaults.padding.graph.bottom,
-          x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0)
+          x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : BlLayoutDefaults.padding.graph.left)
         };
       } else if (direction === 'y') {
-        var yTranslate = layout.container.height - layout.yAxis.height;
-
-        if (layoutHas(componentTypes.xAxis)) {
-          yTranslate -= BlLayoutDefaults.components.xAxis.height;
-        }
+        var yTranslate = 0;
 
         if (layoutHas(componentTypes.title)) {
           var titlePadding = BlLayoutDefaults.padding.title;
@@ -965,8 +960,8 @@ angular.module('dataviz.services', [])
       var titlePadding = BlLayoutDefaults.padding.title;
 
       return {
-        x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : 0),
-        y: (layoutHas(componentTypes.title) ? (BlLayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0) // why?
+        x: (layoutHas(componentTypes.yAxis) ? BlLayoutDefaults.components.yAxis.width : BlLayoutDefaults.padding.graph.left),
+        y: (layoutHas(componentTypes.title) ? (BlLayoutDefaults.components.title.height + titlePadding.top  + titlePadding.bottom) : 0)
       };
     };
 
@@ -1036,7 +1031,8 @@ angular.module('dataviz.services', [])
       } else if (layoutHas(componentTypes.xAxis)) {
         layout.graph.height = paddedHeight - BlLayoutDefaults.components.xAxis.height;
       } else if (layoutHas(componentTypes.title)) {
-        layout.graph.height = paddedHeight - BlLayoutDefaults.components.title.height;
+        var titlePadding = BlLayoutDefaults.padding.title;
+        layout.graph.height = paddedHeight - (BlLayoutDefaults.components.title.height + titlePadding.top + titlePadding.bottom);
       } else {
         layout.graph.height = paddedHeight;
       }
@@ -1119,7 +1115,7 @@ angular.module('dataviz.services', [])
           bottom: 10,
           top: 0,
           right: 15,
-          left: 0
+          left: 15
         },
         legend: {
           left: 0,
