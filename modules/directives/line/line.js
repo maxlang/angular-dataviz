@@ -1,0 +1,136 @@
+/**
+ * @ngdoc directive
+ * @name dataviz:blLine
+ * @restrict E
+ * @element bl-line
+ *
+ * @description
+ * Creates a line chart.
+ *
+ * @example
+ <example module="test">
+ <file name="index.html">
+ <div ng-controller="dataController">
+ <div>
+ Data: {{data}}<br />
+ Height: <input type="number" ng-model="height"><br />
+ Width: <input type="number" ng-model="width">
+ </div>
+ <div class="graph-wrapper">
+ <bl-group>
+   <bl-graph container-height="height"
+             container-width="width"
+             field="power"
+             interval="200"
+             aggregate-by="power"
+             agg-function="sum"
+             resource="es/topics/topic">
+     <bl-line field-x="'key'" field-y="'value'"></bl-line>
+     <bl-axis direction="'x'"></bl-axis>
+     <bl-axis direction="'y'"></bl-axis>
+     <bl-legend></bl-legend>
+   </bl-graph>
+ </bl-group>
+ </div>
+ </div>
+ </file>
+ <file name="script.js">
+ angular.module('test', ['dataviz'])
+ .config(function(AQLRunnerProvider) {
+  AQLRunnerProvider.resource('es/:index/:type', {
+    url: 'http://localhost:5000/api/reports'
+  });
+ })
+ .controller('dataController', function($scope) {
+      $scope.resource = {
+        data: [
+          { key: 1,   value: 5},  { key: 20,  value: 20},
+          { key: 40,  value: 10}, { key: 60,  value: 40},
+          { key: 80,  value: 5},  { key: 300, value: 300}
+        ]
+      };
+
+      $scope.width = 500;
+      $scope.height = 300;
+    });
+ </file>
+ </example>
+ */
+
+  // resource for namespacing all the fields
+// the line is declaratively told which field to aggregate on
+
+angular.module('dataviz')
+  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, blGraphEvents) {
+
+    // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
+    var setLine = function(scales, fields) {
+      return d3.svg.line()
+        .x(function(d) { return scales.x(d[fields.x]); })
+        .y(function(d) { return scales.y(d[fields.y]); })
+        .interpolate('linear');
+    };
+
+    var lineConfig = {
+      circleRadius: 3
+    };
+
+    return new BlChartFactory.Component({
+      template:
+      '<g ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" class="bl-line chart">' +
+        '<path ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></path>' +
+      '</g>',
+      scope: {
+        fieldX: '=',
+        fieldY: '='
+      },
+      link: function(scope, iElem, iAttrs, graphCtrl) {
+        var COMPONENT_TYPE = chartTypes.linechart;
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
+        var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
+        var groupEl = d3.select(iElem[0]); // get the group element to append dots to
+
+        function drawLine() {
+          scope.layout = graphCtrl.layoutMgr.layout.graph;
+          scope.line = setLine(graphCtrl.scaleMgr, {x: scope.fieldX, y: scope.fieldY});
+          scope.translate = BlTranslate.graph(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
+          path
+            .attr('d', scope.line(graphCtrl.dataMgr.data));
+
+          var tip = d3.tip()
+            .attr('class', 'viz-tooltip')
+            .offset([-30, 0])
+            .html(function(d) {
+              return '<span class="tip-text">' + d[scope.fieldX] + '</span>' +
+                '<span class="tip-text">' + d[scope.fieldY] + '</span>';
+            });
+
+          var dots = groupEl.selectAll('g.dot')
+            .data(graphCtrl.dataMgr.data)
+            .enter().append('g')
+            .attr('class', 'dot')
+            .selectAll('circle')
+            .data(graphCtrl.dataMgr.data)
+            .enter().append('circle')
+            .attr('r', lineConfig.circleRadius);
+
+          groupEl.call(tip);
+
+          groupEl.selectAll('g.dot circle')
+            .attr('cx', function(d) { return graphCtrl.scaleMgr.x(d[scope.fieldX]); })
+            .attr('cy', function(d) { return graphCtrl.scaleMgr.y(d[scope.fieldY]); })
+            .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')'; })
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
+
+          dots
+            .data(graphCtrl.dataMgr.data)
+            .exit().remove();
+        }
+
+        scope.$on(blGraphEvents.DRAW, drawLine);
+      }
+    });
+  })
+;

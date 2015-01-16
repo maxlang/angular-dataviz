@@ -1,4 +1,4 @@
-# Angular Dataviz - Reliable, componentized data visualization controls for AngularJS
+# Angular Dataviz - componentized data visualization controls for AngularJS
 
 ***
 
@@ -11,8 +11,6 @@
 * **AngularJS v1.1.3+** is currently required.
 
 ## Installation
-
-The repository comes with the modules pre-built and compressed into the `build/` directory.
 
 ```javascript
 angular.module('myApp', ['dataviz']);
@@ -28,16 +26,15 @@ You do not need to build the project to use it - see above - but if you are work
 
 0. Install [Node.js](http://nodejs.org/) and NPM (should come with)
 
-1. Install local dependencies:
-
+0. Install global dependencies `grunt`, `coffee-script`, `bower`, and `testacular`:
 ```bash
-$ npm install
+$ npm install -g testacular coffee-script grunt-cli bower
 ```
 
-2. Install global dependencies `grunt`, `coffee-script`, and `testacular`:
-
+0. Install local dependencies:
 ```bash
-$ npm install -g testacular coffee-script grunt-cli
+$ npm install
+$ bower install
 ```
 
 ### Build Files & Run Tests

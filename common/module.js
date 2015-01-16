@@ -1,3 +1,1 @@
-
-angular.module('dataviz.directives', []);
-angular.module('dataviz', ['dataviz.directives']);
+angular.module('dataviz', ['dataviz.services', 'dataviz.factories']);

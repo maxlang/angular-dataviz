@@ -1,0 +1,2088 @@
+.bl-axis path,
+.bl-axis line {
+  shape-rendering: crispEdges;
+  stroke: none;
+}
+.bl-axis path.domain {
+  fill: none;
+}
+.bl-axis text {
+  font-size: 12px;
+}
+.bl-axis.y .tick line {
+  stroke: grey;
+}
+
+.bl-legend {
+  fill: transparent;
+  stroke: grey;
+}
+.bl-legend text {
+  stroke: none;
+  fill: black;
+}
+
+.bl-line path {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+.bl-line circle {
+  fill: white;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+
+.bl-title {
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.7;
+}
+.grid path {
+  stroke-width: 0;
+}
+rect.bar {
+  fill: #2162a4;
+}
+rect.bar.selected {
+  fill: #13375b;
+}
+
+block-calendar {
+  display: block;
+  position: relative;
+  /* MAGNITUDE COLORS */
+
+}
+block-calendar * {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+block-calendar .x.axis text {
+  font-size: 11px;
+  font-weight: bold;
+  color: #232323;
+  font-family: 'helvetica neue', 'helvetica', 'arial', sans-serif;
+  text-anchor: left;
+}
+block-calendar .x.axis text:hover {
+  cursor: pointer;
+  opacity: .9;
+  fill: red;
+}
+block-calendar text {
+  opacity: 1.0;
+  font-weight: normal;
+}
+block-calendar .container {
+  padding: 18px 20px 17px 25px;
+  position: relative;
+}
+block-calendar.chart {
+  font: 10px sans-serif;
+}
+block-calendar.chart svg {
+  width: 100%;
+  height: 100%;
+}
+block-calendar.chart .qundefined-9 {
+  fill: #eeeeee;
+}
+block-calendar.chart .qundefined-9.selected {
+  fill: #ccccff;
+}
+block-calendar.chart .q0-9 {
+  fill: #d4e784;
+}
+block-calendar.chart .q0-9.selected {
+  fill: #8585e6;
+}
+block-calendar.chart .q1-9,
+block-calendar.chart .q2-9 {
+  fill: #abc86d;
+}
+block-calendar.chart .q1-9.selected,
+block-calendar.chart .q2-9.selected {
+  fill: #6d6dc7;
+}
+block-calendar.chart .q3-9,
+block-calendar.chart .q4-9 {
+  fill: #76a14e;
+}
+block-calendar.chart .q3-9.selected,
+block-calendar.chart .q4-9.selected {
+  fill: #4f4fa1;
+}
+block-calendar.chart .q5-9,
+block-calendar.chart .q6-9 {
+  fill: #457c32;
+}
+block-calendar.chart .q5-9.selected,
+block-calendar.chart .q6-9.selected {
+  fill: #32327a;
+}
+block-calendar.chart .q7-9,
+block-calendar.chart .q8-9 {
+  fill: #1c5d1a;
+}
+block-calendar.chart .q7-9.selected,
+block-calendar.chart .q8-9.selected {
+  fill: #1a1a5c;
+}
+block-calendar.chart .day {
+  stroke: white;
+}
+block-calendar.chart .day:hover {
+  cursor: pointer;
+  opacity: 0.25;
+  fill: red;
+}
+block-calendar.chart .day.selected {
+  opacity: .5;
+}
+block-calendar.chart .future-day {
+  fill: #f6f6f6;
+}
+block-calendar.chart .month {
+  fill: none;
+  stroke-width: 1px;
+}
+block-calendar .axis {
+  position: absolute;
+}
+block-calendar .axis span {
+  display: block;
+  font-weight: bold;
+  color: #808080;
+}
+block-calendar .y.axis {
+  top: 8px;
+  left: 0;
+}
+block-calendar .y.axis span {
+  line-height: 4px;
+  margin-bottom: 12px;
+  font-size: 0.6em;
+  opacity: 0.8;
+}
+block-calendar .x.axis {
+  top: -9px;
+  left: 35px;
+}
+block-calendar .x.axis span {
+  width: 47px;
+  font-size: 0.65em;
+  display: inline;
+}
+block-calendar .description {
+  position: absolute;
+  bottom: 12px;
+  left: 55px;
+  font-weight: 500;
+  font-size: 0.7em;
+  color: #969696;
+  display: none;
+}
+block-calendar .legend {
+  position: absolute;
+  bottom: 12px;
+  right: 30px;
+  display: none;
+}
+block-calendar .legend li.day {
+  width: 10px;
+  height: 10px;
+  background-color: green;
+}
+block-calendar .legend li {
+  font-weight: 500;
+  font-size: 0.7em;
+  color: #969696;
+  vertical-align: middle;
+  margin-left: 3px;
+}
+block-calendar .legend li.m1 {
+  background-color: #d4e784;
+}
+block-calendar .legend li.m2 {
+  background-color: #abc86d;
+}
+block-calendar .legend li.m3 {
+  background-color: #76a14e;
+}
+block-calendar .legend li.m4 {
+  background-color: #457c32;
+}
+block-calendar .legend li.m5 {
+  background-color: #1c5d1a;
+}
+block-calendar .legend li.m1.selected {
+  background-color: #8585e6;
+}
+block-calendar .legend li.m2.selected {
+  background-color: #6d6dc7;
+}
+block-calendar .legend li.m3.selected {
+  background-color: #4f4fa1;
+}
+block-calendar .legend li.m4.selected {
+  background-color: #32327a;
+}
+block-calendar .legend li.m5.selected {
+  background-color: #1a1a5c;
+}
+block-calendar .legend li:last-child,
+block-calendar .legend li:nth-child(2) {
+  margin-left: 10px;
+}
+block-calendar .annotation0 text {
+  fill: #ff0000;
+}
+block-calendar .annotation0 line {
+  stroke: #ff0000;
+  stroke-width: 2px;
+}
+block-calendar .annotation0 circle {
+  stroke: #ff0000;
+  fill: #ff0000;
+}
+block-calendar .annotation1 text {
+  fill: #0096dc;
+}
+block-calendar .annotation1 line {
+  stroke: #0096dc;
+  stroke-width: 2px;
+}
+block-calendar .annotation1 circle {
+  stroke: #0096dc;
+  fill: #0096dc;
+}
+block-calendar .annotation2 text {
+  fill: #529d1e;
+}
+block-calendar .annotation2 line {
+  stroke: #529d1e;
+  stroke-width: 2px;
+}
+block-calendar .annotation2 circle {
+  stroke: #529d1e;
+  fill: #529d1e;
+}
+block-calendar .annotation-date text {
+  fill: #888;
+  font-weight: normal;
+}
+block-calendar .weekday text {
+  fill: #a6a6a6;
+  font-size: 9px;
+  text-anchor: end;
+  font-family: 'helvetica neue', 'helvetica', 'arial', sans-serif;
+}
+
+barchart .brush {
+  fill: rgba(0, 0, 0, 0.3);
+}
+
+.selected rect {
+  stroke: #000;
+  stroke-width: 3px;
+}
+nv-barchart * {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+
+/*---------------------------------------------------
+    LESS Elements 0.6
+  ---------------------------------------------------
+    A set of useful LESS mixins by Dmitry Fadeyev
+    Special thanks for mixin suggestions to:
+      Kris Van Herzeele,
+      Benoit Adam,
+      Portenart Emile-Victor,
+      Ryan Faerman
+
+    More info at: http://lesselements.com
+-----------------------------------------------------*/
+/*---------------------------------------------------
+
+                    FROM BLEND LABS
+
+-----------------------------------------------------*/
+.flexbox {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-webkit-flex;
+  display: flex;
+  display: -moz-flexbox;
+  display: -ms-flexbox;
+  display: flexbox;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+}
+.flexbox {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-webkit-flex;
+  display: flex;
+  display: -moz-flexbox;
+  display: -ms-flexbox;
+  display: flexbox;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+}
+@font-face {
+  font-family: 'IconicFill';
+  src: url('/assets/fonts/iconic_fill.eot');
+  src: url('/assets/fonts/iconic_fill.eot?#iefix') format('embedded-opentype'), url('/assets/fonts/iconic_fill.ttf') format('truetype'), url('/assets/fonts/iconic_fill.svg#iconic') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.iconic {
+  display: inline-block;
+  font-family: 'IconicFill';
+}
+.iconic.lightbulb:before {
+  content: '\e063';
+}
+.iconic.equalizer:before {
+  content: '\e052';
+}
+.iconic.brush_alt:before {
+  content: '\e01c';
+}
+.iconic.move:before {
+  content: '\e03e';
+}
+.iconic.tag_fill:before {
+  content: '\e02b';
+}
+.iconic.book_alt2:before {
+  content: '\e06a';
+}
+.iconic.layers:before {
+  content: '\e01f';
+}
+.iconic.chat_alt_fill:before {
+  content: '\e007';
+}
+.iconic.layers_alt:before {
+  content: '\e020';
+}
+.iconic.cloud_upload:before {
+  content: '\e045';
+}
+.iconic.chart_alt:before {
+  content: '\e029';
+}
+.iconic.fullscreen_exit_alt:before {
+  content: '\e051';
+}
+.iconic.cloud_download:before {
+  content: '\e044';
+}
+.iconic.paperclip:before {
+  content: '\e08a';
+}
+.iconic.heart_fill:before {
+  content: '\2764';
+}
+.iconic.mail:before {
+  content: '\2709';
+}
+.iconic.pen_alt_fill:before {
+  content: '\e005';
+}
+.iconic.check_alt:before {
+  content: '\2718';
+}
+.iconic.battery_charging:before {
+  content: '\e05d';
+}
+.iconic.lock_fill:before {
+  content: '\e075';
+}
+.iconic.stop:before {
+  content: '\e04a';
+}
+.iconic.arrow_up:before {
+  content: '\2191';
+}
+.iconic.move_horizontal:before {
+  content: '\e038';
+}
+.iconic.compass:before {
+  content: '\e021';
+}
+.iconic.minus_alt:before {
+  content: '\e009';
+}
+.iconic.battery_empty:before {
+  content: '\e05c';
+}
+.iconic.comment_fill:before {
+  content: '\e06d';
+}
+.iconic.map_pin_alt:before {
+  content: '\e002';
+}
+.iconic.question_mark:before {
+  content: '\003f';
+}
+.iconic.list:before {
+  content: '\e055';
+}
+.iconic.upload:before {
+  content: '\e043';
+}
+.iconic.reload:before {
+  content: '\e030';
+}
+.iconic.loop_alt4:before {
+  content: '\e035';
+}
+.iconic.loop_alt3:before {
+  content: '\e034';
+}
+.iconic.loop_alt2:before {
+  content: '\e033';
+}
+.iconic.loop_alt1:before {
+  content: '\e032';
+}
+.iconic.left_quote:before {
+  content: '\275d';
+}
+.iconic.x:before {
+  content: '\2713';
+}
+.iconic.last:before {
+  content: '\e04d';
+}
+.iconic.bars:before {
+  content: '\e06f';
+}
+.iconic.arrow_left:before {
+  content: '\2190';
+}
+.iconic.arrow_down:before {
+  content: '\2193';
+}
+.iconic.download:before {
+  content: '\e042';
+}
+.iconic.home:before {
+  content: '\2302';
+}
+.iconic.calendar:before {
+  content: '\e001';
+}
+.iconic.right_quote_alt:before {
+  content: '\e012';
+}
+.iconic.unlock_fill:before {
+  content: '\e076';
+}
+.iconic.fullscreen:before {
+  content: '\e04e';
+}
+.iconic.dial:before {
+  content: '\e058';
+}
+.iconic.plus_alt:before {
+  content: '\e008';
+}
+.iconic.clock:before {
+  content: '\e079';
+}
+.iconic.movie:before {
+  content: '\e060';
+}
+.iconic.steering_wheel:before {
+  content: '\e024';
+}
+.iconic.pen:before {
+  content: '\270e';
+}
+.iconic.pin:before {
+  content: '\e067';
+}
+.iconic.denied:before {
+  content: '\26d4';
+}
+.iconic.left_quote_alt:before {
+  content: '\e011';
+}
+.iconic.volume_mute:before {
+  content: '\e071';
+}
+.iconic.umbrella:before {
+  content: '\2602';
+}
+.iconic.list_nested:before {
+  content: '\e056';
+}
+.iconic.arrow_up_alt1:before {
+  content: '\e014';
+}
+.iconic.undo:before {
+  content: '\e02f';
+}
+.iconic.pause:before {
+  content: '\e049';
+}
+.iconic.bolt:before {
+  content: '\26a1';
+}
+.iconic.article:before {
+  content: '\e053';
+}
+.iconic.read_more:before {
+  content: '\e054';
+}
+.iconic.beaker:before {
+  content: '\e023';
+}
+.iconic.beaker_alt:before {
+  content: '\e010';
+}
+.iconic.battery_full:before {
+  content: '\e073';
+}
+.iconic.arrow_right:before {
+  content: '\2192';
+}
+.iconic.iphone:before {
+  content: '\e06e';
+}
+.iconic.arrow_up_alt2:before {
+  content: '\e018';
+}
+.iconic.cog:before {
+  content: '\2699';
+}
+.iconic.award_fill:before {
+  content: '\e022';
+}
+.iconic.first:before {
+  content: '\e04c';
+}
+.iconic.trash_fill:before {
+  content: '\e05a';
+}
+.iconic.image:before {
+  content: '\e027';
+}
+.iconic.comment_alt1_fill:before {
+  content: '\e003';
+}
+.iconic.cd:before {
+  content: '\e064';
+}
+.iconic.right_quote:before {
+  content: '\275e';
+}
+.iconic.brush:before {
+  content: '\e01b';
+}
+.iconic.cloud:before {
+  content: '\2601';
+}
+.iconic.eye:before {
+  content: '\e025';
+}
+.iconic.play_alt:before {
+  content: '\e048';
+}
+.iconic.transfer:before {
+  content: '\e041';
+}
+.iconic.pen_alt2:before {
+  content: '\e006';
+}
+.iconic.camera:before {
+  content: '\e070';
+}
+.iconic.move_horizontal_alt2:before {
+  content: '\e03a';
+}
+.iconic.curved_arrow:before {
+  content: '\2935';
+}
+.iconic.move_horizontal_alt1:before {
+  content: '\e039';
+}
+.iconic.aperture:before {
+  content: '\e026';
+}
+.iconic.reload_alt:before {
+  content: '\e031';
+}
+.iconic.magnifying_glass:before {
+  content: '\e074';
+}
+.iconic.calendar_alt_fill:before {
+  content: '\e06c';
+}
+.iconic.fork:before {
+  content: '\e046';
+}
+.iconic.box:before {
+  content: '\e06b';
+}
+.iconic.map_pin_fill:before {
+  content: '\e068';
+}
+.iconic.bars_alt:before {
+  content: '\e00a';
+}
+.iconic.volume:before {
+  content: '\e072';
+}
+.iconic.x_alt:before {
+  content: '\2714';
+}
+.iconic.link:before {
+  content: '\e077';
+}
+.iconic.move_vertical:before {
+  content: '\e03b';
+}
+.iconic.eyedropper:before {
+  content: '\e01e';
+}
+.iconic.spin:before {
+  content: '\e036';
+}
+.iconic.rss:before {
+  content: '\e02c';
+}
+.iconic.info:before {
+  content: '\2139';
+}
+.iconic.target:before {
+  content: '\e02a';
+}
+.iconic.cursor:before {
+  content: '\e057';
+}
+.iconic.key_fill:before {
+  content: '\26bf';
+}
+.iconic.minus:before {
+  content: '\2796';
+}
+.iconic.book_alt:before {
+  content: '\e00b';
+}
+.iconic.headphones:before {
+  content: '\e061';
+}
+.iconic.hash:before {
+  content: '\0023';
+}
+.iconic.arrow_left_alt1:before {
+  content: '\e013';
+}
+.iconic.arrow_left_alt2:before {
+  content: '\e017';
+}
+.iconic.fullscreen_exit:before {
+  content: '\e050';
+}
+.iconic.share:before {
+  content: '\e02e';
+}
+.iconic.fullscreen_alt:before {
+  content: '\e04f';
+}
+.iconic.comment_alt2_fill:before {
+  content: '\e004';
+}
+.iconic.moon_fill:before {
+  content: '\263e';
+}
+.iconic.at:before {
+  content: '\0040';
+}
+.iconic.chat:before {
+  content: '\e05e';
+}
+.iconic.move_vertical_alt2:before {
+  content: '\e03d';
+}
+.iconic.move_vertical_alt1:before {
+  content: '\e03c';
+}
+.iconic.check:before {
+  content: '\2717';
+}
+.iconic.mic:before {
+  content: '\e05f';
+}
+.iconic.book:before {
+  content: '\e069';
+}
+.iconic.move_alt1:before {
+  content: '\e03f';
+}
+.iconic.move_alt2:before {
+  content: '\e040';
+}
+.iconic.document_fill:before {
+  content: '\e066';
+}
+.iconic.plus:before {
+  content: '\2795';
+}
+.iconic.wrench:before {
+  content: '\e078';
+}
+.iconic.play:before {
+  content: '\e047';
+}
+.iconic.star:before {
+  content: '\2605';
+}
+.iconic.document_alt_fill:before {
+  content: '\e000';
+}
+.iconic.chart:before {
+  content: '\e028';
+}
+.iconic.rain:before {
+  content: '\26c6';
+}
+.iconic.folder_fill:before {
+  content: '\e065';
+}
+.iconic.new_window:before {
+  content: '\e059';
+}
+.iconic.user:before {
+  content: '\e062';
+}
+.iconic.battery_half:before {
+  content: '\e05b';
+}
+.iconic.aperture_alt:before {
+  content: '\e00c';
+}
+.iconic.eject:before {
+  content: '\e04b';
+}
+.iconic.arrow_down_alt1:before {
+  content: '\e016';
+}
+.iconic.pilcrow:before {
+  content: '\00b6';
+}
+.iconic.arrow_down_alt2:before {
+  content: '\e01a';
+}
+.iconic.arrow_right_alt1:before {
+  content: '\e015';
+}
+.iconic.arrow_right_alt2:before {
+  content: '\e019';
+}
+.iconic.rss_alt:before {
+  content: '\e02d';
+}
+.iconic.spin_alt:before {
+  content: '\e037';
+}
+.iconic.sun_fill:before {
+  content: '\2600';
+}
+
+/*---------------------------------------------------
+    LESS Elements 0.6
+  ---------------------------------------------------
+    A set of useful LESS mixins by Dmitry Fadeyev
+    Special thanks for mixin suggestions to:
+      Kris Van Herzeele,
+      Benoit Adam,
+      Portenart Emile-Victor,
+      Ryan Faerman
+
+    More info at: http://lesselements.com
+-----------------------------------------------------*/
+/*---------------------------------------------------
+
+                    FROM BLEND LABS
+
+-----------------------------------------------------*/
+.flexbox {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-webkit-flex;
+  display: flex;
+  display: -moz-flexbox;
+  display: -ms-flexbox;
+  display: flexbox;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+}
+.flexbox {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-webkit-flex;
+  display: flex;
+  display: -moz-flexbox;
+  display: -ms-flexbox;
+  display: flexbox;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+}
+@font-face {
+  font-family: 'IconicFill';
+  src: url('/assets/fonts/iconic_fill.eot');
+  src: url('/assets/fonts/iconic_fill.eot?#iefix') format('embedded-opentype'), url('/assets/fonts/iconic_fill.ttf') format('truetype'), url('/assets/fonts/iconic_fill.svg#iconic') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.iconic {
+  display: inline-block;
+  font-family: 'IconicFill';
+}
+.iconic.lightbulb:before {
+  content: '\e063';
+}
+.iconic.equalizer:before {
+  content: '\e052';
+}
+.iconic.brush_alt:before {
+  content: '\e01c';
+}
+.iconic.move:before {
+  content: '\e03e';
+}
+.iconic.tag_fill:before {
+  content: '\e02b';
+}
+.iconic.book_alt2:before {
+  content: '\e06a';
+}
+.iconic.layers:before {
+  content: '\e01f';
+}
+.iconic.chat_alt_fill:before {
+  content: '\e007';
+}
+.iconic.layers_alt:before {
+  content: '\e020';
+}
+.iconic.cloud_upload:before {
+  content: '\e045';
+}
+.iconic.chart_alt:before {
+  content: '\e029';
+}
+.iconic.fullscreen_exit_alt:before {
+  content: '\e051';
+}
+.iconic.cloud_download:before {
+  content: '\e044';
+}
+.iconic.paperclip:before {
+  content: '\e08a';
+}
+.iconic.heart_fill:before {
+  content: '\2764';
+}
+.iconic.mail:before {
+  content: '\2709';
+}
+.iconic.pen_alt_fill:before {
+  content: '\e005';
+}
+.iconic.check_alt:before {
+  content: '\2718';
+}
+.iconic.battery_charging:before {
+  content: '\e05d';
+}
+.iconic.lock_fill:before {
+  content: '\e075';
+}
+.iconic.stop:before {
+  content: '\e04a';
+}
+.iconic.arrow_up:before {
+  content: '\2191';
+}
+.iconic.move_horizontal:before {
+  content: '\e038';
+}
+.iconic.compass:before {
+  content: '\e021';
+}
+.iconic.minus_alt:before {
+  content: '\e009';
+}
+.iconic.battery_empty:before {
+  content: '\e05c';
+}
+.iconic.comment_fill:before {
+  content: '\e06d';
+}
+.iconic.map_pin_alt:before {
+  content: '\e002';
+}
+.iconic.question_mark:before {
+  content: '\003f';
+}
+.iconic.list:before {
+  content: '\e055';
+}
+.iconic.upload:before {
+  content: '\e043';
+}
+.iconic.reload:before {
+  content: '\e030';
+}
+.iconic.loop_alt4:before {
+  content: '\e035';
+}
+.iconic.loop_alt3:before {
+  content: '\e034';
+}
+.iconic.loop_alt2:before {
+  content: '\e033';
+}
+.iconic.loop_alt1:before {
+  content: '\e032';
+}
+.iconic.left_quote:before {
+  content: '\275d';
+}
+.iconic.x:before {
+  content: '\2713';
+}
+.iconic.last:before {
+  content: '\e04d';
+}
+.iconic.bars:before {
+  content: '\e06f';
+}
+.iconic.arrow_left:before {
+  content: '\2190';
+}
+.iconic.arrow_down:before {
+  content: '\2193';
+}
+.iconic.download:before {
+  content: '\e042';
+}
+.iconic.home:before {
+  content: '\2302';
+}
+.iconic.calendar:before {
+  content: '\e001';
+}
+.iconic.right_quote_alt:before {
+  content: '\e012';
+}
+.iconic.unlock_fill:before {
+  content: '\e076';
+}
+.iconic.fullscreen:before {
+  content: '\e04e';
+}
+.iconic.dial:before {
+  content: '\e058';
+}
+.iconic.plus_alt:before {
+  content: '\e008';
+}
+.iconic.clock:before {
+  content: '\e079';
+}
+.iconic.movie:before {
+  content: '\e060';
+}
+.iconic.steering_wheel:before {
+  content: '\e024';
+}
+.iconic.pen:before {
+  content: '\270e';
+}
+.iconic.pin:before {
+  content: '\e067';
+}
+.iconic.denied:before {
+  content: '\26d4';
+}
+.iconic.left_quote_alt:before {
+  content: '\e011';
+}
+.iconic.volume_mute:before {
+  content: '\e071';
+}
+.iconic.umbrella:before {
+  content: '\2602';
+}
+.iconic.list_nested:before {
+  content: '\e056';
+}
+.iconic.arrow_up_alt1:before {
+  content: '\e014';
+}
+.iconic.undo:before {
+  content: '\e02f';
+}
+.iconic.pause:before {
+  content: '\e049';
+}
+.iconic.bolt:before {
+  content: '\26a1';
+}
+.iconic.article:before {
+  content: '\e053';
+}
+.iconic.read_more:before {
+  content: '\e054';
+}
+.iconic.beaker:before {
+  content: '\e023';
+}
+.iconic.beaker_alt:before {
+  content: '\e010';
+}
+.iconic.battery_full:before {
+  content: '\e073';
+}
+.iconic.arrow_right:before {
+  content: '\2192';
+}
+.iconic.iphone:before {
+  content: '\e06e';
+}
+.iconic.arrow_up_alt2:before {
+  content: '\e018';
+}
+.iconic.cog:before {
+  content: '\2699';
+}
+.iconic.award_fill:before {
+  content: '\e022';
+}
+.iconic.first:before {
+  content: '\e04c';
+}
+.iconic.trash_fill:before {
+  content: '\e05a';
+}
+.iconic.image:before {
+  content: '\e027';
+}
+.iconic.comment_alt1_fill:before {
+  content: '\e003';
+}
+.iconic.cd:before {
+  content: '\e064';
+}
+.iconic.right_quote:before {
+  content: '\275e';
+}
+.iconic.brush:before {
+  content: '\e01b';
+}
+.iconic.cloud:before {
+  content: '\2601';
+}
+.iconic.eye:before {
+  content: '\e025';
+}
+.iconic.play_alt:before {
+  content: '\e048';
+}
+.iconic.transfer:before {
+  content: '\e041';
+}
+.iconic.pen_alt2:before {
+  content: '\e006';
+}
+.iconic.camera:before {
+  content: '\e070';
+}
+.iconic.move_horizontal_alt2:before {
+  content: '\e03a';
+}
+.iconic.curved_arrow:before {
+  content: '\2935';
+}
+.iconic.move_horizontal_alt1:before {
+  content: '\e039';
+}
+.iconic.aperture:before {
+  content: '\e026';
+}
+.iconic.reload_alt:before {
+  content: '\e031';
+}
+.iconic.magnifying_glass:before {
+  content: '\e074';
+}
+.iconic.calendar_alt_fill:before {
+  content: '\e06c';
+}
+.iconic.fork:before {
+  content: '\e046';
+}
+.iconic.box:before {
+  content: '\e06b';
+}
+.iconic.map_pin_fill:before {
+  content: '\e068';
+}
+.iconic.bars_alt:before {
+  content: '\e00a';
+}
+.iconic.volume:before {
+  content: '\e072';
+}
+.iconic.x_alt:before {
+  content: '\2714';
+}
+.iconic.link:before {
+  content: '\e077';
+}
+.iconic.move_vertical:before {
+  content: '\e03b';
+}
+.iconic.eyedropper:before {
+  content: '\e01e';
+}
+.iconic.spin:before {
+  content: '\e036';
+}
+.iconic.rss:before {
+  content: '\e02c';
+}
+.iconic.info:before {
+  content: '\2139';
+}
+.iconic.target:before {
+  content: '\e02a';
+}
+.iconic.cursor:before {
+  content: '\e057';
+}
+.iconic.key_fill:before {
+  content: '\26bf';
+}
+.iconic.minus:before {
+  content: '\2796';
+}
+.iconic.book_alt:before {
+  content: '\e00b';
+}
+.iconic.headphones:before {
+  content: '\e061';
+}
+.iconic.hash:before {
+  content: '\0023';
+}
+.iconic.arrow_left_alt1:before {
+  content: '\e013';
+}
+.iconic.arrow_left_alt2:before {
+  content: '\e017';
+}
+.iconic.fullscreen_exit:before {
+  content: '\e050';
+}
+.iconic.share:before {
+  content: '\e02e';
+}
+.iconic.fullscreen_alt:before {
+  content: '\e04f';
+}
+.iconic.comment_alt2_fill:before {
+  content: '\e004';
+}
+.iconic.moon_fill:before {
+  content: '\263e';
+}
+.iconic.at:before {
+  content: '\0040';
+}
+.iconic.chat:before {
+  content: '\e05e';
+}
+.iconic.move_vertical_alt2:before {
+  content: '\e03d';
+}
+.iconic.move_vertical_alt1:before {
+  content: '\e03c';
+}
+.iconic.check:before {
+  content: '\2717';
+}
+.iconic.mic:before {
+  content: '\e05f';
+}
+.iconic.book:before {
+  content: '\e069';
+}
+.iconic.move_alt1:before {
+  content: '\e03f';
+}
+.iconic.move_alt2:before {
+  content: '\e040';
+}
+.iconic.document_fill:before {
+  content: '\e066';
+}
+.iconic.plus:before {
+  content: '\2795';
+}
+.iconic.wrench:before {
+  content: '\e078';
+}
+.iconic.play:before {
+  content: '\e047';
+}
+.iconic.star:before {
+  content: '\2605';
+}
+.iconic.document_alt_fill:before {
+  content: '\e000';
+}
+.iconic.chart:before {
+  content: '\e028';
+}
+.iconic.rain:before {
+  content: '\26c6';
+}
+.iconic.folder_fill:before {
+  content: '\e065';
+}
+.iconic.new_window:before {
+  content: '\e059';
+}
+.iconic.user:before {
+  content: '\e062';
+}
+.iconic.battery_half:before {
+  content: '\e05b';
+}
+.iconic.aperture_alt:before {
+  content: '\e00c';
+}
+.iconic.eject:before {
+  content: '\e04b';
+}
+.iconic.arrow_down_alt1:before {
+  content: '\e016';
+}
+.iconic.pilcrow:before {
+  content: '\00b6';
+}
+.iconic.arrow_down_alt2:before {
+  content: '\e01a';
+}
+.iconic.arrow_right_alt1:before {
+  content: '\e015';
+}
+.iconic.arrow_right_alt2:before {
+  content: '\e019';
+}
+.iconic.rss_alt:before {
+  content: '\e02d';
+}
+.iconic.spin_alt:before {
+  content: '\e037';
+}
+.iconic.sun_fill:before {
+  content: '\2600';
+}
+.sidebar-sizer {
+  position: relative;
+}
+.sidebar-sizer * {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.sidebars {
+  display: block !important;
+}
+.sidebars ul li,
+.sidebars ul sidebar {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-webkit-flex;
+  display: flex;
+  display: -moz-flexbox;
+  display: -ms-flexbox;
+  display: flexbox;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+  color: #1e1e1e;
+  margin: 5px 0;
+  padding: 2px 0;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+}
+.sidebars ul li:first-child,
+.sidebars ul sidebar:first-child {
+  margin-top: 0;
+}
+.sidebars ul li:last-child,
+.sidebars ul sidebar:last-child {
+  margin-bottom: 0;
+}
+.sidebars ul li label,
+.sidebars ul sidebar label {
+  -webkit-flex: 1;
+  -moz-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  -moz-flexbox: 1;
+  -ms-flexbox: 1;
+  flexbox: 1;
+  -moz-box: 1;
+  -ms-box: 1;
+  box: 1;
+  padding-left: 5px;
+  font-weight: 500;
+}
+.sidebars ul li label,
+.sidebars ul sidebar label,
+.sidebars ul li .value,
+.sidebars ul sidebar .value {
+  font-size: 11px;
+  line-height: 20px;
+  vertical-align: middle;
+  display: inline;
+}
+.sidebars ul li span.value,
+.sidebars ul sidebar span.value,
+.sidebars ul li span.cancel,
+.sidebars ul sidebar span.cancel {
+  color: rgba(123, 129, 135, 0.8);
+  text-align: right;
+  font-weight: bold;
+}
+.sidebars ul li span.value,
+.sidebars ul sidebar span.value {
+  position: absolute;
+  height: 20px;
+  text-align: right;
+  background-color: rgba(118, 141, 168, 0.1);
+  right: 0px;
+}
+.sidebars ul li span.value .text,
+.sidebars ul sidebar span.value .text {
+  padding-right: 5px;
+}
+.sidebars ul li:hover,
+.sidebars ul sidebar:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.sidebars ul li:hover span,
+.sidebars ul sidebar:hover span,
+.sidebars ul li:hover label,
+.sidebars ul sidebar:hover label {
+  cursor: pointer;
+}
+.sidebars ul li:hover .value,
+.sidebars ul sidebar:hover .value {
+  background-color: transparent;
+}
+.sidebars ul li.selected,
+.sidebars ul sidebar.selected {
+  background-color: rgba(118, 141, 168, 0.1);
+}
+.sidebars ul li.selected label,
+.sidebars ul sidebar.selected label {
+  font-weight: bold;
+}
+.sidebars ul li.selected .value,
+.sidebars ul sidebar.selected .value {
+  display: none;
+}
+.sidebars ul li.selected:hover,
+.sidebars ul sidebar.selected:hover {
+  background-color: rgba(62, 78, 97, 0.1);
+}
+.sidebars ul li.selected span.cancel,
+.sidebars ul sidebar.selected span.cancel {
+  font-size: 12px !important;
+  color: #3a4350;
+  display: inline-block;
+  font-family: 'IconicFill';
+  margin: 5px 7px 0;
+  font-size: 18px;
+  opacity: 0.5;
+}
+.sidebars ul li.selected span.cancel.lightbulb:before,
+.sidebars ul sidebar.selected span.cancel.lightbulb:before {
+  content: '\e063';
+}
+.sidebars ul li.selected span.cancel.equalizer:before,
+.sidebars ul sidebar.selected span.cancel.equalizer:before {
+  content: '\e052';
+}
+.sidebars ul li.selected span.cancel.brush_alt:before,
+.sidebars ul sidebar.selected span.cancel.brush_alt:before {
+  content: '\e01c';
+}
+.sidebars ul li.selected span.cancel.move:before,
+.sidebars ul sidebar.selected span.cancel.move:before {
+  content: '\e03e';
+}
+.sidebars ul li.selected span.cancel.tag_fill:before,
+.sidebars ul sidebar.selected span.cancel.tag_fill:before {
+  content: '\e02b';
+}
+.sidebars ul li.selected span.cancel.book_alt2:before,
+.sidebars ul sidebar.selected span.cancel.book_alt2:before {
+  content: '\e06a';
+}
+.sidebars ul li.selected span.cancel.layers:before,
+.sidebars ul sidebar.selected span.cancel.layers:before {
+  content: '\e01f';
+}
+.sidebars ul li.selected span.cancel.chat_alt_fill:before,
+.sidebars ul sidebar.selected span.cancel.chat_alt_fill:before {
+  content: '\e007';
+}
+.sidebars ul li.selected span.cancel.layers_alt:before,
+.sidebars ul sidebar.selected span.cancel.layers_alt:before {
+  content: '\e020';
+}
+.sidebars ul li.selected span.cancel.cloud_upload:before,
+.sidebars ul sidebar.selected span.cancel.cloud_upload:before {
+  content: '\e045';
+}
+.sidebars ul li.selected span.cancel.chart_alt:before,
+.sidebars ul sidebar.selected span.cancel.chart_alt:before {
+  content: '\e029';
+}
+.sidebars ul li.selected span.cancel.fullscreen_exit_alt:before,
+.sidebars ul sidebar.selected span.cancel.fullscreen_exit_alt:before {
+  content: '\e051';
+}
+.sidebars ul li.selected span.cancel.cloud_download:before,
+.sidebars ul sidebar.selected span.cancel.cloud_download:before {
+  content: '\e044';
+}
+.sidebars ul li.selected span.cancel.paperclip:before,
+.sidebars ul sidebar.selected span.cancel.paperclip:before {
+  content: '\e08a';
+}
+.sidebars ul li.selected span.cancel.heart_fill:before,
+.sidebars ul sidebar.selected span.cancel.heart_fill:before {
+  content: '\2764';
+}
+.sidebars ul li.selected span.cancel.mail:before,
+.sidebars ul sidebar.selected span.cancel.mail:before {
+  content: '\2709';
+}
+.sidebars ul li.selected span.cancel.pen_alt_fill:before,
+.sidebars ul sidebar.selected span.cancel.pen_alt_fill:before {
+  content: '\e005';
+}
+.sidebars ul li.selected span.cancel.check_alt:before,
+.sidebars ul sidebar.selected span.cancel.check_alt:before {
+  content: '\2718';
+}
+.sidebars ul li.selected span.cancel.battery_charging:before,
+.sidebars ul sidebar.selected span.cancel.battery_charging:before {
+  content: '\e05d';
+}
+.sidebars ul li.selected span.cancel.lock_fill:before,
+.sidebars ul sidebar.selected span.cancel.lock_fill:before {
+  content: '\e075';
+}
+.sidebars ul li.selected span.cancel.stop:before,
+.sidebars ul sidebar.selected span.cancel.stop:before {
+  content: '\e04a';
+}
+.sidebars ul li.selected span.cancel.arrow_up:before,
+.sidebars ul sidebar.selected span.cancel.arrow_up:before {
+  content: '\2191';
+}
+.sidebars ul li.selected span.cancel.move_horizontal:before,
+.sidebars ul sidebar.selected span.cancel.move_horizontal:before {
+  content: '\e038';
+}
+.sidebars ul li.selected span.cancel.compass:before,
+.sidebars ul sidebar.selected span.cancel.compass:before {
+  content: '\e021';
+}
+.sidebars ul li.selected span.cancel.minus_alt:before,
+.sidebars ul sidebar.selected span.cancel.minus_alt:before {
+  content: '\e009';
+}
+.sidebars ul li.selected span.cancel.battery_empty:before,
+.sidebars ul sidebar.selected span.cancel.battery_empty:before {
+  content: '\e05c';
+}
+.sidebars ul li.selected span.cancel.comment_fill:before,
+.sidebars ul sidebar.selected span.cancel.comment_fill:before {
+  content: '\e06d';
+}
+.sidebars ul li.selected span.cancel.map_pin_alt:before,
+.sidebars ul sidebar.selected span.cancel.map_pin_alt:before {
+  content: '\e002';
+}
+.sidebars ul li.selected span.cancel.question_mark:before,
+.sidebars ul sidebar.selected span.cancel.question_mark:before {
+  content: '\003f';
+}
+.sidebars ul li.selected span.cancel.list:before,
+.sidebars ul sidebar.selected span.cancel.list:before {
+  content: '\e055';
+}
+.sidebars ul li.selected span.cancel.upload:before,
+.sidebars ul sidebar.selected span.cancel.upload:before {
+  content: '\e043';
+}
+.sidebars ul li.selected span.cancel.reload:before,
+.sidebars ul sidebar.selected span.cancel.reload:before {
+  content: '\e030';
+}
+.sidebars ul li.selected span.cancel.loop_alt4:before,
+.sidebars ul sidebar.selected span.cancel.loop_alt4:before {
+  content: '\e035';
+}
+.sidebars ul li.selected span.cancel.loop_alt3:before,
+.sidebars ul sidebar.selected span.cancel.loop_alt3:before {
+  content: '\e034';
+}
+.sidebars ul li.selected span.cancel.loop_alt2:before,
+.sidebars ul sidebar.selected span.cancel.loop_alt2:before {
+  content: '\e033';
+}
+.sidebars ul li.selected span.cancel.loop_alt1:before,
+.sidebars ul sidebar.selected span.cancel.loop_alt1:before {
+  content: '\e032';
+}
+.sidebars ul li.selected span.cancel.left_quote:before,
+.sidebars ul sidebar.selected span.cancel.left_quote:before {
+  content: '\275d';
+}
+.sidebars ul li.selected span.cancel.x:before,
+.sidebars ul sidebar.selected span.cancel.x:before {
+  content: '\2713';
+}
+.sidebars ul li.selected span.cancel.last:before,
+.sidebars ul sidebar.selected span.cancel.last:before {
+  content: '\e04d';
+}
+.sidebars ul li.selected span.cancel.bars:before,
+.sidebars ul sidebar.selected span.cancel.bars:before {
+  content: '\e06f';
+}
+.sidebars ul li.selected span.cancel.arrow_left:before,
+.sidebars ul sidebar.selected span.cancel.arrow_left:before {
+  content: '\2190';
+}
+.sidebars ul li.selected span.cancel.arrow_down:before,
+.sidebars ul sidebar.selected span.cancel.arrow_down:before {
+  content: '\2193';
+}
+.sidebars ul li.selected span.cancel.download:before,
+.sidebars ul sidebar.selected span.cancel.download:before {
+  content: '\e042';
+}
+.sidebars ul li.selected span.cancel.home:before,
+.sidebars ul sidebar.selected span.cancel.home:before {
+  content: '\2302';
+}
+.sidebars ul li.selected span.cancel.calendar:before,
+.sidebars ul sidebar.selected span.cancel.calendar:before {
+  content: '\e001';
+}
+.sidebars ul li.selected span.cancel.right_quote_alt:before,
+.sidebars ul sidebar.selected span.cancel.right_quote_alt:before {
+  content: '\e012';
+}
+.sidebars ul li.selected span.cancel.unlock_fill:before,
+.sidebars ul sidebar.selected span.cancel.unlock_fill:before {
+  content: '\e076';
+}
+.sidebars ul li.selected span.cancel.fullscreen:before,
+.sidebars ul sidebar.selected span.cancel.fullscreen:before {
+  content: '\e04e';
+}
+.sidebars ul li.selected span.cancel.dial:before,
+.sidebars ul sidebar.selected span.cancel.dial:before {
+  content: '\e058';
+}
+.sidebars ul li.selected span.cancel.plus_alt:before,
+.sidebars ul sidebar.selected span.cancel.plus_alt:before {
+  content: '\e008';
+}
+.sidebars ul li.selected span.cancel.clock:before,
+.sidebars ul sidebar.selected span.cancel.clock:before {
+  content: '\e079';
+}
+.sidebars ul li.selected span.cancel.movie:before,
+.sidebars ul sidebar.selected span.cancel.movie:before {
+  content: '\e060';
+}
+.sidebars ul li.selected span.cancel.steering_wheel:before,
+.sidebars ul sidebar.selected span.cancel.steering_wheel:before {
+  content: '\e024';
+}
+.sidebars ul li.selected span.cancel.pen:before,
+.sidebars ul sidebar.selected span.cancel.pen:before {
+  content: '\270e';
+}
+.sidebars ul li.selected span.cancel.pin:before,
+.sidebars ul sidebar.selected span.cancel.pin:before {
+  content: '\e067';
+}
+.sidebars ul li.selected span.cancel.denied:before,
+.sidebars ul sidebar.selected span.cancel.denied:before {
+  content: '\26d4';
+}
+.sidebars ul li.selected span.cancel.left_quote_alt:before,
+.sidebars ul sidebar.selected span.cancel.left_quote_alt:before {
+  content: '\e011';
+}
+.sidebars ul li.selected span.cancel.volume_mute:before,
+.sidebars ul sidebar.selected span.cancel.volume_mute:before {
+  content: '\e071';
+}
+.sidebars ul li.selected span.cancel.umbrella:before,
+.sidebars ul sidebar.selected span.cancel.umbrella:before {
+  content: '\2602';
+}
+.sidebars ul li.selected span.cancel.list_nested:before,
+.sidebars ul sidebar.selected span.cancel.list_nested:before {
+  content: '\e056';
+}
+.sidebars ul li.selected span.cancel.arrow_up_alt1:before,
+.sidebars ul sidebar.selected span.cancel.arrow_up_alt1:before {
+  content: '\e014';
+}
+.sidebars ul li.selected span.cancel.undo:before,
+.sidebars ul sidebar.selected span.cancel.undo:before {
+  content: '\e02f';
+}
+.sidebars ul li.selected span.cancel.pause:before,
+.sidebars ul sidebar.selected span.cancel.pause:before {
+  content: '\e049';
+}
+.sidebars ul li.selected span.cancel.bolt:before,
+.sidebars ul sidebar.selected span.cancel.bolt:before {
+  content: '\26a1';
+}
+.sidebars ul li.selected span.cancel.article:before,
+.sidebars ul sidebar.selected span.cancel.article:before {
+  content: '\e053';
+}
+.sidebars ul li.selected span.cancel.read_more:before,
+.sidebars ul sidebar.selected span.cancel.read_more:before {
+  content: '\e054';
+}
+.sidebars ul li.selected span.cancel.beaker:before,
+.sidebars ul sidebar.selected span.cancel.beaker:before {
+  content: '\e023';
+}
+.sidebars ul li.selected span.cancel.beaker_alt:before,
+.sidebars ul sidebar.selected span.cancel.beaker_alt:before {
+  content: '\e010';
+}
+.sidebars ul li.selected span.cancel.battery_full:before,
+.sidebars ul sidebar.selected span.cancel.battery_full:before {
+  content: '\e073';
+}
+.sidebars ul li.selected span.cancel.arrow_right:before,
+.sidebars ul sidebar.selected span.cancel.arrow_right:before {
+  content: '\2192';
+}
+.sidebars ul li.selected span.cancel.iphone:before,
+.sidebars ul sidebar.selected span.cancel.iphone:before {
+  content: '\e06e';
+}
+.sidebars ul li.selected span.cancel.arrow_up_alt2:before,
+.sidebars ul sidebar.selected span.cancel.arrow_up_alt2:before {
+  content: '\e018';
+}
+.sidebars ul li.selected span.cancel.cog:before,
+.sidebars ul sidebar.selected span.cancel.cog:before {
+  content: '\2699';
+}
+.sidebars ul li.selected span.cancel.award_fill:before,
+.sidebars ul sidebar.selected span.cancel.award_fill:before {
+  content: '\e022';
+}
+.sidebars ul li.selected span.cancel.first:before,
+.sidebars ul sidebar.selected span.cancel.first:before {
+  content: '\e04c';
+}
+.sidebars ul li.selected span.cancel.trash_fill:before,
+.sidebars ul sidebar.selected span.cancel.trash_fill:before {
+  content: '\e05a';
+}
+.sidebars ul li.selected span.cancel.image:before,
+.sidebars ul sidebar.selected span.cancel.image:before {
+  content: '\e027';
+}
+.sidebars ul li.selected span.cancel.comment_alt1_fill:before,
+.sidebars ul sidebar.selected span.cancel.comment_alt1_fill:before {
+  content: '\e003';
+}
+.sidebars ul li.selected span.cancel.cd:before,
+.sidebars ul sidebar.selected span.cancel.cd:before {
+  content: '\e064';
+}
+.sidebars ul li.selected span.cancel.right_quote:before,
+.sidebars ul sidebar.selected span.cancel.right_quote:before {
+  content: '\275e';
+}
+.sidebars ul li.selected span.cancel.brush:before,
+.sidebars ul sidebar.selected span.cancel.brush:before {
+  content: '\e01b';
+}
+.sidebars ul li.selected span.cancel.cloud:before,
+.sidebars ul sidebar.selected span.cancel.cloud:before {
+  content: '\2601';
+}
+.sidebars ul li.selected span.cancel.eye:before,
+.sidebars ul sidebar.selected span.cancel.eye:before {
+  content: '\e025';
+}
+.sidebars ul li.selected span.cancel.play_alt:before,
+.sidebars ul sidebar.selected span.cancel.play_alt:before {
+  content: '\e048';
+}
+.sidebars ul li.selected span.cancel.transfer:before,
+.sidebars ul sidebar.selected span.cancel.transfer:before {
+  content: '\e041';
+}
+.sidebars ul li.selected span.cancel.pen_alt2:before,
+.sidebars ul sidebar.selected span.cancel.pen_alt2:before {
+  content: '\e006';
+}
+.sidebars ul li.selected span.cancel.camera:before,
+.sidebars ul sidebar.selected span.cancel.camera:before {
+  content: '\e070';
+}
+.sidebars ul li.selected span.cancel.move_horizontal_alt2:before,
+.sidebars ul sidebar.selected span.cancel.move_horizontal_alt2:before {
+  content: '\e03a';
+}
+.sidebars ul li.selected span.cancel.curved_arrow:before,
+.sidebars ul sidebar.selected span.cancel.curved_arrow:before {
+  content: '\2935';
+}
+.sidebars ul li.selected span.cancel.move_horizontal_alt1:before,
+.sidebars ul sidebar.selected span.cancel.move_horizontal_alt1:before {
+  content: '\e039';
+}
+.sidebars ul li.selected span.cancel.aperture:before,
+.sidebars ul sidebar.selected span.cancel.aperture:before {
+  content: '\e026';
+}
+.sidebars ul li.selected span.cancel.reload_alt:before,
+.sidebars ul sidebar.selected span.cancel.reload_alt:before {
+  content: '\e031';
+}
+.sidebars ul li.selected span.cancel.magnifying_glass:before,
+.sidebars ul sidebar.selected span.cancel.magnifying_glass:before {
+  content: '\e074';
+}
+.sidebars ul li.selected span.cancel.calendar_alt_fill:before,
+.sidebars ul sidebar.selected span.cancel.calendar_alt_fill:before {
+  content: '\e06c';
+}
+.sidebars ul li.selected span.cancel.fork:before,
+.sidebars ul sidebar.selected span.cancel.fork:before {
+  content: '\e046';
+}
+.sidebars ul li.selected span.cancel.box:before,
+.sidebars ul sidebar.selected span.cancel.box:before {
+  content: '\e06b';
+}
+.sidebars ul li.selected span.cancel.map_pin_fill:before,
+.sidebars ul sidebar.selected span.cancel.map_pin_fill:before {
+  content: '\e068';
+}
+.sidebars ul li.selected span.cancel.bars_alt:before,
+.sidebars ul sidebar.selected span.cancel.bars_alt:before {
+  content: '\e00a';
+}
+.sidebars ul li.selected span.cancel.volume:before,
+.sidebars ul sidebar.selected span.cancel.volume:before {
+  content: '\e072';
+}
+.sidebars ul li.selected span.cancel.x_alt:before,
+.sidebars ul sidebar.selected span.cancel.x_alt:before {
+  content: '\2714';
+}
+.sidebars ul li.selected span.cancel.link:before,
+.sidebars ul sidebar.selected span.cancel.link:before {
+  content: '\e077';
+}
+.sidebars ul li.selected span.cancel.move_vertical:before,
+.sidebars ul sidebar.selected span.cancel.move_vertical:before {
+  content: '\e03b';
+}
+.sidebars ul li.selected span.cancel.eyedropper:before,
+.sidebars ul sidebar.selected span.cancel.eyedropper:before {
+  content: '\e01e';
+}
+.sidebars ul li.selected span.cancel.spin:before,
+.sidebars ul sidebar.selected span.cancel.spin:before {
+  content: '\e036';
+}
+.sidebars ul li.selected span.cancel.rss:before,
+.sidebars ul sidebar.selected span.cancel.rss:before {
+  content: '\e02c';
+}
+.sidebars ul li.selected span.cancel.info:before,
+.sidebars ul sidebar.selected span.cancel.info:before {
+  content: '\2139';
+}
+.sidebars ul li.selected span.cancel.target:before,
+.sidebars ul sidebar.selected span.cancel.target:before {
+  content: '\e02a';
+}
+.sidebars ul li.selected span.cancel.cursor:before,
+.sidebars ul sidebar.selected span.cancel.cursor:before {
+  content: '\e057';
+}
+.sidebars ul li.selected span.cancel.key_fill:before,
+.sidebars ul sidebar.selected span.cancel.key_fill:before {
+  content: '\26bf';
+}
+.sidebars ul li.selected span.cancel.minus:before,
+.sidebars ul sidebar.selected span.cancel.minus:before {
+  content: '\2796';
+}
+.sidebars ul li.selected span.cancel.book_alt:before,
+.sidebars ul sidebar.selected span.cancel.book_alt:before {
+  content: '\e00b';
+}
+.sidebars ul li.selected span.cancel.headphones:before,
+.sidebars ul sidebar.selected span.cancel.headphones:before {
+  content: '\e061';
+}
+.sidebars ul li.selected span.cancel.hash:before,
+.sidebars ul sidebar.selected span.cancel.hash:before {
+  content: '\0023';
+}
+.sidebars ul li.selected span.cancel.arrow_left_alt1:before,
+.sidebars ul sidebar.selected span.cancel.arrow_left_alt1:before {
+  content: '\e013';
+}
+.sidebars ul li.selected span.cancel.arrow_left_alt2:before,
+.sidebars ul sidebar.selected span.cancel.arrow_left_alt2:before {
+  content: '\e017';
+}
+.sidebars ul li.selected span.cancel.fullscreen_exit:before,
+.sidebars ul sidebar.selected span.cancel.fullscreen_exit:before {
+  content: '\e050';
+}
+.sidebars ul li.selected span.cancel.share:before,
+.sidebars ul sidebar.selected span.cancel.share:before {
+  content: '\e02e';
+}
+.sidebars ul li.selected span.cancel.fullscreen_alt:before,
+.sidebars ul sidebar.selected span.cancel.fullscreen_alt:before {
+  content: '\e04f';
+}
+.sidebars ul li.selected span.cancel.comment_alt2_fill:before,
+.sidebars ul sidebar.selected span.cancel.comment_alt2_fill:before {
+  content: '\e004';
+}
+.sidebars ul li.selected span.cancel.moon_fill:before,
+.sidebars ul sidebar.selected span.cancel.moon_fill:before {
+  content: '\263e';
+}
+.sidebars ul li.selected span.cancel.at:before,
+.sidebars ul sidebar.selected span.cancel.at:before {
+  content: '\0040';
+}
+.sidebars ul li.selected span.cancel.chat:before,
+.sidebars ul sidebar.selected span.cancel.chat:before {
+  content: '\e05e';
+}
+.sidebars ul li.selected span.cancel.move_vertical_alt2:before,
+.sidebars ul sidebar.selected span.cancel.move_vertical_alt2:before {
+  content: '\e03d';
+}
+.sidebars ul li.selected span.cancel.move_vertical_alt1:before,
+.sidebars ul sidebar.selected span.cancel.move_vertical_alt1:before {
+  content: '\e03c';
+}
+.sidebars ul li.selected span.cancel.check:before,
+.sidebars ul sidebar.selected span.cancel.check:before {
+  content: '\2717';
+}
+.sidebars ul li.selected span.cancel.mic:before,
+.sidebars ul sidebar.selected span.cancel.mic:before {
+  content: '\e05f';
+}
+.sidebars ul li.selected span.cancel.book:before,
+.sidebars ul sidebar.selected span.cancel.book:before {
+  content: '\e069';
+}
+.sidebars ul li.selected span.cancel.move_alt1:before,
+.sidebars ul sidebar.selected span.cancel.move_alt1:before {
+  content: '\e03f';
+}
+.sidebars ul li.selected span.cancel.move_alt2:before,
+.sidebars ul sidebar.selected span.cancel.move_alt2:before {
+  content: '\e040';
+}
+.sidebars ul li.selected span.cancel.document_fill:before,
+.sidebars ul sidebar.selected span.cancel.document_fill:before {
+  content: '\e066';
+}
+.sidebars ul li.selected span.cancel.plus:before,
+.sidebars ul sidebar.selected span.cancel.plus:before {
+  content: '\2795';
+}
+.sidebars ul li.selected span.cancel.wrench:before,
+.sidebars ul sidebar.selected span.cancel.wrench:before {
+  content: '\e078';
+}
+.sidebars ul li.selected span.cancel.play:before,
+.sidebars ul sidebar.selected span.cancel.play:before {
+  content: '\e047';
+}
+.sidebars ul li.selected span.cancel.star:before,
+.sidebars ul sidebar.selected span.cancel.star:before {
+  content: '\2605';
+}
+.sidebars ul li.selected span.cancel.document_alt_fill:before,
+.sidebars ul sidebar.selected span.cancel.document_alt_fill:before {
+  content: '\e000';
+}
+.sidebars ul li.selected span.cancel.chart:before,
+.sidebars ul sidebar.selected span.cancel.chart:before {
+  content: '\e028';
+}
+.sidebars ul li.selected span.cancel.rain:before,
+.sidebars ul sidebar.selected span.cancel.rain:before {
+  content: '\26c6';
+}
+.sidebars ul li.selected span.cancel.folder_fill:before,
+.sidebars ul sidebar.selected span.cancel.folder_fill:before {
+  content: '\e065';
+}
+.sidebars ul li.selected span.cancel.new_window:before,
+.sidebars ul sidebar.selected span.cancel.new_window:before {
+  content: '\e059';
+}
+.sidebars ul li.selected span.cancel.user:before,
+.sidebars ul sidebar.selected span.cancel.user:before {
+  content: '\e062';
+}
+.sidebars ul li.selected span.cancel.battery_half:before,
+.sidebars ul sidebar.selected span.cancel.battery_half:before {
+  content: '\e05b';
+}
+.sidebars ul li.selected span.cancel.aperture_alt:before,
+.sidebars ul sidebar.selected span.cancel.aperture_alt:before {
+  content: '\e00c';
+}
+.sidebars ul li.selected span.cancel.eject:before,
+.sidebars ul sidebar.selected span.cancel.eject:before {
+  content: '\e04b';
+}
+.sidebars ul li.selected span.cancel.arrow_down_alt1:before,
+.sidebars ul sidebar.selected span.cancel.arrow_down_alt1:before {
+  content: '\e016';
+}
+.sidebars ul li.selected span.cancel.pilcrow:before,
+.sidebars ul sidebar.selected span.cancel.pilcrow:before {
+  content: '\00b6';
+}
+.sidebars ul li.selected span.cancel.arrow_down_alt2:before,
+.sidebars ul sidebar.selected span.cancel.arrow_down_alt2:before {
+  content: '\e01a';
+}
+.sidebars ul li.selected span.cancel.arrow_right_alt1:before,
+.sidebars ul sidebar.selected span.cancel.arrow_right_alt1:before {
+  content: '\e015';
+}
+.sidebars ul li.selected span.cancel.arrow_right_alt2:before,
+.sidebars ul sidebar.selected span.cancel.arrow_right_alt2:before {
+  content: '\e019';
+}
+.sidebars ul li.selected span.cancel.rss_alt:before,
+.sidebars ul sidebar.selected span.cancel.rss_alt:before {
+  content: '\e02d';
+}
+.sidebars ul li.selected span.cancel.spin_alt:before,
+.sidebars ul sidebar.selected span.cancel.spin_alt:before {
+  content: '\e037';
+}
+.sidebars ul li.selected span.cancel.sun_fill:before,
+.sidebars ul sidebar.selected span.cancel.sun_fill:before {
+  content: '\2600';
+}
+.sidebars ul li.selected span.cancel:hover,
+.sidebars ul sidebar.selected span.cancel:hover {
+  opacity: 1;
+}
+.sidebars ul span.more {
+  font-size: 0.65em;
+  color: #356796;
+  text-decoration: none;
+}
+.sidebars ul span.more:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+/**
+ * import components to builds angular-dataviz.css
+ */
+
+.graph-wrapper {
+  border: solid lightgrey 1px;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+  padding: 15px;
+  display: inline-block;
+}
+.bl-graph .chart {
+  display: block;
+}
+.viz-tooltip {
+  background: white;
+  border: solid grey 1px;
+  box-shadow: 1px 1px 2px grey;
+  padding: 5px;
+  border-radius: 3px;
+  z-index: 999;
+}
+.viz-tooltip .tip-text {
+  display: block;
+}
+
