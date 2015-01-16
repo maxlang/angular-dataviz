@@ -1,7 +1,7 @@
-angular.module('dataviz', ['dataviz.services']);
+angular.module('dataviz', ['dataviz.services', 'dataviz.factories']);
 
 angular.module('dataviz')
-  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, BlLayout, $log) {
+  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, blGraphEvents, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -67,28 +67,25 @@ angular.module('dataviz')
         title: '=?',
         orderBy: '=?'
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         // Ensure that the direction is passed in as lowercase
         if (scope.direction !== scope.direction.toLowerCase()) {
           throw new Error('The axis direction must be lowercase or very little will work.');
         }
-
-        var graphCtrl = controllers[0];
         var axisType = scope.direction + 'Axis';
 
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + scope.direction)
           .attr('width', BlLayoutDefaults.components.yAxis.width);
 
-        graphCtrl.components.register(axisType, {
-          direction: scope.direction,
-          field: scope.field
+        graphCtrl.componentsMgr.register(axisType, {
+          direction: scope.direction
         });
 
-        scope.$on(BlLayout.DRAW, function() {
-          scope.layout = graphCtrl.layout[axisType];
-          scope.translate = BlTranslate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-          drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
+        scope.$on(blGraphEvents.DRAW, function() {
+          scope.layout = graphCtrl.layoutMgr.layout[axisType];
+          scope.translate = BlTranslate.axis(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, scope.direction);
+          drawAxis(graphCtrl.scaleMgr, scope.direction, axisContainer, scope.layout);
         });
       }
     });
@@ -100,7 +97,7 @@ angular.module('dataviz')
  */
 
 angular.module('dataviz')
-  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate) {
+  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate, blGraphEvents) {
 
     var clickFn = function(d, addFilter) {
       addFilter('includes', d.key);
@@ -109,18 +106,17 @@ angular.module('dataviz')
     return new BlChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {},
-      link: function(scope, iElem, iAttrs, controllers) {
-        var graphCtrl = controllers[0];
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.barchart;
         var g = d3.select(iElem[0]);
 
-        graphCtrl.components.register(COMPONENT_TYPE);
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
 
         function drawChart() {
-          scope.layout = graphCtrl.layout.chart;
-          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.chart;
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
 
-          var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
+          var bars = g.selectAll('rect').data(graphCtrl.dataMgr.data);
 
           bars.enter().append('rect')
             .classed('bar', true)
@@ -133,83 +129,29 @@ angular.module('dataviz')
             });
 
           bars
-            .attr('y', function(d) { return graphCtrl.scale.y(d.key); })
-            .attr('width', function(d) { return graphCtrl.scale.x(d.value); })
-            .attr('height', Math.abs(graphCtrl.scale.y.rangeBand()));
+            .attr('y', function(d) { return graphCtrl.scaleMgr.y(d.key); })
+            .attr('width', function(d) { return graphCtrl.scaleMgr.x(d.value); })
+            .attr('height', Math.abs(graphCtrl.scaleMgr.y.rangeBand()));
 
           bars
             .exit()
             .remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawChart);
+        scope.$on(blGraphEvents.DRAW, drawChart);
       }
     });
   });
 angular.module('dataviz')
-  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, AQLRunner, $log) {
+  .factory('blGraphEvents', function() {
+    return {
+      DRAW: 'graph.DRAW',
+      ALL_COMPONENTS_REGISTERED: 'graph.ALL_COMPONENTS_REGISTERED'
+    };
+  })
+
+  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, $log, DataMgrFactory, ScaleMgrFactory, FilterMgrFactory, QueryMgrFactory, ComponentMgrFactory, LayoutMgrFactory, blGraphEvents) {
     var groupCtrl;
-
-    var setScale = function(metadata, xRange, yRange, chartType) {
-      var scales = {};
-      var getXScale = function(metadata, xRange) {
-        // check to see if the data is linear or time-based
-        if (!metadata.isTime) {
-          return d3.scale.linear()
-            .domain(metadata.range)
-            .range(xRange);
-        } else {
-          return d3.time.scale()
-            .domain(metadata.range)
-            .range(xRange);
-        }
-      };
-
-      // All charts use a linear scale on x. I doubt this is actually true.
-      scales.x = getXScale(metadata, xRange);
-
-      scales.x = d3.scale.linear()
-        .domain(metadata.domain)
-        .range(xRange);
-
-      // Define the Y scale based on whether the chart type is ordinal or linear
-      if (!ChartHelper.isOrdinal(chartType)) {
-        scales.y = d3.scale.linear()
-          .domain(metadata.range)
-          .range(yRange);
-      } else {
-        scales.y = d3.scale.ordinal()
-          .domain(metadata.range)
-          .rangeRoundBands(yRange, 0.1, 0);
-      }
-
-      return scales;
-    };
-
-    var isChart = function(componentType) {
-      return _.contains(chartTypes, componentType);
-    };
-
-    var isAxis = function(componentType) {
-      return _.contains(componentType.toLowerCase(), componentTypes.axis);
-    };
-
-    var getScaleDims = function(graphLayout) {
-      return {
-        x: [0, graphLayout.width - BlLayoutDefaults.padding.graph.right],
-        y: [graphLayout.height, 0]
-      };
-    };
-
-    var getChartType = function(registeredComponents) {
-      return _.find(registeredComponents, function(c) { return isChart(c.type); }).type;
-    };
-
-    var getChartParams = function(registeredComponents, componentType) {
-      var chartObj = _.find(registeredComponents, {type: componentType});
-
-      return chartObj ? chartObj.params : {};
-    };
 
     var addAggregate = function(query, aggFunction, field) {
       // aggFunction is going to be: 'count' or 'min'
@@ -249,106 +191,56 @@ angular.module('dataviz')
       },
       controller: function($scope, $element, $attrs) {
         var ctrl = this;
-        var hasRun = false;
-        this.layout = BlLayout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
-        $scope.layout = this.layout.container;
-        this.interval = $scope.interval;
-        this.query = new AQL.SelectQuery($scope.resource);
-        this.data = {};
-        this.scale = {};
-        this.fields = {};
-        this.filters = {
-          includes: [],
-          excludes: [],
-          addFilter: function(type, term) {
-            // To be clear, 'type' here is going to be either 'includes' or 'excludes'
-            // So we're adding inclusion/exclusion filters
-            this.toggleTerm(type, term);
-            var filter = new AQL.TermFilter($scope.field, this[type]);
-            groupCtrl.filters.registerFilter(filter);
-          },
-          toggleTerm: function(type, term) {
-            var termIndex = _.findIndex(this[type], term);
+        this.layoutMgr = new LayoutMgrFactory($scope.containerHeight, $scope.containerWidth);
+        $scope.layout = ctrl.layoutMgr.layout.container;
+        ctrl.interval = $scope.interval;
+        ctrl.queryMgr = new QueryMgrFactory($scope.resource);
+        ctrl.dataMgr = new DataMgrFactory();
+        ctrl.scaleMgr = new ScaleMgrFactory();
+        ctrl.filterMgr = new FilterMgrFactory();
+        ctrl.componentsMgr = new ComponentMgrFactory($scope, $element);
 
-            if (termIndex < 0) {
-              this[type].push(term);
+        $scope.$on(blGraphEvents.ALL_COMPONENTS_REGISTERED, function() {
+          $timeout(function() {
+            var group;
+
+            if (!ctrl.componentsMgr.chart) { $log.warn('No chart registered.'); }
+
+            if (ChartHelper.isOrdinal(ctrl.componentsMgr.chart.type)) {
+              // It's ordinal, set an interval and use intervalGroup
+              group = ctrl.queryMgr.query.termGroup($scope.field);
+            } else if ($scope.interval) {
+              // Use termGroup
+              group = ctrl.queryMgr.query.intervalGroup($scope.field, $scope.interval);
+            } else if (ctrl.numBuckets) {
+              group = ctrl.queryMgr.query.intervalGroup(
+                $scope.field, null, {buckets: ctrl.componentsMgr.chart.params.numBuckets}
+              );
             } else {
-              this[type].splice(termIndex, 1);
-            }
-          }
-        };
-
-        this.components = {
-          registered: [],
-          update: function(componentType, params) {
-            var registeredIndex = _.findIndex(registered, {type: componentType});
-            if (index < 0) { return $log.warn('Can\'t update component type as it wasn\'t found.'); }
-            registered[registeredIndex].params = params;
-          },
-          register: function(componentType, params) {
-            var self = this;
-            this.registered.push({type: componentType, params: params || {}});
-            ctrl.layout = BlLayout.updateLayout(this.registered, ctrl.layout);
-
-            if (isAxis(componentType)) {
-              ctrl.fields[params.direction] = params.field;
+              $log.warn('There was no interval set and no buckets registered.');
             }
 
-            $timeout(function() {
-              // If everything is registered and we haven't yet run the initial query
-              if (self.registered.length === $scope.componentCount && !hasRun) {
+            if ($scope.aggFunction && $scope.aggregateBy) {
+              group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+            }
 
-                // First, update the query
-                var group;
-                ctrl.chartType = getChartType(self.registered);
-                if (!ctrl.chartType) {
-                  $log.warn('No chart type registered.');
-                }
+            if (ctrl.componentsMgr.chartType === chartTypes.number) {
+              var chartParams = ctrl.componentsMgr.chart.params;
+              ctrl.queryMgr.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
+            }
 
-                if (ChartHelper.isOrdinal(ctrl.chartType)) {
-                  // It's ordinal, set an interval and use intervalGroup
-                  group = ctrl.query.termGroup($scope.field);
-                } else if ($scope.interval) {
-                  // Use termGroup
-                  group = ctrl.query.intervalGroup($scope.field, $scope.interval);
-                } else if (ctrl.numBuckets) {
-                  group = ctrl.query.intervalGroup($scope.field, null, {buckets: ctrl.numBuckets});
-                } else {
-                  $log.warn('There was no interval set and no buckets registered.');
-                }
+            ctrl.dataMgr.refresh(ctrl.queryMgr.query)
+              .then(function(data) {
+                // TODO (il): Empty state
+                if (!data) { return; }
 
-                if ($scope.aggFunction && $scope.aggregateBy) {
-                  group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
-                }
+                ctrl.layoutMgr.update(ctrl.componentsMgr.registered);
+                ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, ctrl.componentsMgr.chart.type);
+                $scope.$broadcast(blGraphEvents.DRAW);
+              });
+          });
+        });
 
-                if (ctrl.chartType === chartTypes.number) {
-                  var chartParams = getChartParams(self.registered, ctrl.chartType);
-                  ctrl.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
-                }
-
-                hasRun = true;
-                AQLRunner(ctrl.query)
-                  .success(function(data) {
-                    ctrl.data.grouped = data;
-                    // This is really just to reset the linear or ordinal scale on the x/y axes --
-                    // graph dimensions should really already be set at this point.
-                    $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
-                    ctrl.layout = BlLayout.updateLayout(self.registered, ctrl.layout);
-
-                    var scaleDims = getScaleDims(ctrl.layout.graph);
-                    ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-
-                    if (BlLayout.layoutIsValid(ctrl.layout)) {
-                      $scope.$broadcast(BlLayout.DRAW);
-                    }
-                  })
-                  .error(function(err) {
-                    $log.error('Error pulling data: ', err);
-                  });
-              }
-            });
-          }
-        };
 
         $scope.$watch('[containerHeight, containerWidth]', function(nv, ov) {
           if (angular.equals(nv, ov)) { return; }
@@ -356,49 +248,219 @@ angular.module('dataviz')
           var height = nv[0];
           var width = nv[1];
 
-          ctrl.layout = BlLayout.updateLayout(ctrl.components.registered, BlLayout.getDefaultLayout(height, width));
-          $scope.layout = ctrl.layout.container;
-          var scaleDims = getScaleDims(ctrl.layout.graph);
-          ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-          $scope.$broadcast(BlLayout.DRAW);
+          ctrl.layoutMgr.update(ctrl.componentsMgr.registered, BlLayout.getDefaultLayout(height, width));
+          $scope.layout = ctrl.layoutMgr.layout.container;
+          ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, ctrl.componentsMgr.chart.type);
+          $scope.$broadcast(blGraphEvents.DRAW);
         });
 
         $scope.$on(BlFilterService.FILTER_CHANGED, function() {
-          // Clear existing filters
-          ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
+          ctrl.queryMgr.query.clear(); // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
           var newFilterSet = BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
 
-          if (!newFilterSet.value) {
-            ctrl.query.filters = [];
-          } else {
+          if (!newFilterSet.isEmpty()) {
             ctrl.query.addFilter(BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
           }
 
-
-          // Repull the data
-          AQLRunner(ctrl.query)
-            .success(function(data) {
-              ctrl.data.grouped = data;
-              $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
-
-              var scaleDims = getScaleDims(ctrl.layout.graph);
-              ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-
-              $scope.$broadcast(BlLayout.DRAW);
-
-            })
-            .error(function(err) {
-              $log.error('Error running AQL query: ', err);
+          ctrl.dataMgr.refresh()
+            .then(function() {
+              var chartType = ctrl.componentsMgr.chart.type;
+              ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, chartType);
+              $scope.$broadcast(blGraphEvents.DRAW);
             });
+
         });
 
       }
     };
   })
 ;
+
+var module = angular.module('dataviz.factories', []);
+
+var DataMgrFactory = function(AQLRunner, RangeFunctions) {
+  var DataMgr = function () {
+    this.data = [];
+    this.metadata = {};
+  };
+
+  DataMgr.prototype.refresh = function (query) {
+    var self = this;
+    return AQLRunner(query)
+      .success(function (data) {
+        self.data = data;
+        self.metadata = RangeFunctions.getMetadata(data);
+        return data;
+      })
+      .error(function(err) {
+        $log.error('Error pulling data: ', err);
+      });
+  };
+
+  return DataMgr;
+};
+
+var ScaleMgrFactory = function(BlLayoutDefaults, ChartHelper) {
+  var getScaleDims = function(graphLayout) {
+    return {
+      x: [0, graphLayout.width - BlLayoutDefaults.padding.graph.right],
+      y: [graphLayout.height, 0]
+    };
+  };
+
+  var setScale = function(metadata, xRange, yRange, chartType) {
+    var scales = {};
+    var getXScale = function(metadata, xRange) {
+      // check to see if the data is linear or time-based
+      if (!metadata.isTime) {
+        return d3.scale.linear()
+          .domain(metadata.range)
+          .range(xRange);
+      } else {
+        return d3.time.scale()
+          .domain(metadata.range)
+          .range(xRange);
+      }
+    };
+
+    // All charts use a linear scale on x. I doubt this is actually true.
+    scales.x = getXScale(metadata, xRange);
+
+    scales.x = d3.scale.linear()
+      .domain(metadata.domain)
+      .range(xRange);
+
+    // Define the Y scale based on whether the chart type is ordinal or linear
+    if (!ChartHelper.isOrdinal(chartType)) {
+      scales.y = d3.scale.linear()
+        .domain(metadata.range)
+        .range(yRange);
+    } else {
+      scales.y = d3.scale.ordinal()
+        .domain(metadata.range)
+        .rangeRoundBands(yRange, 0.1, 0);
+    }
+
+    return scales;
+  };
+
+  var ScaleMgr = function() {
+    this.x = function() {};
+    this.y = function() {};
+  };
+
+  ScaleMgr.prototype.update = function(layout, metadata, chartType) {
+    var scaleDims = getScaleDims(layout.graph);
+    var newScale = setScale(metadata, scaleDims.x, scaleDims.y, chartType);
+    this.x = newScale.x;
+    this.y = newScale.y;
+  };
+
+  return ScaleMgr;
+};
+
+var FilterMgrFactory = function() {
+  var FILTER_ADDED = 'filters.filterAdded';
+
+  var FilterMgr = function() {
+    this.includes = [];
+    this.excludes = [];
+  };
+
+  FilterMgr.prototype.addFilter = function(field, term, scopeObj) {
+    this.toggleTerm(type, term);
+    var filter = new AQL.TermFilter(field, term);
+    scopeObj.$broadcast(FILTER_ADDED);
+    // hm. going to need to think through this in light of the new
+    // developments. all filtering will now be done at a group level, really,
+    // and the individual graphs will just handle displaying their own data
+  };
+
+  FilterMgr.prototype.toggleTerm = function(type, term) {
+    var termIndex = _.findIndex(this[type], term);
+
+    if (termIndex < 0) {
+      this[type].push(term);
+    } else {
+      this[type].splice(termIndex, 1);
+    }
+  };
+
+  return FilterMgr;
+};
+
+var QueryMgrFactory = function() {
+  var QueryMgr = function(resourceName) {
+    this.query = new AQL.SelectQuery(resourceName);
+  };
+
+  return QueryMgr;
+};
+
+var ComponentMgrFactory = function(blGraphEvents, $log, chartTypes) {
+
+  var isChart = function(componentType) {
+    return _.contains(chartTypes, componentType);
+  };
+
+  var ComponentMgr = function(scopeObj, element) {
+    this.registered = [];
+    this.scope = scopeObj;
+    this.componentCount = 0;
+    this.element = element;
+    this.chartType = null;
+  };
+
+  ComponentMgr.prototype.update = function(componentId, params) {
+    var registeredIndex = _.findIndex(registered, {_id: componentId});
+    if (index < 0) { return $log.warn('Component to update wasn\'t found.'); }
+    registered[registeredIndex].params = params;
+    return registered[registeredIndex];
+  };
+
+  ComponentMgr.prototype.register = function(componentType, params) {
+    if (!this.componentCount) {
+      this.componentCount = this.element.children().length;
+    }
+    var component = {
+      type: componentType,
+      _id: this.registered.length,
+      params: params || {}
+    };
+    this.registered.push(component);
+
+    if (isChart(componentType)) {
+      this.chart = component;
+    }
+
+    if (this.registered.length !== this.componentCount) { return; }
+    this.scope.$emit(blGraphEvents.ALL_COMPONENTS_REGISTERED);
+  };
+
+  return ComponentMgr;
+};
+
+var LayoutMgrFactory = function(BlLayout) {
+  var LayoutMgr = function(height, width) {
+    this.layout = BlLayout.getDefaultLayout(height, width);
+  };
+
+  LayoutMgr.prototype.update = function(registeredComponents, newLayout) {
+    this.layout = BlLayout.updateLayout(registeredComponents, newLayout || this.layout);
+  };
+
+  return LayoutMgr;
+};
+
+module.factory('DataMgrFactory', DataMgrFactory);
+module.factory('ScaleMgrFactory', ScaleMgrFactory);
+module.factory('FilterMgrFactory', FilterMgrFactory);
+module.factory('QueryMgrFactory', QueryMgrFactory);
+module.factory('ComponentMgrFactory', ComponentMgrFactory);
+module.factory('LayoutMgrFactory', LayoutMgrFactory);
 
 /*
  WIDTH AUTOFILL SPEC
@@ -451,7 +513,7 @@ angular.module('dataviz')
 ;
 
 angular.module('dataviz')
-  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers) {
+  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers, blGraphEvents) {
     var histConfig = {
       bars: {
         minWidth: 4,
@@ -468,20 +530,19 @@ angular.module('dataviz')
       scope: {
         numBars: '@?'
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.histogram;
-        var graphCtrl = controllers[0];
-        graphCtrl.components.register(COMPONENT_TYPE);
-        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         graphCtrl.numBuckets = HistogramHelpers.getBucketsForWidth(scope.numBars, scope.layout.width, histConfig);
         var g = d3.select(iElem[0]);
 
         function drawHist() {
-          scope.layout = graphCtrl.layout.graph;
-          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          var barWidth = HistogramHelpers.getBarWidth(graphCtrl.data.grouped, scope.layout, histConfig);
+          scope.layout = graphCtrl.layoutMgr.layout.graph;
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
+          var barWidth = HistogramHelpers.getBarWidth(graphCtrl.dataMgr.data, scope.layout, histConfig);
 
-          var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
+          var bars = g.selectAll('rect').data(graphCtrl.dataMgr.data);
 
           // Do this for all the
           bars.enter().append('rect')
@@ -497,14 +558,14 @@ angular.module('dataviz')
 
           bars
             .attr('transform', function(d) {
-              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
+              return 'translate(0,' + (graphCtrl.scaleMgr.y(d.value))  +')';
             })
             .attr('x', function(d, i) {
-              return graphCtrl.scale.x(d.key);
+              return graphCtrl.scaleMgr.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
             .attr('height', function(d) {
-              return scope.layout.height - graphCtrl.scale.y(d.value);
+              return scope.layout.height - graphCtrl.scaleMgr.y(d.value);
             });
 
 
@@ -514,7 +575,7 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawHist);
+        scope.$on(blGraphEvents.DRAW, drawHist);
 
       }
     });
@@ -541,20 +602,19 @@ angular.module('dataviz')
 ;
 
 angular.module('dataviz')
-  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes) {
+  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes, blGraphEvents) {
     return new BlChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
-        var graphCtrl = controllers[0];
         var COMPONENT_TYPE = componentTypes.legend;
         var seriesData = ['Loans'];
-        graphCtrl.components.register(COMPONENT_TYPE);
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;
 
         function drawLegend() {
-          scope.layout = graphCtrl.layout.legend;
-          scope.translate = BlTranslate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.legend;
+          scope.translate = BlTranslate.legend(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
         }
 
         var legend = d3.select(iElem[0])
@@ -587,7 +647,7 @@ angular.module('dataviz')
           .attr('y', 14)
           .text(_.identity);
 
-        scope.$on(BlLayout.DRAW, drawLegend);
+        scope.$on(blGraphEvents.DRAW, drawLegend);
       }
     });
   })
@@ -610,7 +670,7 @@ angular.module('dataviz')
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz')
-  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes) {
+  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, blGraphEvents) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -633,20 +693,19 @@ angular.module('dataviz')
         fieldX: '=',
         fieldY: '='
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.linechart;
-        var graphCtrl = controllers[0];
-        graphCtrl.components.register(COMPONENT_TYPE);
-        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
         var groupEl = d3.select(iElem[0]); // get the group element to append dots to
 
         function drawLine() {
-          scope.layout = graphCtrl.layout.graph;
-          scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
-          scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.graph;
+          scope.line = setLine(graphCtrl.scaleMgr, {x: scope.fieldX, y: scope.fieldY});
+          scope.translate = BlTranslate.graph(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
           path
-            .attr('d', scope.line(graphCtrl.data.grouped));
+            .attr('d', scope.line(graphCtrl.dataMgr.data));
 
           var tip = d3.tip()
             .attr('class', 'viz-tooltip')
@@ -657,66 +716,65 @@ angular.module('dataviz')
             });
 
           var dots = groupEl.selectAll('g.dot')
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .enter().append('g')
             .attr('class', 'dot')
             .selectAll('circle')
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .enter().append('circle')
             .attr('r', lineConfig.circleRadius);
 
           groupEl.call(tip);
 
           groupEl.selectAll('g.dot circle')
-            .attr('cx', function(d) { return graphCtrl.scale.x(d[scope.fieldX]); })
-            .attr('cy', function(d) { return graphCtrl.scale.y(d[scope.fieldY]); })
+            .attr('cx', function(d) { return graphCtrl.scaleMgr.x(d[scope.fieldX]); })
+            .attr('cy', function(d) { return graphCtrl.scaleMgr.y(d[scope.fieldY]); })
             .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')'; })
             .on('mouseover', tip.show)
             .on('mouseout', tip.hide);
 
           dots
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .exit().remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawLine);
+        scope.$on(blGraphEvents.DRAW, drawLine);
       }
     });
   })
 ;
 
 angular.module('dataviz')
-  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils) {
+  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils, blGraphEvents) {
     return new BlChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
       scope: {
         aggregate: '=?' // TODO: This should eventually look like: aggFunc(aggField); e.g. count('_id').
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.number;
-        var graphCtrl = controllers[0];
 
         // If this is an agg, data will look like an object with count, min, max, avg, and sum attributes
-        var format = FormatUtils.getFormatFunction(graphCtrl.data.grouped, 'plain');
-        graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
-        scope.layout = graphCtrl.layout.graph;
+        var format = FormatUtils.getFormatFunction(graphCtrl.dataMgr.data, 'plain');
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         var text = d3.select(iElem[0]);
         //scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
         function drawNumber() {
           text
             .attr('font-family', 'Verdana')
-            .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
-            .call(FormatUtils.resizeText, graphCtrl.layout);
+            .text(function() { return format(graphCtrl.dataMgr.data[scope.aggregate]); })
+            .call(FormatUtils.resizeText, graphCtrl.layoutMgr.layout);
         }
 
         scope.$watch('aggregate', function(nv, ov) {
           if (nv === ov) { return; }
-          graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
+          graphCtrl.componentsMgr.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(BlLayout.DRAW, drawNumber);
+        scope.$on(blGraphEvents.DRAW, drawNumber);
       }
     });
   })
@@ -815,17 +873,16 @@ angular.module('dataviz')
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
-    .directive('blPie', function(BlChartFactory, chartTypes) {
+    .directive('blPie', function(BlChartFactory, blGraphEvents) {
       return new BlChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
-        link: function(scope, iElem, iAttrs, controllers) {
-          var graphCtrl = controllers[0];
+        link: function(scope, iElem, iAttrs, graphCtrl) {
           var COMPONENT_TYPE = charts.pie;
 
-          graphCtrl.components.register(COMPONENT_TYPE);
+          graphCtrl.componentsMgr.register(COMPONENT_TYPE);
 
           // With modifications
-          var diameter = Math.min(graphCtrl.layout.graph.height, graphCtrl.layout.graph.width);
+          var diameter = Math.min(graphCtrl.layoutMgr.layout.graph.height, graphCtrl.layoutMgr.layout.graph.width);
           scope.layout = {
             width: diameter,
             height: diameter,
@@ -881,7 +938,7 @@ angular.module('dataviz')
 
 
 angular.module('dataviz')
-  .directive('blTitle', function(BlChartFactory, componentTypes, BlLayoutDefaults, BlLayout) {
+  .directive('blTitle', function(BlChartFactory, componentTypes, BlLayoutDefaults, blGraphEvents) {
     return new BlChartFactory.Component({
       template: '<text class="graph-title" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{title}}</text>',
       scope: {
@@ -889,11 +946,11 @@ angular.module('dataviz')
       },
       require: '^blGraph',
       link: function(scope, iElem, iAttrs, graphCtrl) {
-        graphCtrl.components.register(componentTypes.title);
+        graphCtrl.componentsMgr.register(componentTypes.title);
 
         // The text needs to be centered and positioned at the top
         function drawTitle(){
-          var containerWidth = graphCtrl.layout.container.width;
+          var containerWidth = graphCtrl.layoutMgr.layout.container.width;
           var elemWidth = d3.select(iElem[0]).node().getComputedTextLength();
 
           scope.translate = {
@@ -902,7 +959,7 @@ angular.module('dataviz')
           };
         }
 
-        scope.$on(BlLayout.DRAW, drawTitle);
+        scope.$on(blGraphEvents.DRAW, drawTitle);
       }
     });
   })
@@ -915,7 +972,7 @@ angular.module('dataviz.services', [])
         restrict: 'E',
         replace: true,
         scope: true,
-        require: ['^blGraph'],
+        require: '^blGraph',
         templateNamespace: 'svg'
       });
     };

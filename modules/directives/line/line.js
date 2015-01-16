@@ -61,7 +61,7 @@
 // the line is declaratively told which field to aggregate on
 
 angular.module('dataviz')
-  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes) {
+  .directive('blLine', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, blGraphEvents) {
 
     // setLine expects scales = {x: d3Scale, y: d3Scale}, fields: {x: 'fieldName', y: 'fieldName'}
     var setLine = function(scales, fields) {
@@ -84,20 +84,19 @@ angular.module('dataviz')
         fieldX: '=',
         fieldY: '='
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.linechart;
-        var graphCtrl = controllers[0];
-        graphCtrl.components.register(COMPONENT_TYPE);
-        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         var path = d3.select(iElem[0]).select('path'); // strip off the jquery wrapper
         var groupEl = d3.select(iElem[0]); // get the group element to append dots to
 
         function drawLine() {
-          scope.layout = graphCtrl.layout.graph;
-          scope.line = setLine(graphCtrl.scale, {x: scope.fieldX, y: scope.fieldY});
-          scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.graph;
+          scope.line = setLine(graphCtrl.scaleMgr, {x: scope.fieldX, y: scope.fieldY});
+          scope.translate = BlTranslate.graph(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
           path
-            .attr('d', scope.line(graphCtrl.data.grouped));
+            .attr('d', scope.line(graphCtrl.dataMgr.data));
 
           var tip = d3.tip()
             .attr('class', 'viz-tooltip')
@@ -108,29 +107,29 @@ angular.module('dataviz')
             });
 
           var dots = groupEl.selectAll('g.dot')
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .enter().append('g')
             .attr('class', 'dot')
             .selectAll('circle')
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .enter().append('circle')
             .attr('r', lineConfig.circleRadius);
 
           groupEl.call(tip);
 
           groupEl.selectAll('g.dot circle')
-            .attr('cx', function(d) { return graphCtrl.scale.x(d[scope.fieldX]); })
-            .attr('cy', function(d) { return graphCtrl.scale.y(d[scope.fieldY]); })
+            .attr('cx', function(d) { return graphCtrl.scaleMgr.x(d[scope.fieldX]); })
+            .attr('cy', function(d) { return graphCtrl.scaleMgr.y(d[scope.fieldY]); })
             .attr('transform', function() { return 'translate(' + scope.translate.x + ', ' + scope.translate.y + ')'; })
             .on('mouseover', tip.show)
             .on('mouseout', tip.hide);
 
           dots
-            .data(graphCtrl.data.grouped)
+            .data(graphCtrl.dataMgr.data)
             .exit().remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawLine);
+        scope.$on(blGraphEvents.DRAW, drawLine);
       }
     });
   })

@@ -1,67 +1,13 @@
 angular.module('dataviz')
-  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, AQLRunner, $log) {
+  .factory('blGraphEvents', function() {
+    return {
+      DRAW: 'graph.DRAW',
+      ALL_COMPONENTS_REGISTERED: 'graph.ALL_COMPONENTS_REGISTERED'
+    };
+  })
+
+  .directive('blGraph', function(BlLayout, $timeout, RangeFunctions, chartTypes, componentTypes, ChartHelper, BlLayoutDefaults, BlFilterService, $log, DataMgrFactory, ScaleMgrFactory, FilterMgrFactory, QueryMgrFactory, ComponentMgrFactory, LayoutMgrFactory, blGraphEvents) {
     var groupCtrl;
-
-    var setScale = function(metadata, xRange, yRange, chartType) {
-      var scales = {};
-      var getXScale = function(metadata, xRange) {
-        // check to see if the data is linear or time-based
-        if (!metadata.isTime) {
-          return d3.scale.linear()
-            .domain(metadata.range)
-            .range(xRange);
-        } else {
-          return d3.time.scale()
-            .domain(metadata.range)
-            .range(xRange);
-        }
-      };
-
-      // All charts use a linear scale on x. I doubt this is actually true.
-      scales.x = getXScale(metadata, xRange);
-
-      scales.x = d3.scale.linear()
-        .domain(metadata.domain)
-        .range(xRange);
-
-      // Define the Y scale based on whether the chart type is ordinal or linear
-      if (!ChartHelper.isOrdinal(chartType)) {
-        scales.y = d3.scale.linear()
-          .domain(metadata.range)
-          .range(yRange);
-      } else {
-        scales.y = d3.scale.ordinal()
-          .domain(metadata.range)
-          .rangeRoundBands(yRange, 0.1, 0);
-      }
-
-      return scales;
-    };
-
-    var isChart = function(componentType) {
-      return _.contains(chartTypes, componentType);
-    };
-
-    var isAxis = function(componentType) {
-      return _.contains(componentType.toLowerCase(), componentTypes.axis);
-    };
-
-    var getScaleDims = function(graphLayout) {
-      return {
-        x: [0, graphLayout.width - BlLayoutDefaults.padding.graph.right],
-        y: [graphLayout.height, 0]
-      };
-    };
-
-    var getChartType = function(registeredComponents) {
-      return _.find(registeredComponents, function(c) { return isChart(c.type); }).type;
-    };
-
-    var getChartParams = function(registeredComponents, componentType) {
-      var chartObj = _.find(registeredComponents, {type: componentType});
-
-      return chartObj ? chartObj.params : {};
-    };
 
     var addAggregate = function(query, aggFunction, field) {
       // aggFunction is going to be: 'count' or 'min'
@@ -101,105 +47,56 @@ angular.module('dataviz')
       },
       controller: function($scope, $element, $attrs) {
         var ctrl = this;
-        var hasRun = false;
-        this.layout = BlLayout.getDefaultLayout($scope.containerHeight, $scope.containerWidth);
-        $scope.layout = this.layout.container;
-        this.interval = $scope.interval;
-        this.query = new AQL.SelectQuery($scope.resource);
-        this.data = {};
-        this.scale = {};
-        this.filters = {
-          includes: [],
-          excludes: [],
-          addFilter: function(type, term) {
-            // To be clear, 'type' here is going to be either 'includes' or 'excludes'
-            // So we're adding inclusion/exclusion filters
-            this.toggleTerm(type, term);
-            var filter = new AQL.TermFilter($scope.field, this[type]);
-            groupCtrl.filters.registerFilter(filter);
-          },
-          toggleTerm: function(type, term) {
-            var termIndex = _.findIndex(this[type], term);
+        this.layoutMgr = new LayoutMgrFactory($scope.containerHeight, $scope.containerWidth);
+        $scope.layout = ctrl.layoutMgr.layout.container;
+        ctrl.interval = $scope.interval;
+        ctrl.queryMgr = new QueryMgrFactory($scope.resource);
+        ctrl.dataMgr = new DataMgrFactory();
+        ctrl.scaleMgr = new ScaleMgrFactory();
+        ctrl.filterMgr = new FilterMgrFactory();
+        ctrl.componentsMgr = new ComponentMgrFactory($scope, $element);
 
-            if (termIndex < 0) {
-              this[type].push(term);
+        $scope.$on(blGraphEvents.ALL_COMPONENTS_REGISTERED, function() {
+          $timeout(function() {
+            var group;
+
+            if (!ctrl.componentsMgr.chart) { $log.warn('No chart registered.'); }
+
+            if (ChartHelper.isOrdinal(ctrl.componentsMgr.chart.type)) {
+              // It's ordinal, set an interval and use intervalGroup
+              group = ctrl.queryMgr.query.termGroup($scope.field);
+            } else if ($scope.interval) {
+              // Use termGroup
+              group = ctrl.queryMgr.query.intervalGroup($scope.field, $scope.interval);
+            } else if (ctrl.numBuckets) {
+              group = ctrl.queryMgr.query.intervalGroup(
+                $scope.field, null, {buckets: ctrl.componentsMgr.chart.params.numBuckets}
+              );
             } else {
-              this[type].splice(termIndex, 1);
-            }
-          }
-        };
-
-        this.components = {
-          registered: [],
-          update: function(componentType, params) {
-            var registeredIndex = _.findIndex(registered, {type: componentType});
-            if (index < 0) { return $log.warn('Can\'t update component type as it wasn\'t found.'); }
-            registered[registeredIndex].params = params;
-          },
-          register: function(componentType, params) {
-            var self = this;
-            this.registered.push({type: componentType, params: params || {}});
-            ctrl.layout = BlLayout.updateLayout(this.registered, ctrl.layout);
-
-            if (isAxis(componentType)) {
-              ctrl.fields[params.direction] = params.field;
+              $log.warn('There was no interval set and no buckets registered.');
             }
 
-            $timeout(function() {
-              // If everything is registered and we haven't yet run the initial query
-              if (self.registered.length === $scope.componentCount && !hasRun) {
+            if ($scope.aggFunction && $scope.aggregateBy) {
+              group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
+            }
 
-                // First, update the query
-                var group;
-                ctrl.chartType = getChartType(self.registered);
-                if (!ctrl.chartType) {
-                  $log.warn('No chart type registered.');
-                }
+            if (ctrl.componentsMgr.chartType === chartTypes.number) {
+              var chartParams = ctrl.componentsMgr.chart.params;
+              ctrl.queryMgr.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
+            }
 
-                if (ChartHelper.isOrdinal(ctrl.chartType)) {
-                  // It's ordinal, set an interval and use intervalGroup
-                  group = ctrl.query.termGroup($scope.field);
-                } else if ($scope.interval) {
-                  // Use termGroup
-                  group = ctrl.query.intervalGroup($scope.field, $scope.interval);
-                } else if (ctrl.numBuckets) {
-                  group = ctrl.query.intervalGroup($scope.field, null, {buckets: ctrl.numBuckets});
-                } else {
-                  $log.warn('There was no interval set and no buckets registered.');
-                }
+            ctrl.dataMgr.refresh(ctrl.queryMgr.query)
+              .then(function(data) {
+                // TODO (il): Empty state
+                if (!data) { return; }
 
-                if ($scope.aggFunction && $scope.aggregateBy) {
-                  group[$scope.aggFunction + 'Aggregation']($scope.aggregateBy);
-                }
+                ctrl.layoutMgr.update(ctrl.componentsMgr.registered);
+                ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, ctrl.componentsMgr.chart.type);
+                $scope.$broadcast(blGraphEvents.DRAW);
+              });
+          });
+        });
 
-                if (ctrl.chartType === chartTypes.number) {
-                  var chartParams = getChartParams(self.registered, ctrl.chartType);
-                  ctrl.query = addAggregate(ctrl.query, chartParams.aggregate, $scope.field);
-                }
-
-                hasRun = true;
-                AQLRunner(ctrl.query)
-                  .success(function(data) {
-                    ctrl.data.grouped = data;
-                    // This is really just to reset the linear or ordinal scale on the x/y axes --
-                    // graph dimensions should really already be set at this point.
-                    $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType, true);
-                    ctrl.layout = BlLayout.updateLayout(self.registered, ctrl.layout);
-
-                    var scaleDims = getScaleDims(ctrl.layout.graph);
-                    ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-
-                    if (BlLayout.layoutIsValid(ctrl.layout)) {
-                      $scope.$broadcast(BlLayout.DRAW);
-                    }
-                  })
-                  .error(function(err) {
-                    $log.error('Error pulling data: ', err);
-                  });
-              }
-            });
-          }
-        };
 
         $scope.$watch('[containerHeight, containerWidth]', function(nv, ov) {
           if (angular.equals(nv, ov)) { return; }
@@ -207,43 +104,30 @@ angular.module('dataviz')
           var height = nv[0];
           var width = nv[1];
 
-          ctrl.layout = BlLayout.updateLayout(ctrl.components.registered, BlLayout.getDefaultLayout(height, width));
-          $scope.layout = ctrl.layout.container;
-          var scaleDims = getScaleDims(ctrl.layout.graph);
-          ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-          $scope.$broadcast(BlLayout.DRAW);
+          ctrl.layoutMgr.update(ctrl.componentsMgr.registered, BlLayout.getDefaultLayout(height, width));
+          $scope.layout = ctrl.layoutMgr.layout.container;
+          ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, ctrl.componentsMgr.chart.type);
+          $scope.$broadcast(blGraphEvents.DRAW);
         });
 
         $scope.$on(BlFilterService.FILTER_CHANGED, function() {
-          // Clear existing filters
-          ctrl.query.filters = []; // TODO (ian): There is a method for this now, I think.
+          ctrl.queryMgr.query.clear(); // TODO (ian): There is a method for this now, I think.
           $scope.filters = groupCtrl.filters.getAllFilters();
 
           // Add all filters except for the current field's
           var newFilterSet = BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters());
 
-          if (!newFilterSet.value) {
-            ctrl.query.filters = [];
-          } else {
+          if (!newFilterSet.isEmpty()) {
             ctrl.query.addFilter(BlFilterService.groupFiltersExcept($scope.field, groupCtrl.filters.getAllFilters()));
           }
 
-
-          // Repull the data
-          AQLRunner(ctrl.query)
-            .success(function(data) {
-              ctrl.data.grouped = data;
-              $scope.metadata = RangeFunctions.getMetadata(ctrl.data.grouped, ctrl.chartType);
-
-              var scaleDims = getScaleDims(ctrl.layout.graph);
-              ctrl.scale = setScale($scope.metadata, scaleDims.x, scaleDims.y, ctrl.chartType);
-
-              $scope.$broadcast(BlLayout.DRAW);
-
-            })
-            .error(function(err) {
-              $log.error('Error running AQL query: ', err);
+          ctrl.dataMgr.refresh()
+            .then(function() {
+              var chartType = ctrl.componentsMgr.chart.type;
+              ctrl.scaleMgr.update(ctrl.layoutMgr.layout, ctrl.dataMgr.metadata, chartType);
+              $scope.$broadcast(blGraphEvents.DRAW);
             });
+
         });
 
       }

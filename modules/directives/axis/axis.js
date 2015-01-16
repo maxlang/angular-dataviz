@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, BlLayout, $log) {
+  .directive('blAxis', function(BlLayoutDefaults, BlChartFactory, BlTranslate, blGraphEvents, $log) {
     var getOffsetX = function(direction) {
       return direction === 'x' ? 0 : -12;
     };
@@ -65,27 +65,25 @@ angular.module('dataviz')
         title: '=?',
         orderBy: '=?'
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         // Ensure that the direction is passed in as lowercase
         if (scope.direction !== scope.direction.toLowerCase()) {
           throw new Error('The axis direction must be lowercase or very little will work.');
         }
-
-        var graphCtrl = controllers[0];
         var axisType = scope.direction + 'Axis';
 
         var axisContainer = d3.select(iElem[0])
           .attr('class', 'bl-axis ' + scope.direction)
           .attr('width', BlLayoutDefaults.components.yAxis.width);
 
-        graphCtrl.components.register(axisType, {
+        graphCtrl.componentsMgr.register(axisType, {
           direction: scope.direction
         });
 
-        scope.$on(BlLayout.DRAW, function() {
-          scope.layout = graphCtrl.layout[axisType];
-          scope.translate = BlTranslate.axis(graphCtrl.layout, graphCtrl.components.registered, scope.direction);
-          drawAxis(graphCtrl.scale, scope.direction, axisContainer, scope.layout);
+        scope.$on(blGraphEvents.DRAW, function() {
+          scope.layout = graphCtrl.layoutMgr.layout[axisType];
+          scope.translate = BlTranslate.axis(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, scope.direction);
+          drawAxis(graphCtrl.scaleMgr, scope.direction, axisContainer, scope.layout);
         });
       }
     });

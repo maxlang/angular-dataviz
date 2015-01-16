@@ -1,5 +1,5 @@
 angular.module('dataviz')
-  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers) {
+  .directive('blHistogram', function(BlChartFactory, BlTranslate, BlLayout, chartTypes, HistogramHelpers, blGraphEvents) {
     var histConfig = {
       bars: {
         minWidth: 4,
@@ -16,20 +16,19 @@ angular.module('dataviz')
       scope: {
         numBars: '@?'
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.histogram;
-        var graphCtrl = controllers[0];
-        graphCtrl.components.register(COMPONENT_TYPE);
-        scope.layout = graphCtrl.layout.graph;
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         graphCtrl.numBuckets = HistogramHelpers.getBucketsForWidth(scope.numBars, scope.layout.width, histConfig);
         var g = d3.select(iElem[0]);
 
         function drawHist() {
-          scope.layout = graphCtrl.layout.graph;
-          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
-          var barWidth = HistogramHelpers.getBarWidth(graphCtrl.data.grouped, scope.layout, histConfig);
+          scope.layout = graphCtrl.layoutMgr.layout.graph;
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
+          var barWidth = HistogramHelpers.getBarWidth(graphCtrl.dataMgr.data, scope.layout, histConfig);
 
-          var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
+          var bars = g.selectAll('rect').data(graphCtrl.dataMgr.data);
 
           // Do this for all the
           bars.enter().append('rect')
@@ -45,14 +44,14 @@ angular.module('dataviz')
 
           bars
             .attr('transform', function(d) {
-              return 'translate(0,' + (graphCtrl.scale.y(d.value))  +')';
+              return 'translate(0,' + (graphCtrl.scaleMgr.y(d.value))  +')';
             })
             .attr('x', function(d, i) {
-              return graphCtrl.scale.x(d.key);
+              return graphCtrl.scaleMgr.x(d.key);
             })
             .attr('width', function(d) { return barWidth; })
             .attr('height', function(d) {
-              return scope.layout.height - graphCtrl.scale.y(d.value);
+              return scope.layout.height - graphCtrl.scaleMgr.y(d.value);
             });
 
 
@@ -62,7 +61,7 @@ angular.module('dataviz')
             .remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawHist);
+        scope.$on(blGraphEvents.DRAW, drawHist);
 
       }
     });

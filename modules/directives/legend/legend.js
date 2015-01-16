@@ -1,18 +1,17 @@
 angular.module('dataviz')
-  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes) {
+  .directive('blLegend', function(BlChartFactory, BlTranslate, BlLayout, BlLayoutDefaults, componentTypes, blGraphEvents) {
     return new BlChartFactory.Component({
       template: '<g class="bl-legend" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})"></g>',
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         // graphCtrl is responsible for communicating the keys and values in a fairly simple way to the legend
-        var graphCtrl = controllers[0];
         var COMPONENT_TYPE = componentTypes.legend;
         var seriesData = ['Loans'];
-        graphCtrl.components.register(COMPONENT_TYPE);
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
         var RECT_SIZE = 18;
 
         function drawLegend() {
-          scope.layout = graphCtrl.layout.legend;
-          scope.translate = BlTranslate.legend(graphCtrl.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.legend;
+          scope.translate = BlTranslate.legend(graphCtrl.layoutMgr.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
         }
 
         var legend = d3.select(iElem[0])
@@ -45,7 +44,7 @@ angular.module('dataviz')
           .attr('y', 14)
           .text(_.identity);
 
-        scope.$on(BlLayout.DRAW, drawLegend);
+        scope.$on(blGraphEvents.DRAW, drawLegend);
       }
     });
   })

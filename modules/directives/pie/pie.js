@@ -23,17 +23,16 @@
 
 // Lovingly borrowed from: http://jsfiddle.net/ragingsquirrel3/qkHK6/
 angular.module('dataviz')
-    .directive('blPie', function(BlChartFactory, chartTypes) {
+    .directive('blPie', function(BlChartFactory, blGraphEvents) {
       return new BlChartFactory.Component({
         template: '<g class="bl-pie chart" ng-attr-width="{{layout.width}}" ng-attr-height="{{layout.height}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})" class="bl-pie"></g>',
-        link: function(scope, iElem, iAttrs, controllers) {
-          var graphCtrl = controllers[0];
+        link: function(scope, iElem, iAttrs, graphCtrl) {
           var COMPONENT_TYPE = charts.pie;
 
-          graphCtrl.components.register(COMPONENT_TYPE);
+          graphCtrl.componentsMgr.register(COMPONENT_TYPE);
 
           // With modifications
-          var diameter = Math.min(graphCtrl.layout.graph.height, graphCtrl.layout.graph.width);
+          var diameter = Math.min(graphCtrl.layoutMgr.layout.graph.height, graphCtrl.layoutMgr.layout.graph.width);
           scope.layout = {
             width: diameter,
             height: diameter,

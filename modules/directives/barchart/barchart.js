@@ -46,7 +46,7 @@
  */
 
 angular.module('dataviz')
-  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate) {
+  .directive('blBarchart', function(BlChartFactory, BlLayout, chartTypes, BlTranslate, blGraphEvents) {
 
     var clickFn = function(d, addFilter) {
       addFilter('includes', d.key);
@@ -55,18 +55,17 @@ angular.module('dataviz')
     return new BlChartFactory.Component({
       template: '<g class="bl-barchart chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}},{{translate.y}})"></g>',
       scope: {},
-      link: function(scope, iElem, iAttrs, controllers) {
-        var graphCtrl = controllers[0];
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.barchart;
         var g = d3.select(iElem[0]);
 
-        graphCtrl.components.register(COMPONENT_TYPE);
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE);
 
         function drawChart() {
-          scope.layout = graphCtrl.layout.chart;
-          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.components.registered, COMPONENT_TYPE);
+          scope.layout = graphCtrl.layoutMgr.layout.chart;
+          scope.translate = BlTranslate.graph(scope.layout, graphCtrl.componentsMgr.registered, COMPONENT_TYPE);
 
-          var bars = g.selectAll('rect').data(graphCtrl.data.grouped);
+          var bars = g.selectAll('rect').data(graphCtrl.dataMgr.data);
 
           bars.enter().append('rect')
             .classed('bar', true)
@@ -79,16 +78,16 @@ angular.module('dataviz')
             });
 
           bars
-            .attr('y', function(d) { return graphCtrl.scale.y(d.key); })
-            .attr('width', function(d) { return graphCtrl.scale.x(d.value); })
-            .attr('height', Math.abs(graphCtrl.scale.y.rangeBand()));
+            .attr('y', function(d) { return graphCtrl.scaleMgr.y(d.key); })
+            .attr('width', function(d) { return graphCtrl.scaleMgr.x(d.value); })
+            .attr('height', Math.abs(graphCtrl.scaleMgr.y.rangeBand()));
 
           bars
             .exit()
             .remove();
         }
 
-        scope.$on(BlLayout.DRAW, drawChart);
+        scope.$on(blGraphEvents.DRAW, drawChart);
       }
     });
   });

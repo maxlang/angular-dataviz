@@ -15,7 +15,7 @@ angular.module('dataviz.services', [])
         restrict: 'E',
         replace: true,
         scope: true,
-        require: ['^blGraph'],
+        require: '^blGraph',
         templateNamespace: 'svg'
       });
     };

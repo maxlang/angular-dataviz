@@ -38,37 +38,36 @@
  </example>
  */
 angular.module('dataviz')
-  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils) {
+  .directive('blNumber', function(BlChartFactory, chartTypes, BlLayout, FormatUtils, blGraphEvents) {
     return new BlChartFactory.Component({
       //template: '<text class="bl-number chart" ng-attr-height="{{layout.height}}" ng-attr-width="{{layout.width}}" ng-attr-transform="translate({{translate.x}}, {{translate.y}})">{{text}}</text>',
       template: '<text class="bl-number chart" font-size="250px"></text>',
       scope: {
         aggregate: '=?' // TODO: This should eventually look like: aggFunc(aggField); e.g. count('_id').
       },
-      link: function(scope, iElem, iAttrs, controllers) {
+      link: function(scope, iElem, iAttrs, graphCtrl) {
         var COMPONENT_TYPE = chartTypes.number;
-        var graphCtrl = controllers[0];
 
         // If this is an agg, data will look like an object with count, min, max, avg, and sum attributes
-        var format = FormatUtils.getFormatFunction(graphCtrl.data.grouped, 'plain');
-        graphCtrl.components.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
-        scope.layout = graphCtrl.layout.graph;
+        var format = FormatUtils.getFormatFunction(graphCtrl.dataMgr.data, 'plain');
+        graphCtrl.componentsMgr.register(COMPONENT_TYPE, {aggregate: scope.aggregate});
+        scope.layout = graphCtrl.layoutMgr.layout.graph;
         var text = d3.select(iElem[0]);
         //scope.translate = BlTranslate.graph(graphCtrl.layout, graphCtrl.registered, COMPONENT_TYPE);
 
         function drawNumber() {
           text
             .attr('font-family', 'Verdana')
-            .text(function() { return format(graphCtrl.data.grouped[scope.aggregate]); })
-            .call(FormatUtils.resizeText, graphCtrl.layout);
+            .text(function() { return format(graphCtrl.dataMgr.data[scope.aggregate]); })
+            .call(FormatUtils.resizeText, graphCtrl.layoutMgr.layout);
         }
 
         scope.$watch('aggregate', function(nv, ov) {
           if (nv === ov) { return; }
-          graphCtrl.components.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
+          graphCtrl.componentsMgr.update(COMPONENT_TYPE, {aggregate: scope.aggregate});
         });
 
-        scope.$on(BlLayout.DRAW, drawNumber);
+        scope.$on(blGraphEvents.DRAW, drawNumber);
       }
     });
   })
