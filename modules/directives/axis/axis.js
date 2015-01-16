@@ -79,8 +79,7 @@ angular.module('dataviz')
           .attr('width', BlLayoutDefaults.components.yAxis.width);
 
         graphCtrl.components.register(axisType, {
-          direction: scope.direction,
-          field: scope.field
+          direction: scope.direction
         });
 
         scope.$on(BlLayout.DRAW, function() {

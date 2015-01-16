@@ -108,7 +108,6 @@ angular.module('dataviz')
         this.query = new AQL.SelectQuery($scope.resource);
         this.data = {};
         this.scale = {};
-        this.fields = {};
         this.filters = {
           includes: [],
           excludes: [],
