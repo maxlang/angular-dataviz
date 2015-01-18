@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="makerApp" id="top">
+<head>
+  <title>Angular Dataviz for AngularJS</title>
+
+  <meta charset="utf-8"> <!-- for d3 -->
+
+  <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+  <script src="../components/jquery/jquery.js"></script>
+  <!--<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>-->
+  <script src="../components/angular-unstable/angular.js"></script>
+  <script src="../components/d3/d3.js"></script>
+  <script src="../components/d3-plugins/sankey/sankey.js"></script>
+  <script src="../components/nvd3/nv.d3.js"></script>
+  <script src="../components/moment/moment.js"></script>
+  <script src="../components/lodash/lodash.js"></script>
+  <script src="../components/gridster/dist/jquery.gridster.js"></script>
+  <script src="../components/angular-ui-utils/modules/event/event.js"></script>
+
+  <!--<script src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>-->
+  <!--<script src="../components/google-maps-utility-library-v3/markerclustererplus/src/markerclusterer.js"></script>-->
+  <!--<script src="../components/google-maps-utility-library-v3/keydragzoom/src/keydragzoom.js"></script>-->
+
+  <script src="../components/angular-ui-map/src/map.js"></script>
+  <script src="../components/angular-ui/build/angular-ui.js"></script>
+
+  <script src="../components/select2/select2.js"></script>
+  <script src="../components/github/github.js"></script>
+  <script src="../components/github/lib/base64.js"></script>
+  <script src="../components/jquery-ui/ui/jquery-ui.js"></script>
+
+  <script src="../components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js"></script>
+
+  <script src="../dist/angular-dataviz.js"></script>
+  <script src="../components/google-code-prettify/src/prettify.js"></script>
+  <script src="../components/ace-builds/src/ace.js"></script>
+  <script src="../components/ace-builds/src/ext-emmet.js"></script>
+  <!--<script src="../components/emmet-core/emmet.js"></script>-->
+  <script src="../components/Editr.js/editr/editr.js"></script>
+  <script src="../components/Editr.js/editr/parsers/coffeescript.js"></script>
+  <script src="../components/Editr.js/editr/parsers/less.js"></script>
+  <script src="js/makerApp.js"></script>
+
+  <link rel="stylesheet" href="../components/angular-bootstrap-colorpicker/css/colorpicker.css">
+  <link rel="stylesheet" href="../components/jquery-ui/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="../components/select2/select2.css">
+  <link rel="stylesheet" href="../components/Editr.js/editr/editr.css">
+  <!--<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">-->
+  <link rel="stylesheet" href="../dist/angular-dataviz.css">
+  <link rel="stylesheet" href="../components/google-code-prettify/src/prettify.css">
+  <link rel="stylesheet" href="css/doc.css">
+  <link rel="stylesheet" href="css/demoApp.css">
+  <style>
+
+    rect.bar {
+      fill:rgb(33, 98, 164);
+    }
+
+    rect.bar.d2 {
+      fill: #5492D2;
+    }
+
+    .d1 {
+      fill:rgb(33, 98, 164);
+      stroke:white;
+    }
+
+    .d2 {
+      fill: #5492D2;
+      stroke:white;
+    }
+
+    .node rect {
+      cursor: move;
+      fill-opacity: .9;
+      shape-rendering: crispEdges;
+    }
+
+
+    .node text {
+      pointer-events: none;
+      text-shadow: 0 1px 0 #fff;
+    }
+
+    .link {
+      fill: none;
+      stroke: #000;
+      stroke-opacity: .2;
+    }
+
+    .link:hover {
+      stroke-opacity: .5;
+    }
+
+    rect.bar-0, .bar-0 {
+      opacity: 0.9;
+      fill:red;
+    }
+
+    rect.bar-1, .bar-1 {
+      opacity: 0.5;
+      fill:red;
+    }
+
+    rect.bar-2, .bar-2 {
+      opacity: 0.7;
+    }
+
+    .bar-3 {
+      opacity: 0.6;
+    }
+
+    .bar-4 {
+      opacity: 0.5;
+    }
+
+    .bar-5 {
+      opacity: 0.4;
+    }
+
+    .bar-6 {
+      opacity: 0.3;
+    }
+
+    .bar-7 {
+      opacity: 0.2;
+    }
+
+    .bar-8 {
+      opacity: 0.1;
+    }
+
+    .bar-9 {
+      opacity: 0.01;
+    }
+
+    .line {
+      stroke-width: 2px;
+      stroke-opacity: 1;
+      stroke: black;
+    }
+
+    .line-0 {
+      stroke: red;
+    }
+    rect.line-0 {
+      fill:red;
+    }
+
+    .line-1 {
+      stroke: blue;
+    }
+    rect.line-1 {
+      fill:blue;
+    }
+
+    .red-color {
+      fill: #EA1F33;
+    }
+    .yellow-color {
+      fill: #F0BA1A;
+    }
+    .green-color {
+      fill: #00A651;
+    }
+
+    .a-point {
+      fill: red;
+      stroke: black;
+      fill-opacity: .4;
+      stroke-opacity: .2;
+      stroke-width:1.5px;
+    }
+
+    .domain {
+      stroke-width:1;
+    }
+
+  </style>
+</head>
+<body data-spy="scroll">
+<header class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <div class="dropdown pull-left">
+        <a class="brand dropdown-toggle" role="button" href="#">
+          Angular Dataviz
+        </a>
+      </div>
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="active">
+            <a scrollto href="#top">Home</a>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+              Directives
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a scrollto href="#blockCalendar">Block Calendar</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="pull-right nav">
+          <li><a href="https://github.com/maxlang/angular-dataviz/graphs/contributors">Contributors</a></li>
+          <li class="dropdown">
+            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
+              Need Help?
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="https://github.com/maxlang/angular-dataviz/issues?sort=updated&state=open">Angular Dataviz broken or want a new feature?</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+<div role="main">
+
+  <header class="hero-unit" id="overview">
+    <div class="container">
+      <h1>Angular Dataviz</h1>
+      <p>Reliable, componentized data visualization controls for <strong><a href="http://angularjs.org">AngularJS</a></strong>.</p>
+      <p class="btn-group">
+        <a class="btn btn-large" href="https://github.com/maxlang/angular-dataviz"><i class="icon-github"></i> Code on Github</a><a class="btn btn-large btn-primary" href="https://github.com/maxlang/angular-dataviz/tags"><i class="icon-download-alt icon-white"></i> Download</a>
+      </p>
+    </div>
+    <div class="bs-docs-social">
+      <div class="container">
+        <ul class="bs-docs-social-buttons">
+          <!--<li>-->
+            <!--<iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=watch&count=true"-->
+                    <!--allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--<iframe src="http://ghbtns.com/github-btn.html?user=maxlang&repo=angular-dataviz&type=fork&count=true"-->
+                    <!--allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--<a href="https://twitter.com/share" class="twitter-share-button" data-hashtags="angularjs">Tweet</a>-->
+            <!--<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>-->
+          <!--</li>-->
+          <!--<li>-->
+            <!--&lt;!&ndash; Place this tag where you want the +1 button to render. &ndash;&gt;-->
+            <!--<div class="g-plusone" data-size="medium"></div>-->
+
+            <!--&lt;!&ndash; Place this tag after the last +1 button tag. &ndash;&gt;-->
+            <!--<script type="text/javascript">-->
+              <!--(function() {-->
+                <!--var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;-->
+                <!--po.src = 'https://apis.google.com/js/plusone.js';-->
+                <!--var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);-->
+              <!--})();-->
+            <!--</script>-->
+          <!--</li>-->
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" ng-controller="makerCtrl">
+
+    Type: <input ng-model="viz.type">
+    Data: <textarea ng-model="viz.data"></textarea>
+    Config: <textarea ng-model="viz.config"></textarea>
+    Filter: <span ng-bind="viz.parsedConfig.filter|json"></span>
+    <!--Github User: <input ng-model="github.user">-->
+    <!--Github Password: <input type="password" ng-model="github.password">-->
+    <!--<button ng-click="auth()">Login</button>-->
+    <!--<span ng-if="github.user && github.password">GistId: <input ng-model="github.gist" ui-select2="select2Options"></input></span>-->
+    <!--{{ github.gistid }}-->
+
+    <maker-resize style = "display:block; border:1px solid #000;">
+      <block-calendar ng-if="viz.type==='calendar'" data="viz.parsedData" params="viz.parsedConfig"></block-calendar>
+      <a-histogram ng-if="viz.type==='histogram'" data="viz.parsedData" params="viz.parsedConfig"></a-histogram>
+      <a-barchart ng-if="viz.type==='barchart'" data="viz.parsedData" params="viz.parsedConfig"></a-barchart>
+      <a-pie ng-if="viz.type==='piechart'" data="viz.parsedData" params="viz.parsedConfig"></a-pie>
+      <a-number ng-if="viz.type==='number'" data="viz.parsedData" params="viz.parsedConfig"></a-number>
+      <a-linechart ng-if="viz.type==='line' || viz.type==='linechart'" data="viz.parsedData" params="viz.parsedConfig"></a-linechart>
+      <a-scatter ng-if="viz.type==='scatter' || viz.type==='scatterchart'" data="viz.parsedData" params="viz.parsedConfig"></a-scatter>
+
+
+
+    </maker-resize>
+    <!--<div ng-if="github.gist" class="editr" data-item="maker" ></div>-->
+    <div style="width:100px;height:1000px;"></div>
+
+
+
+  </div>
+
+</div>
+
+<script src="http://localhost:35730/livereload.js"></script>
+</body>
+</html>

@@ -5,10 +5,12 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-recess');
+  grunt.loadNpmTasks('grunt-ngdocs');
+
 
   // Project configuration.
   grunt.initConfig({
@@ -21,7 +23,7 @@ module.exports = function (grunt) {
       ' * @license MIT License, http://www.opensource.org/licenses/MIT\n' + ' */'
     },
     clean: {
-      src: ['dist']
+      src: ['dist', 'ngdocs']
     },
     concat: {
       options: {
@@ -29,7 +31,7 @@ module.exports = function (grunt) {
         stripBanners: true
       },
       dist: {
-        src: ['common/module.js', 'modules/**/*.js', '!modules/**/test/*.js'],
+        src: ['common/module.js', 'modules/directives/**/*.js', 'modules/services/**/*.js', '!modules/**/test/*.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -42,25 +44,19 @@ module.exports = function (grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
-    recess: {
-      dist: {
-        src: ['common/**/*.less', 'modules/**/*.less'],
-        dest: 'dist/<%= pkg.name %>.css',
-        options: {
-          compile: true
-        }
+     less: {
+      options: {
       },
-      min: {
-        src: '<%= recess.dist.dest %>',
-        dest: 'dist/<%= pkg.name %>.min.css',
-        options: {
-          compress: true
+      dist: {
+        files: {
+          'dist/<%= pkg.name %>.css': ['modules/**/*.less', 'common/stylesheets/**/*.less']
         }
       }
     },
     jshint: {
-      gruntfile: {
-        src: 'Gruntfile.js'
+      options: {
+        jshintrc: '.jshintrc',
+        force: true
       },
       src: {
         src: ['modules/**/*.js', '!modules/**/test/*.js']
@@ -70,39 +66,40 @@ module.exports = function (grunt) {
       }
     },
     watch: {
-      files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less'],
-      tasks: ['build', 'test']
+      files: ['modules/**/*.js', 'modules/**/*.less', 'common/**/*.js', 'common/**/*.less',
+              'doc/**/*.js', 'doc/**/*.css', 'doc/*.html', 'Gruntfile.js'],
+      tasks: ['build'], //'test'
+      options: {
+        livereload: 35730
+      }
+    },
+    //https://www.npmjs.org/package/grunt-ngdocs
+    ngdocs: {
+      src: 'modules/**/*.js',
+      options: {
+        dest: 'ngdocs',
+        html5Mode: false,
+        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+          'components/angular/angular.js',
+          'http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js',
+          'components/d3/d3.js',
+          'components/d3-plugins/sankey/sankey.js',
+          'components/moment/moment.js',
+          'components/lodash/dist/lodash.js',
+          'components/abstractquerylanguage/dist/aql.js',
+          'components/d3-tip/index.js',
+          'dist/angular-dataviz.js'],
+        styles: [
+          'dist/angular-dataviz.css'
+        ]
+      }
     }
   });
 
   // Default task.
-  grunt.registerTask('default', ['build', 'test']);
+  grunt.registerTask('default', ['build', 'test', 'watch']);
 
-  grunt.registerTask('build', 'build all or some of the angular-dataviz modules', function () {
-
-    var jsBuildFiles = grunt.config('concat.dist.src');
-    var lessBuildFiles = [];
-
-    if (this.args.length > 0) {
-
-      this.args.forEach(function(moduleName) {
-        var modulejs = grunt.file.expandFiles('modules/*/' + moduleName + '/*.js');
-        var moduleless = grunt.file.expandFiles('modules/*/' + moduleName + '/stylesheets/*.less', 'modules/*/' + moduleName + '/*.less');
-
-        jsBuildFiles = jsBuildFiles.concat(modulejs);
-        lessBuildFiles = lessBuildFiles.concat(moduleless);
-      });
-
-      grunt.config('concat.dist.src', jsBuildFiles);
-      grunt.config('recess.dist.src', lessBuildFiles);
-
-    } else {
-      grunt.config('concat.dist.src', jsBuildFiles.concat(['modules/*/*/*.js']));
-      grunt.config('recess.dist.src', lessBuildFiles.concat(grunt.config('recess.dist.src')));
-    }
-
-    grunt.task.run(['jshint', 'concat', 'recess:dist']);
-  });
+  grunt.registerTask('build', ['clean', 'jshint', 'concat', 'less:dist', 'ngdocs']);
 
   grunt.registerTask('server', 'start testacular server', function () {
     //Mark the task as async but never call done, so the server stays up
